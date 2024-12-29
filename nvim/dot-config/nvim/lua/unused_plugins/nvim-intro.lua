@@ -1,0 +1,32 @@
+return {
+	"Yoolayn/nvim-intro",
+	lazy = false,
+	config = {
+		intro = {
+			"███╗   ██╗ ███████╗ ██████╗  ██╗   ██╗ ██╗ ███╗   ███╗",
+			"████╗  ██║ ██╔════╝██╔═══██╗ ██║   ██║ ██║ ████╗ ████║",
+			"██╔██╗ ██║ █████╗  ██║   ██║ ██║   ██║ ██║ ██╔████╔██║",
+			"██║╚██╗██║ ██╔══╝  ██║   ██║ ╚██╗ ██╔╝ ██║ ██║╚██╔╝██║",
+			"██║ ╚████║ ███████╗╚██████╔╝  ╚████╔╝  ██║ ██║ ╚═╝ ██║",
+			"╚═╝  ╚═══╝ ╚══════╝ ╚═════╝    ╚═══╝   ╚═╝ ╚═╝     ╚═╝",
+			"                                                      ",
+			"                                                      ",
+			"  type :checkhealth<Enter> ->   to optimize Nvim      ",
+			"  type :Lazy<Enter>        ->   to update plugins     ",
+			"  type :help<Enter>        ->   for help              ",
+			"                                                      ",
+			"  type :help news<Enter>   ->   for help              ",
+			"                                                      ",
+			"  press <Space>t           ->   to find files         ",
+			"  press <Space>fm          ->   to find project marks ",
+			"  press <Space>fo          ->   to find old files     ",
+			"                                                      ",
+		},
+		color = "#f7f3f2",
+		scratch = true,
+		highlights = {
+			["<Enter>"] = "#187df0",
+		},
+	},
+  enabled = false,
+}

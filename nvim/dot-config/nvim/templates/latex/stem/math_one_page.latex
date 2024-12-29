@@ -1,0 +1,14 @@
+\documentclass{article}
+
+\input{"/Users/abhijeetsurakanti/.config/latex/latex_templates/one_page.tex"}
+\input{"/Users/abhijeetsurakanti/.config/latex/latex_templates/math/commands.tex"}
+
+\title{{{_cursor_}}}
+\author{Abhijeet Surakanti\\ \texttt{asurakan@students.kennesaw.edu}}
+\date{SPCEET --- \today}
+
+\begin{document}
+  \maketitle
+
+  % start writing here
+\end{document}

@@ -1,0 +1,20 @@
+\documentclass[letterpaper]{report}
+\usepackage[margin=1in]{geometry}
+\usepackage{pdfpages}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{float}
+\pgfplotsset{width=15cm,compat=1.9}
+\newcommand{\RNum}[1]{\uppercase\expandafter{\romannumeral #1\relax}}
+
+\title{{{_cursor_}}}
+\author{Abhijeet Surakanti\\ \texttt{asurakan@students.kennesaw.edu}}
+\date{SPCEET --- \today}
+
+\begin{document}
+\maketitle
+  
+\end{document}

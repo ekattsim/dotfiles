@@ -1,0 +1,10 @@
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+
+\title{{{_cursor_}}}
+
+\begin{document}
+  \maketitle
+
+  % start writing here
+\end{document}

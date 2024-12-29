@@ -1,0 +1,3 @@
+% TeX root = {{_lua:vim.system({"/usr/local/bin/scripts/nvim/findMaster.sh", vim.fn.expand("%:p")}):wait().stdout_}}
+
+\lesson{{{_cursor_}}}{}

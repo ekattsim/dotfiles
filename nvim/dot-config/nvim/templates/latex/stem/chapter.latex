@@ -1,0 +1,5 @@
+% TeX root = {{_lua:vim.system({"/usr/local/bin/scripts/nvim/findMaster.sh", vim.fn.expand("%:p")}):wait().stdout_}}
+\chapter{{{_cursor_}}}
+\setcounter{section}{0}
+
+% Intro

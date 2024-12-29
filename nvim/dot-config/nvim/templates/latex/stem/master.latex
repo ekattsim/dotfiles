@@ -1,0 +1,17 @@
+\documentclass[letterpaper]{report}
+\input{"/Users/abhijeetsurakanti/.config/latex/latex_templates/notes.tex"}
+
+\title{{{_cursor_}}}
+\author{Abhijeet Surakanti\\ \texttt{asurakan@students.kennesaw.edu}}
+\date{SPCEET --- \today}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+% put lessons
+
+\end{document}
