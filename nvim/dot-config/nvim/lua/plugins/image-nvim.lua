@@ -6,5 +6,5 @@ return {
 	},
 	ft = "norg",
 	lazy = true,
-	enabled = true,
+	enabled = false,
 }

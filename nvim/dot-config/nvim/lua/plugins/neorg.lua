@@ -64,8 +64,8 @@ return {
 					},
 				},
 				["core.integrations.nvim-cmp"] = {},
-				["core.integrations.image"] = {},
-				["core.latex.renderer"] = {},
+				-- ["core.integrations.image"] = {},
+				-- ["core.latex.renderer"] = {},
 			},
 		})
 
