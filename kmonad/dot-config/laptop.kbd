@@ -1,0 +1,57 @@
+(defcfg
+	input (iokit-name "Apple Internal Keyboard / Trackpad")
+	output (kext)
+
+	fallthrough true
+	allow-cmd true
+)
+
+(defsrc
+	q	w	e	r	t	y	u	i	o	p
+	a	s	d	f	g	h	j	k	l	;
+	z	x	c	v	b	n	m	,	.	/
+	lctl  lalt  lmet	 spc  rmet  rctl
+)
+
+(defalias
+    sft_a (tap-hold-next-release 200 a lsft)
+    alt_s (tap-hold-next-release 175 s lalt)
+    ctl_d (tap-hold-next-release 175 d lctl)
+    met_f (tap-hold-next-release 175 f lmet)
+
+    met_j (tap-hold-next-release 175 j rmet)
+    ctl_k (tap-hold-next-release 175 k rctl)
+    alt_l (tap-hold-next-release 175 l lalt)
+
+    s_; (tap-hold-next-release 150 ; rsft)
+    ;; sz (tap-hold-next-release 150 z lsft)
+    s_spc (tap-hold-next-release 175 spc lsft)
+
+    lmd (layer-toggle left-mods)
+    rmd (layer-toggle right-mods)
+)
+
+;;(deflayer homerow
+;;    @sft_a   @alt_s   @ctl_d   @met_f   g   h   @met_j   @ctl_k   @alt_l   @sft_/
+;;)
+
+(deflayer qwerty
+	q	w	e	r	t	y	u	i	o	p
+	a	s	d	f	g	h	j	k	l	;
+	z	x	c	v	b	n	m	,	.	/
+	lctl  lalt  @lmd	spc  @rmd  rctl
+)
+
+(deflayer right-mods
+	grv	_	_	_	_	_	_	_	_	_
+	_	_ _ _	esc	_	rmet rctl lalt	_
+	_	_	_	_	_	_	_	_	_	_
+	_  _  _	 _  _  _
+)
+
+(deflayer left-mods
+	_	_	_	_	_	_	_	_	_	_
+	_  lalt lctl lmet _	left down up right	_
+	_	_	_	_	_	_	_	_	_	_
+	_  _  _	 _  _  _
+)
