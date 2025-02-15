@@ -1,3 +1,4 @@
 tmux/dot-config/tmux/plugins/*
 emacs/dot-emacs.d
 emacs/dot-config/emacs
+emacs/dot-config/doom/literate-config/config.el

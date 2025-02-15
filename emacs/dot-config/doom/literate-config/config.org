@@ -1,0 +1,32 @@
+#+title: Config
+
+* Aesbetic's Emacs Configuration
+This file contains the literate configuration for all non-package emacs configuration.
+
+* UI
+** System
+*** TODO Theme: apply rose-pine for the soho vibes
+Load theme, taking current system APPEARANCE into consideration.
+#+BEGIN_SRC emacs-lisp :results none :exports code
+(defun my/apply-theme (appearance)
+  (mapc #'disable-theme custom-enabled-themes)
+  (pcase appearance
+    ('light (load-theme 'modus-operandi t))
+    ('dark (load-theme 'modus-vivendi t))))
+(add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
+#+END_SRC
+*Note:* I might remove this if it gets dark outside too quick.
+
+** Frame
+Remove the title bar because it's unaesthetic.
+#+BEGIN_SRC emacs-lisp :results none :exports code
+(add-to-list 'default-frame-alist '(undecorated-round . t))
+#+END_SRC
+
+** Window
+
+** Buffer
+Enable relative line numbers because it's a habit from vim
+#+BEGIN_SRC emacs-lisp :results none :exports code
+(setq display-line-numbers-type 'relative)
+#+END_SRC
