@@ -11,8 +11,8 @@ Load theme, taking current system APPEARANCE into consideration.
 (defun my/apply-theme (appearance)
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
-    ('light (load-theme 'modus-operandi t))
-    ('dark (load-theme 'modus-vivendi t))))
+    ('light (load-theme 'leuven t))
+    ('dark (load-theme 'leuven-dark t))))
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 #+END_SRC
 *Note:* I might remove this if it gets dark outside too quick.
