@@ -5,7 +5,7 @@ This file contains the literate configuration for all non-package emacs configur
 
 * UI
 ** System
-*** TODO Theme: apply rose-pine for the soho vibes
+*** TODO Theme: apply rose-pine for the soho vibes :theme:
 Load theme, taking current system APPEARANCE into consideration.
 #+BEGIN_SRC emacs-lisp :results none :exports code
 (defun my/apply-theme (appearance)
@@ -29,4 +29,11 @@ Remove the title bar because it's unaesthetic.
 Enable relative line numbers because it's a habit from vim
 #+BEGIN_SRC emacs-lisp :results none :exports code
 (setq display-line-numbers-type 'relative)
+#+END_SRC
+
+* Org
+** Roam
+Make "~/zettelkasten" the org-roam directory
+#+BEGIN_SRC emacs-lisp :results none :exports code
+(setq org-roam-directory "~/zettelkasten")
 #+END_SRC
