@@ -1,13 +1,14 @@
+#+PROPERTY: header-args:emacs-lisp :results none :exports code
+
 #+title: Config
 
 * Aesbetic's Emacs Configuration
-This file contains the literate configuration for all non-package emacs configuration.
-
+This file contains the literate configuration for emacs.
 * UI
 ** System
 *** TODO Theme: apply rose-pine for the soho vibes :theme:
 Load theme, taking current system APPEARANCE into consideration.
-#+BEGIN_SRC emacs-lisp :results none :exports code
+#+BEGIN_SRC emacs-lisp
 (defun my/apply-theme (appearance)
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
@@ -16,70 +17,62 @@ Load theme, taking current system APPEARANCE into consideration.
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 #+END_SRC
 *Note:* I might remove this if it gets dark outside too quick.
-
 ** Frame
 Remove the title bar because it's unaesthetic.
-#+BEGIN_SRC emacs-lisp :results none :exports code
+#+BEGIN_SRC emacs-lisp
 (add-to-list 'default-frame-alist '(undecorated-round . t))
 #+END_SRC
-
 ** Window
-
 ** Buffer
 Enable relative line numbers because it's a habit from vim
-#+BEGIN_SRC emacs-lisp :results none :exports code
+#+BEGIN_SRC emacs-lisp
 (setq display-line-numbers-type 'relative)
 #+END_SRC
-
 * Org
 ** Roam
 Make "~/zettelkasten" the org-roam directory
-#+BEGIN_SRC emacs-lisp :results none :exports code
+#+BEGIN_SRC emacs-lisp
 (setq org-roam-directory "~/zettelkasten")
 #+END_SRC
-
 * Keybinds
-** To get you started
+** Navigation
+*** Workspace
+Bind workspace navigation to be more like t-smart
+#+BEGIN_SRC emacs-lisp
+(map! :n "C-t" #'+workspace/switch-to)
+#+END_SRC
+*** File
 Bind "<leader>ff" to switch to src/header pair replacing the find-file offered by doom. This is okay because "<leader>." does finding files for me.
-#+BEGIN_SRC emacs-lisp :results none :exports code
+#+BEGIN_SRC emacs-lisp
 (map! :leader :desc "Find other file" "f f" #'ff-find-other-file)
 #+END_SRC
-
-** Navigation
-*** Buffer
-Switch to last buffer
-#+BEGIN_SRC emacs-lisp :results none :exports code
-(map! :leader
-      :desc "Switch to last buffer" "f o" #'evil-switch-to-windows-last-buffer
-      "`" nil)
-#+END_SRC
-
-make working with wrapped lines easy
-#+BEGIN_SRC emacs-lisp :results none :exports code
-(map!  :nv "j" #'evil-next-visual-line
-       :nv "k" #'evil-previous-visual-line)
-#+END_SRC
-
-general buffer navigation
-#+BEGIN_SRC emacs-lisp :results none :exports code
-(map!  :m "H" #'evil-beginning-of-visual-line
-       :m "L" #'evil-end-of-visual-line
-       :m "0" #'evil-window-top
-       :m "$" #'evil-window-bottom)
-#+END_SRC
-
 *** Window
-bind splits to more intuitive keys
-#+BEGIN_SRC emacs-lisp :results none :exports code
+Bind splits to more intuitive keys
+#+BEGIN_SRC emacs-lisp
 (map! :leader
       "-" #'evil-window-split
       "w s" nil
       "|" #'evil-window-vsplit
       "w v" nil)
 #+END_SRC
+*** Buffer
+Switch to last buffer
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      :desc "Switch to last buffer" "f o" #'evil-switch-to-windows-last-buffer
+      "`" nil)
+#+END_SRC
 
-*** Workspace
-bind workspace navigation to be more like t-smart
-#+BEGIN_SRC emacs-lisp :results none :exports code
-(map! :n "C-t" #'+workspace/switch-to)
+Make working with wrapped lines easy
+#+BEGIN_SRC emacs-lisp
+(map!  :nv "j" #'evil-next-visual-line
+       :nv "k" #'evil-previous-visual-line)
+#+END_SRC
+
+General buffer navigation
+#+BEGIN_SRC emacs-lisp
+(map!  :m "H" #'evil-beginning-of-visual-line
+       :m "L" #'evil-end-of-visual-line
+       :m "0" #'evil-window-top
+       :m "$" #'evil-window-bottom)
 #+END_SRC
