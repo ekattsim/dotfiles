@@ -1,4 +1,6 @@
-#+PROPERTY: header-args:emacs-lisp :results none :exports code
+:PROPERTIES:
+:header-args:emacs-lisp: :results none :exports code
+:END:
 
 #+title: Config
 
