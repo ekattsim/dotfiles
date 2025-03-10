@@ -41,7 +41,9 @@ Make "~/zettelkasten" the org-roam directory
 *** Workspace
 Bind workspace navigation to be more like t-smart
 #+BEGIN_SRC emacs-lisp
-(map! :n "C-t" #'+workspace/switch-to)
+(map! :map override-global-map
+      :g "C-t" #'+workspace/switch-to
+      :g "C-TAB" #'+workspace/other)
 #+END_SRC
 *** File
 Bind "<leader>ff" to switch to src/header pair replacing the find-file offered by doom. This is okay because "<leader>." does finding files for me.
