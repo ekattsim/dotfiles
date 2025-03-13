@@ -59,6 +59,15 @@ Bind splits to more intuitive keys
       "|" #'evil-window-vsplit
       "w v" nil)
 #+END_SRC
+
+Bind window navigation like tmux pane navigation
+#+BEGIN_SRC emacs-lisp
+(map! :n "C-h" #'evil-window-left
+      :n "C-j" #'evil-window-down
+      :n "C-k" #'evil-window-up
+      :n "C-l" #'evil-window-right)
+
+#+END_SRC
 *** Buffer
 Switch to last buffer
 #+BEGIN_SRC emacs-lisp
