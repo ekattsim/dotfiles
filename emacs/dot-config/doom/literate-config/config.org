@@ -36,14 +36,38 @@ Make "~/zettelkasten" the org-roam directory
 #+BEGIN_SRC emacs-lisp
 (setq org-roam-directory "~/zettelkasten")
 #+END_SRC
+** Latex Previews
+#+BEGIN_SRC emacs-lisp
+
+(use-package! org-latex-preview
+  :defer
+  :config
+  ;; Increase preview width
+  (plist-put org-latex-preview-appearance-options
+             :page-width 1.0)
+
+  ;; enable consistent equation numbering
+  (setq org-latex-preview-numbered t)
+
+  ;; real time previews of latex fagments as you type
+  (setq org-latex-preview-live t)
+  (setq org-latex-preview-live-debounce 0.25)  ;; reducing delay before preview
+
+  ;; png is faster than svg
+  ;; (setq org-latex-preview-process-default 'dvipng)
+
+  ;; reveals source text under the fragment being pointed to
+  (add-hook! 'org-mode-hook 'org-latex-preview-auto-mode)
+  )
+#+END_SRC
+
 * Keybinds
 ** Navigation
 *** Workspace
 Bind workspace navigation to be more like t-smart
 #+BEGIN_SRC emacs-lisp
-(map! :map override-global-map
-      :g "C-t" #'+workspace/switch-to
-      :g "C-TAB" #'+workspace/other)
+(map! :ni "C-t" #'+workspace/switch-to
+      :ni [C-tab] #'+workspace/other)
 #+END_SRC
 *** File
 Bind "<leader>ff" to switch to src/header pair replacing the find-file offered by doom. This is okay because "<leader>." does finding files for me.
