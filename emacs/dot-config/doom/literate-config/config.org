@@ -14,11 +14,22 @@ Load theme, taking current system APPEARANCE into consideration.
 (defun my/apply-theme (appearance)
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
-    ('light (load-theme 'leuven t))
-    ('dark (load-theme 'leuven-dark t))))
+    ('light (load-theme 'tango t))
+    ('dark (load-theme 'doom-lantern t))))
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 #+END_SRC
 *Note:* I might remove this if it gets dark outside too quick.
+*** Fonts
+#+BEGIN_SRC emacs-lisp
+(when (member "Roboto Mono" (font-family-list))
+  ;; (setq doom-font (font-spec :family "Roboto Mono" :height 120))
+  (set-face-attribute 'default nil :family "Roboto Mono" :height 108)
+  (set-face-attribute 'fixed-pitch nil :family "Roboto Mono"))
+
+(when (member "Source Sans Pro" (font-family-list))
+  (set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.18))
+#+END_SRC
+
 ** Frame
 Remove the title bar because it's unaesthetic.
 #+BEGIN_SRC emacs-lisp
@@ -31,6 +42,24 @@ Enable relative line numbers because it's a habit from vim
 (setq display-line-numbers-type 'relative)
 #+END_SRC
 * Org
+** Aesthetics
+*** Fonts
+Set Source Sans Pro as header font and resize headings.
+#+BEGIN_SRC emacs-lisp
+;; Resize Org headings
+(dolist (face '((org-level-1 . 1.35)
+                (org-level-2 . 1.3)
+                (org-level-3 . 1.2)
+                (org-level-4 . 1.1)
+                (org-level-5 . 1.1)
+                (org-level-6 . 1.1)
+                (org-level-7 . 1.1)
+                (org-level-8 . 1.1)))
+  (set-face-attribute (car face) nil :family "Source Sans Pro" :weight 'bold :height (cdr face)))
+
+;; Make the document title a bit bigger
+(set-face-attribute 'org-document-title nil :family "Source Sans Pro" :weight 'bold :height 1.8)
+#+END_SRC
 ** Roam
 Make "~/zettelkasten" the org-roam directory
 #+BEGIN_SRC emacs-lisp
@@ -45,6 +74,8 @@ Make "~/zettelkasten" the org-roam directory
   ;; Increase preview width
   (plist-put org-latex-preview-appearance-options
              :page-width 1.0)
+  (plist-put org-latex-preview-appearance-options
+             :scale 2)
 
   ;; enable consistent equation numbering
   (setq org-latex-preview-numbered t)
