@@ -20,16 +20,16 @@ Load theme, taking current system APPEARANCE into consideration.
 #+END_SRC
 *Note:* I might remove this if it gets dark outside too quick.
 *** Fonts
+Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respectively. I'm choosing not to use "doom-font" to keep things migratable.
 #+BEGIN_SRC emacs-lisp
 (when (member "Roboto Mono" (font-family-list))
-  ;; (setq doom-font (font-spec :family "Roboto Mono" :height 120))
   (set-face-attribute 'default nil :family "Roboto Mono" :height 108)
   (set-face-attribute 'fixed-pitch nil :family "Roboto Mono"))
 
 (when (member "Source Sans Pro" (font-family-list))
-  (set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.18))
+  ;; variable pitch font will be a little larger than fixed fonts
+(set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.18))
 #+END_SRC
-
 ** Frame
 Remove the title bar because it's unaesthetic.
 #+BEGIN_SRC emacs-lisp
@@ -44,7 +44,7 @@ Enable relative line numbers because it's a habit from vim
 * Org
 ** Aesthetics
 *** Fonts
-Set Source Sans Pro as header font and resize headings.
+Set Roboto Mono as header font and resize headings.
 #+BEGIN_SRC emacs-lisp
 ;; Resize Org headings
 (dolist (face '((org-level-1 . 1.35)
@@ -55,10 +55,41 @@ Set Source Sans Pro as header font and resize headings.
                 (org-level-6 . 1.1)
                 (org-level-7 . 1.1)
                 (org-level-8 . 1.1)))
-  (set-face-attribute (car face) nil :family "Source Sans Pro" :weight 'bold :height (cdr face)))
+  (set-face-attribute (car face) nil :family "Roboto Mono" :weight 'bold :height (cdr face)))
 
 ;; Make the document title a bit bigger
-(set-face-attribute 'org-document-title nil :family "Source Sans Pro" :weight 'bold :height 1.8)
+(set-face-attribute 'org-document-title nil :family "Roboto Mono" :weight 'bold :height 1.8)
+#+END_SRC
+*** Decluttering
+Don't be a litterbug!
+#+BEGIN_SRC emacs-lisp
+(setq org-adapt-indentation t
+      org-hide-leading-stars t
+      org-hide-emphasis-markers t  ;; hide markers(bold, italics, etc)
+      org-pretty-entities t) ;; allow LaTeX-like syntax to insert special symbols
+#+END_SRC
+*** Source Blocks
+#+BEGIN_SRC emacs-lisp
+(setq org-src-fontify-natively t
+      org-src-tab-acts-natively t
+      org-edit-src-content-indentation 0)
+#+END_SRC
+*** Org-Superstar
+#+BEGIN_SRC emacs-lisp
+(use-package org-superstar
+  :hook (org-mode-hook . (lambda () (org-superstar-mode 1)))
+  :after org
+  :config
+  (setq org-superstar-leading-bullet " "
+        org-superstar-headline-bullets-list '("●" "○" "◆" "◇" "•" "⚬")
+        org-superstar-item-bullet-alist '((42 . "⚬") (43 . "⚬") (45 . "⚬"))
+        org-superstar-prettify-item-bullets t)
+  #+END_SRC
+
+Plain-list bullets are invisible because they have the org-indent face. We can make them visible by having them inherit the default face.
+#+BEGIN_SRC emacs-lisp
+  (set-face-attribute 'org-list-dt nil :inherit 'default)
+)
 #+END_SRC
 ** Roam
 Make "~/zettelkasten" the org-roam directory
@@ -67,8 +98,7 @@ Make "~/zettelkasten" the org-roam directory
 #+END_SRC
 ** Latex Previews
 #+BEGIN_SRC emacs-lisp
-
-(use-package! org-latex-preview
+(use-package org-latex-preview
   :defer
   :config
   ;; Increase preview width

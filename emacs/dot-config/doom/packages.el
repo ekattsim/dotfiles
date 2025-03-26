@@ -74,3 +74,6 @@
   :pin nil)
 
 (unpin! org)
+
+;; nice org writing environment
+(package! org-superstar)
