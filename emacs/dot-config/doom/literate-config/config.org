@@ -23,12 +23,12 @@ Load theme, taking current system APPEARANCE into consideration.
 Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respectively. I'm choosing not to use "doom-font" to keep things migratable.
 #+BEGIN_SRC emacs-lisp
 (when (member "Roboto Mono" (font-family-list))
-  (set-face-attribute 'default nil :family "Roboto Mono" :height 108)
+  (set-face-attribute 'default nil :family "Roboto Mono" :height 150)
   (set-face-attribute 'fixed-pitch nil :family "Roboto Mono"))
 
 (when (member "Source Sans Pro" (font-family-list))
   ;; variable pitch font will be a little larger than fixed fonts
-(set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.18))
+(set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.20))
 #+END_SRC
 ** Frame
 Remove the title bar because it's unaesthetic.
@@ -97,29 +97,40 @@ Make "~/zettelkasten" the org-roam directory
 (setq org-roam-directory "~/zettelkasten")
 #+END_SRC
 ** Latex Previews
+*** Load/Enable
+Configure org-latex-preview to be load after org and enable auto-mode which reveals source text under the fragment being pointed to.
 #+BEGIN_SRC emacs-lisp
 (use-package org-latex-preview
-  :defer
-  :config
-  ;; Increase preview width
-  (plist-put org-latex-preview-appearance-options
-             :page-width 1.0)
-  (plist-put org-latex-preview-appearance-options
-             :scale 2)
+:after org
+:hook (org-mode-hook . org-latex-preview-auto-mode)
+#+END_SRC
 
-  ;; enable consistent equation numbering
-  (setq org-latex-preview-numbered t)
+*** Appearance Settings
+Basic appearance settings. I've noticed ":scale" doesn't seem to do anything, this could only be for png.
+#+BEGIN_SRC emacs-lisp
+:config
+;; enable latex-previews startup option
+(setq org-startup-with-latex-preview t)
 
-  ;; real time previews of latex fagments as you type
-  (setq org-latex-preview-live t)
-  (setq org-latex-preview-live-debounce 0.25)  ;; reducing delay before preview
+;; Increase preview width
+(plist-put org-latex-preview-appearance-options
+:page-width 1.0)
+(plist-put org-latex-preview-appearance-options
+:scale 2)
 
-  ;; png is faster than svg
-  ;; (setq org-latex-preview-process-default 'dvipng)
+;; enable consistent equation numbering
+(setq org-latex-preview-numbered t)
+#+END_SRC
 
-  ;; reveals source text under the fragment being pointed to
-  (add-hook! 'org-mode-hook 'org-latex-preview-auto-mode)
-  )
+*** Latency and Performance
+#+BEGIN_SRC emacs-lisp
+;; real time previews of latex fagments as you type
+(setq org-latex-preview-live t)
+(setq org-latex-preview-live-debounce 0.25)  ;; reducing delay before preview
+
+;; png is faster than svg
+(setq org-latex-preview-process-default 'dvipng)
+)
 #+END_SRC
 
 * Keybinds
