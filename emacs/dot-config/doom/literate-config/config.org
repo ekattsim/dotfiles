@@ -5,6 +5,101 @@
 #+title: Config
 
 * Rudimentary configuration
+** Confpkg
+Clump parts of config into "self-contained packets of functionality"
+*** Design
+It's already natural to organise blocks of config under sections, and we can use
+=:noweb-ref= with a =header-args:emacs-lisp= property to direct all child source
+blocks into a single parent. We could have two parents, one tangling to
+=subconf/config-X.el= and the other to =config.el=, however this will duplicate
+any evaluations required to generate the content, which isn't great
+(particularly for things which take a moment, like checking for LaTeX
+packages). Instead we can /just/ write to the =subconf/*= files and then at the
+end of tangling extract their contents into =config.el=.
+
+To set this up within each section, instead of manually repeating a common form
+we can generate the form and supply the relevant section properties via a babel
+call keyword, like so:
+
+#+begin_src org
+,* Subject
+
+,#+call: confpkg("subject")
+
+,#+begin_src emacs-lisp
+;; Code that configures the subject...
+,#+end_src
+#+end_src
+*** Preparation
+This approach is built around =#+call= invocations that affect the tangling.
+Unfortunately for this use-case, babel call keywords are not executed on tangle.
+Tangled noweb blocks /are/ however, and so we can fudge the behaviour we want by
+tangling a noweb block to a temp file, with a noweb block that executes babel
+calls in the buffer.
+#+name: confpkg-prepare
+#+begin_src emacs-lisp :noweb no-export
+(condition-case nil
+    (progn
+      (message "Intitialising confpkg")
+      (org-fold-core-ignore-fragility-checks
+        (org-babel-map-executables nil
+          (when (eq (org-element-type (org-element-context)) 'babel-call)
+            (org-babel-lob-execute-maybe)))))
+  (quit (revert-buffer t t t)))
+#+end_src
+
+#+header: :tangle (expand-file-name (make-temp-name "emacs-org-babel-excuses/confpkg-prepare-") temporary-file-directory)
+#+begin_src emacs-lisp :noweb no-export :mkdirp yes :export-embed no
+<<confpkg-prepare()>>
+#+end_src
+
+*** Setup
+Before generating the template with babel, we want to keep track of:
++ How many config groups are created
++ Information about each config group
+
+To do this we can simply create two variables. Due to temp-buffer shenanigans,
+we'll have to use global variables here.
+
+Then we need to set up the two final phases of this process:
++ Creating =config.el=
++ Cleaning up the superfluous generated content
+
+To trigger the final phases we'll add a hook to ~org-babel-post-tangle-hook~. Once
+again, it would be preferred if this was done locally, but it needs to be
+global. To avoid this causing headaches down the line we'll make sure when
+implementing the hook function to have it remove itself from the hook when
+executed.
+#+name: confpkg-setup
+#+begin_src emacs-lisp :results silent :noweb no-export
+(setq confpkg--num 0
+      confpkg--list nil)
+
+<<confpkg-dependency-analysis>>
+<<confpkg-strip-package-statements>>
+<<confpkg-create-config>>
+(defun confpkg-cleanup ()
+ <<confpkg-cleanup>>
+  )
+<<confpkg-finaliser>>
+
+<<confpkg-clear-old-files>>
+
+(add-hook 'org-babel-tangle-finished-hook #'confpkg-tangle-finalise)
+#+end_src
+
+To avoid generating cruft, it would also be good to get rid of old tangled
+config files at the start.
+#+name: confpkg-clear-old-files
+#+begin_src emacs-lisp
+(make-directory "subconf" t)
+(dolist (conf-file (directory-files "subconf" t "config-.*\\.el"))
+  (delete-file conf-file))
+#+end_src
+
+Now to have this take effect, we can just use a babel call keyword. Thanks to
+the preparation step this will be executed during tangling.
+#+call: confpkg-setup[:results none]()
 ** Personal information
 #+BEGIN_SRC emacs-lisp
 (setq user-full-name "Aesbetic"
