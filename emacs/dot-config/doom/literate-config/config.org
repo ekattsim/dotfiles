@@ -20,7 +20,6 @@ end of tangling extract their contents into =config.el=.
 To set this up within each section, instead of manually repeating a common form
 we can generate the form and supply the relevant section properties via a babel
 call keyword, like so:
-
 #+begin_src org
 ,* Subject
 
@@ -100,6 +99,141 @@ config files at the start.
 Now to have this take effect, we can just use a babel call keyword. Thanks to
 the preparation step this will be executed during tangling.
 #+call: confpkg-setup[:results none]()
+*** Package generation
+Now we actually implement the =confpkg= babel function. We could just direct the
+output into the =subconf/config-X.el= file without any extra steps, but why not be
+a bit fancier and make it more like a package.
+
+To do this, we'll have =confpkg= load a template and then fill it in using
+~format-spec~. To make sure this is actually used, we'll call ~org-set-property~ to
+modify the parent heading, and register the config group with the variables we
+created earlier.
+#+name: confpkg
+#+begin_src elisp :var name="" needs="" after="" pre="" prefix="config-" via="copy" emacs-minimum="29.1" :results silent raw :noweb no-export
+;; Babel block for use with #+call
+;; Arguments:
+;;  - name, the name of the config sub-package
+;;  - needs, (when non-empty) required system executable(s)
+;;  - after, required features as a string or vector of strings
+;;  - pre, a noweb reference to code that should be executed eagerly,
+;;    and not deferred via after. The code is not included in the
+;;    generated .el file and should only be used in dire situations.
+;;  - prefix, the package prefix ("config-" by default)
+;;  - via, how this configuration should be included in config.el,
+;;    the current options are:
+;;    + "copy", copy the configuration lisp
+;;    + "require", insert a require statement
+;;    + "none", do not do anything to load this configuration.
+;;      This only makes sense when configuration is either being
+;;      temporarily disabled or loaded indirectly/elsewhere.
+;;  - emacs-minimum, the minimum emacs version ("29.1" by default)
+(when (or (string-empty-p needs)
+          (cl-every #'executable-find (delq nil (split-string needs ","))))
+  (let* ((name (if (string-empty-p name)
+                   (save-excursion
+                     (and (org-back-to-heading-or-point-min t)
+                          (substring-no-properties
+                           (org-element-interpret-data
+                            (org-element-property :title (org-element-at-point))))))
+                 name))
+         (after
+          (cond
+           ((and (stringp after) (string-empty-p after)) nil)
+           ((and (stringp after) (string-match-p "\\`[^()]+\\'" after))
+            (intern after)) ; Single feature.
+           ((and (vectorp after) (cl-every #'stringp after))
+            (nconc (list :and) (mapcar #'intern after)))
+           (t nil)))
+         (pre (and (not (string-empty-p pre)) pre))
+         (confpkg-name
+          (concat prefix (replace-regexp-in-string
+                          "[^a-z-]" "-" (downcase name))))
+         (confpkg-file (expand-file-name (concat confpkg-name ".el")
+                                         "subconf")))
+    (unless (file-exists-p confpkg-file)
+      (make-empty-file confpkg-file t))
+    (cl-incf confpkg--num)
+    (org-set-property
+     "header-args:emacs-lisp"
+     (format ":tangle no :noweb-ref %s :noweb-sep \"\\n\\n\"" confpkg-name))
+    (push (list :name name
+                :package confpkg-name
+                :file confpkg-file
+                :after after
+                :pre pre
+                :via (intern via)
+                :package-statements nil)
+          confpkg--list)
+    (format-spec
+     "#+begin_src emacs-lisp :tangle %f :mkdirp yes :noweb no-export :noweb-ref none :comments no
+<<confpkg-template>>
+,#+end_src"
+     `((?n . ,confpkg--num)
+       (?p . ,confpkg-name)
+       (?f . ,confpkg-file)
+       (?e . ,emacs-minimum)
+       (?Y . ,(format-time-string "%Y"))
+       (?B . ,(format-time-string "%B"))
+       (?m . ,(format-time-string "%m"))
+       (?d . ,(format-time-string "%d"))
+       (?M . ,(format-time-string "%M"))
+       (?S . ,(format-time-string "%S"))))))
+#+end_src
+
+Now all that's needed is a template to be used.
+#+name: confpkg-template
+#+begin_src emacs-lisp :eval no
+;;; %p.el --- Generated package (no.%n) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) %Y TEC
+;;
+;; Author: TEC <https://code.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: %B %d, %Y
+;; Modified: %B %d, %Y
+;; Version: %Y.%m.%d
+;; Homepage: https://code.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs \"%e\"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.%n) from my config.
+;;
+;;  During generation, dependency on other aspects of my configuration and
+;;  packages is inferred via (regexp-based) static analysis.  While this seems
+;;  to do a good job, this method is imperfect.  This code likely depends on
+;;  utilities provided by Doom, and if you try to run it in isolation you may
+;;  discover the code makes more assumptions.
+;;
+;;  That said, I've found pretty good results so far.
+;;
+;;; Code:
+
+<<%p>>
+
+(provide '%p)
+;;; %p.el ends here
+#+end_src
+
+This currently makes the included content look much more package-like than it
+truly is.
+
+Lastly, should there be an issue or interruption, it's possible that the
+modifications from =#+call: confpkg= may persist. If I've been good with my
+committing, resolving this should be as simple as reverting unstaged changes.
+So... back in reality, it would be nice to have a way to clean up =confpkg=
+residue.
+#+name: confpkg-cleanup
+#+begin_src emacs-lisp :results none
+(org-fold-core-ignore-fragility-checks
+  (org-babel-map-executables nil
+    (when (and (eq (org-element-type (org-element-context)) 'babel-call)
+               (equal (org-element-property :call (org-element-context)) "confpkg"))
+      (org-babel-remove-result)
+      (org-entry-delete nil "header-args:emacs-lisp"))))
+#+end_src
 ** Personal information
 #+BEGIN_SRC emacs-lisp
 (setq user-full-name "Aesbetic"
