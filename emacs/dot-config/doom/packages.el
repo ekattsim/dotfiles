@@ -77,3 +77,6 @@
 
 ;; nice org writing environment
 (package! org-superstar)
+
+;; I have no clue why this is enabled by default
+(package! evil-escape :disable t)

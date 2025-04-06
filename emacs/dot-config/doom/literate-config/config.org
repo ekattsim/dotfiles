@@ -3,7 +3,6 @@
 :END:
 
 #+title: Config
-
 * Rudimentary configuration
 ** Personal information
 #+BEGIN_SRC emacs-lisp
@@ -128,8 +127,9 @@ Don't be a litterbug!
 #+BEGIN_SRC emacs-lisp
 (setq org-adapt-indentation t
       org-hide-leading-stars t
-      org-hide-emphasis-markers t  ;; hide markers(bold, italics, etc)
-      org-pretty-entities t) ;; allow LaTeX-like syntax to insert special symbols
+      org-hide-emphasis-markers t)  ;; hide markers(bold, italics, etc)
+      ;; messes with cursor positions in cdlatex templates
+      ;; org-pretty-entities t) ;; allow LaTeX-like syntax to insert special symbols
 #+END_SRC
 *** Source Blocks
 #+BEGIN_SRC emacs-lisp
@@ -167,9 +167,8 @@ Configure org-latex-preview to be load after org and enable auto-mode which reve
 :after org
 :hook (org-mode-hook . org-latex-preview-auto-mode)
 #+END_SRC
-
 *** Appearance Settings
-Basic appearance settings. I've noticed ":scale" doesn't seem to do anything, this could only be for png.
+Basic appearance settings.
 #+BEGIN_SRC emacs-lisp
 :config
 ;; enable latex-previews startup option
@@ -184,7 +183,6 @@ Basic appearance settings. I've noticed ":scale" doesn't seem to do anything, th
 ;; enable consistent equation numbering
 (setq org-latex-preview-numbered t)
 #+END_SRC
-
 *** Latency and Performance
 #+BEGIN_SRC emacs-lisp
 ;; real time previews of latex fagments as you type
