@@ -194,6 +194,11 @@ Basic appearance settings.
 )
 #+END_SRC
 
+** evil-tex
+#+BEGIN_SRC emacs-lisp
+(use-package! evil-tex
+:hook (org-mode-hook . evil-tex-mode))
+#+END_SRC
 * Keybinds
 ** Navigation
 *** Workspace
@@ -201,4 +206,12 @@ Bind workspace navigation to be more like t-smart
 #+BEGIN_SRC emacs-lisp
 (map! :ni "C-t" #'+workspace/switch-to
       :ni [C-tab] #'+workspace/other)
+#+END_SRC
+*** Code
+I don't want to spam j's and k's anymore
+#+BEGIN_SRC emacs-lisp
+(after! evil-snipe
+  (setq evil-snipe-smart-case t
+        evil-snipe-scope 'visible
+        ))
 #+END_SRC
