@@ -193,7 +193,70 @@ Basic appearance settings.
 (setq org-latex-preview-process-default 'dvipng)
 )
 #+END_SRC
+** org-cdlatex
+Org-cdlatex is the foundation to editing latex in org-mode. It removes much of the hassle of defining common latex macros and templates. Doing this with a snippet engine would've been pretty boring, so now we can just focus on adding more complex snippets like the auto-expanding ones to our snippet engine of choice: =aas=.
 
+Change the symbol cycling key to ';'. Note that this doesn't add a prefix, we do that later with aas to ";s"
+#+BEGIN_SRC emacs-lisp
+(after! cdlatex
+  (setq cdlatex-math-symbol-prefix ?\;) ;; this doesn't add the cdlatex-math-symbol keybind
+#+END_SRC
+
+Add custom environment snippets
+#+BEGIN_SRC emacs-lisp
+  (setq cdlatex-env-alist
+        '(("bmatrix" "\\begin{bmatrix}\n?\n\\end{bmatrix}" nil)
+          ("equation*" "\\begin{equation*}\n?\n\\end{equation*}" nil)))
+#+END_SRC
+
+Modify available symbols and modifiers
+#+BEGIN_SRC emacs-lisp
+   (setq cdlatex-math-symbol-alist
+   '( ;; adding missing functions to 3rd level symbols
+     (?_    ("\\downarrow"  ""           "\\inf"))
+     (?2    ("^2"           "\\sqrt{?}"     ""     ))
+     (?3    ("^3"           "\\sqrt[3]{?}"  ""     ))
+     (?^    ("\\uparrow"    ""           "\\sup"))
+     (?k    ("\\kappa"      ""           "\\ker"))
+     (?m    ("\\mu"         ""           "\\lim"))
+     (?c    (""             "\\circ"     "\\cos"))
+     (?d    ("\\delta"      "\\partial"  "\\dim"))
+     (?D    ("\\Delta"      "\\nabla"    "\\deg"))
+     ;; no idea why \Phi isnt on 'F' in first place, \phi is on 'f'.
+     (?F    ("\\Phi"))
+     ;; now just convenience
+     (?.    ("\\cdot " "\\dots "))
+     (?:    ("\\vdots " "\\ddots "))
+     (?*    ("\\cdot " "\\times " "\\star ")))
+
+   cdlatex-math-modify-alist
+   '( ;; adding modifiers
+     (?B    "\\mathbb"        nil          t    nil  nil)
+     (?a    "\\abs"           nil          t    nil  nil))))
+#+END_SRC
+
+Add binding to insert-mode.
+#+BEGIN_SRC emacs-lisp
+(map! :map org-cdlatex-mode-map
+      :i [tab] #'cdlatex-tab)
+#+END_SRC
+
+Rebind conflicting corfu's =[tab]= binding to =[M-tab]= which evaluates =completion-at-point=
+#+BEGIN_SRC emacs-lisp
+(map! :map corfu-map
+      :i [tab] nil
+      :i [m-tab] #'completion-at-point)
+#+END_SRC
+** laas
+#+BEGIN_SRC emacs-lisp
+(use-package! laas
+  :hook (org-mode-hook . laas-mode)
+  :config
+  (aas-set-snippets 'laas-mode
+    ";s" (lambda () (interactive) (cdlatex-math-symbol)) ;; symbols prefix
+    )
+  )
+#+END_SRC
 ** evil-tex
 #+BEGIN_SRC emacs-lisp
 (use-package! evil-tex
