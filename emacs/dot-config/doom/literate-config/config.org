@@ -196,10 +196,11 @@ Basic appearance settings.
 ** org-cdlatex
 Org-cdlatex is the foundation to editing latex in org-mode. It removes much of the hassle of defining common latex macros and templates. Doing this with a snippet engine would've been pretty boring, so now we can just focus on adding more complex snippets like the auto-expanding ones to our snippet engine of choice: =aas=.
 
-Change the symbol cycling key to ';'. Note that this doesn't add a prefix, we do that later with aas to ";s"
+Change the symbol/modifier cycling key to ';'. Note for some reason these don't change the existing activating keymap bind; we do this later with =aas= though.
 #+BEGIN_SRC emacs-lisp
 (after! cdlatex
-  (setq cdlatex-math-symbol-prefix ?\;) ;; this doesn't add the cdlatex-math-symbol keybind
+  (setq cdlatex-math-symbol-prefix ?\;)
+  (setq cdlatex-math-modify-prefix ?\;)
 #+END_SRC
 
 Add custom environment snippets
@@ -253,6 +254,19 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]= which evaluates =complet
   :hook (org-mode-hook . laas-mode)
   :config
   (aas-set-snippets 'laas-mode
+    ;; auto environments under ;e
+    ";e" nil
+    ";ee" (lambda () (interactive) (insert "env") (cdlatex-tab)) ;; arbitrary environment
+    ";ea" (lambda () (interactive) (insert "ali*") (cdlatex-tab)) ;; align*
+    ";eq" (lambda () (interactive) (insert "equ") (cdlatex-tab)) ;; equation
+
+    ;; TODO figure out how to get "M-RET" behavior for items
+    ";ei" (lambda () (interactive) (insert "ite") (cdlatex-tab)) ;; itemize
+    ";en" (lambda () (interactive) (insert "enu") (cdlatex-tab)) ;; enumerate
+
+    ";es" (lambda () (interactive) (insert "sn") (cdlatex-tab)) ;; section
+    "sb" (lambda () (interactive) (insert "ss") (cdlatex-tab)) ;; subsection
+    "ssb" (lambda () (interactive) (insert "sss") (cdlatex-tab)) ;; subsubsection
     ";s" (lambda () (interactive) (cdlatex-math-symbol)) ;; symbols prefix
     )
   )
