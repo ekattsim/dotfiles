@@ -201,8 +201,12 @@ Change the symbol/modifier cycling key to ';'. Note for some reason these don't 
 (after! cdlatex
   (setq cdlatex-math-symbol-prefix ?\;)
   (setq cdlatex-math-modify-prefix ?\;)
-#+END_SRC
 
+  (map! :map org-cdlatex-mode-map
+        "'" nil)
+  (map! :map org-cdlatex-mode-map
+        "`" nil)
+#+END_SRC
 Add custom environment snippets
 #+BEGIN_SRC emacs-lisp
   (setq cdlatex-env-alist
@@ -238,8 +242,8 @@ Modify available symbols and modifiers
 
 Add binding to insert-mode.
 #+BEGIN_SRC emacs-lisp
-(map! :map org-cdlatex-mode-map
-      :i [tab] #'cdlatex-tab)
+;; (map! :map org-cdlatex-mode-map
+;;       :i [tab] #'cdlatex-tab)
 #+END_SRC
 
 Rebind conflicting corfu's =[tab]= binding to =[M-tab]= which evaluates =completion-at-point=
@@ -254,9 +258,15 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]= which evaluates =complet
   :hook (org-mode-hook . laas-mode)
   :config
   (aas-set-snippets 'laas-mode
+    ;; org mode snippets
+    "<src" '(yas "#+begin_src ${1:$$(yas-completing-read \"Language: \" (mapcar #'car org-babel-load-languages))}\n$0\n#+end_src")
+
     ;; auto environments under ;e
     ";e" nil
-    ";ee" (lambda () (interactive) (insert "env") (cdlatex-tab)) ;; arbitrary environment
+
+    ;; arbitrary environment
+    ";ee" '(yas "\\begin{$1}\n $0 \n\\end{$1}")
+
     ";ea" (lambda () (interactive) (insert "ali*") (cdlatex-tab)) ;; align*
     ";eq" (lambda () (interactive) (insert "equ") (cdlatex-tab)) ;; equation
 
@@ -267,9 +277,37 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]= which evaluates =complet
     ";es" (lambda () (interactive) (insert "sn") (cdlatex-tab)) ;; section
     "sb" (lambda () (interactive) (insert "ss") (cdlatex-tab)) ;; subsection
     "ssb" (lambda () (interactive) (insert "sss") (cdlatex-tab)) ;; subsubsection
+
+    ;; symbols, these are mostly handled by laas
     ";s" (lambda () (interactive) (cdlatex-math-symbol)) ;; symbols prefix
-    )
-  )
+
+    ;; commands(copy from karthink)
+    "mk" '(yas "\\\\( $0 \\\\)") ;; We're trying to pass the string "\\( $0 \\)"
+    "dm" '(yas "\\[ $0 \\]")
+
+    :cond #'texmathp
+    ;; math commands
+    "lm" '(yas "\\\\lim_{${1:x} \\\\to ${2:\\\\infty}}$0")
+    "sm" '(yas "\\sum_{${1:i}={$2:0}}^{${3:N}}$0")
+
+    ";i" nil
+    ";id" '(yas "\\\\int_{${1:-\\\\infty}}^{${2:\\\\infty}}$0")
+    ";in" '(yas "\\\\int$1${2:dx}$0")
+    ";d" '(yas "\\\\frac{\\\\mathrm{d}$1}{\\\\mathrm{d}${2:t}}$0")
+
+    ;; modifiers
+    ";m" (lambda () (interactive) (org-cdlatex-math-modify)) ;; modifiers prefix
+    ";t" (lambda () (interactive)
+           (let ((last-command-event ?^)
+                 (last-command nil))
+             (org-cdlatex-underscore-caret)))
+    ";v" '(yas "\\vec{$0}")
+    ";q" '(yas "\\sqrt{$0}")
+    ";(" '(yas "\\left( $0 \\right") ;; note that the right paren is not there(it autoexpands)
+    ";[" '(yas "\\left[ $0 \\right")
+    ";|" '(yas "\\left| $0 \\right|")
+    ;;TODO write a cdlatex modifier that only inserts a '|' on the right
+    ))
 #+END_SRC
 ** evil-tex
 #+BEGIN_SRC emacs-lisp
