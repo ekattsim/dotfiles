@@ -8,18 +8,9 @@
 ** Confpkg
 Clump parts of config into "self-contained packets of functionality"
 *** Design
-It's already natural to organise blocks of config under sections, and we can use
-=:noweb-ref= with a =header-args:emacs-lisp= property to direct all child source
-blocks into a single parent. We could have two parents, one tangling to
-=subconf/config-X.el= and the other to =config.el=, however this will duplicate
-any evaluations required to generate the content, which isn't great
-(particularly for things which take a moment, like checking for LaTeX
-packages). Instead we can /just/ write to the =subconf/*= files and then at the
-end of tangling extract their contents into =config.el=.
+It's already natural to organize blocks of config under sections, and we can use =:noweb-ref= with a =header-args:emacs-lisp= property to direct all child source blocks into a single parent. We could have two parents, one tangling to =subconf/config-X.el= and the other to =config.el=, however this will duplicate any evaluations required to generate the content, which isn't great (particularly for things which take a moment, like checking for LaTeX packages). Instead we can /just/ write to the =subconf/*= files and then at the end of tangling extract their contents into =config.el=.
 
-To set this up within each section, instead of manually repeating a common form
-we can generate the form and supply the relevant section properties via a babel
-call keyword, like so:
+To set this up within each section, instead of manually repeating a common form we can generate the form and supply the relevant section properties via a babel call keyword, like so:
 #+begin_src org
 ,* Subject
 
@@ -30,11 +21,7 @@ call keyword, like so:
 ,#+end_src
 #+end_src
 *** Preparation
-This approach is built around =#+call= invocations that affect the tangling.
-Unfortunately for this use-case, babel call keywords are not executed on tangle.
-Tangled noweb blocks /are/ however, and so we can fudge the behaviour we want by
-tangling a noweb block to a temp file, with a noweb block that executes babel
-calls in the buffer.
+This approach is built around =#+call= invocations that affect the tangling. Unfortunately for this use-case, babel call keywords are not executed on tangle. However, a *noweb ref* can be executed on tangle if we choose to expand its evaluation result instead of its body. And so we can fudge the behaviour we want by tangling a noweb ref to a temp file, where the referenced block(=confpkg-prepare=) executes all babel calls in the buffer.
 #+name: confpkg-prepare
 #+begin_src emacs-lisp :noweb no-export
 (condition-case nil
@@ -47,6 +34,7 @@ calls in the buffer.
   (quit (revert-buffer t t t)))
 #+end_src
 
+And here's the tangled noweb-ref that will execute =confpk-prepare=.
 #+header: :tangle (expand-file-name (make-temp-name "emacs-org-babel-excuses/confpkg-prepare-") temporary-file-directory)
 #+begin_src emacs-lisp :noweb no-export :mkdirp yes :export-embed no
 <<confpkg-prepare()>>
