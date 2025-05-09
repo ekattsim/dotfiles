@@ -341,6 +341,18 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much bec
 (use-package! evil-tex
 :hook (org-mode-hook . evil-tex-mode))
 #+END_SRC
+* Information
+** RSS feeds
+#+begin_src emacs-lisp
+(use-package! elfeed
+  :config
+  (setq elfeed-feeds
+      '("https://xkcd.com/rss.xml"
+        "https://hnrss.org/frontpage"
+        "https://old.reddit.com/r/slatestarcodex.rss"
+        "https://old.reddit.com/r/hardware.rss"))
+  )
+#+end_src
 * Keybinds
 ** Navigation
 *** Workspace
