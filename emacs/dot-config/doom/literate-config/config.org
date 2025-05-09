@@ -207,13 +207,13 @@ Change the symbol/modifier cycling key to ';'. Note for some reason these don't 
   (map! :map org-cdlatex-mode-map
         "`" nil)
 #+END_SRC
+
 Add custom environment snippets
 #+BEGIN_SRC emacs-lisp
   (setq cdlatex-env-alist
         '(("bmatrix" "\\begin{bmatrix}\n?\n\\end{bmatrix}" nil)
           ("equation*" "\\begin{equation*}\n?\n\\end{equation*}" nil)))
 #+END_SRC
-
 Modify available symbols and modifiers
 #+BEGIN_SRC emacs-lisp
    (setq cdlatex-math-symbol-alist
@@ -239,14 +239,33 @@ Modify available symbols and modifiers
      (?B    "\\mathbb"        nil          t    nil  nil)
      (?a    "\\abs"           nil          t    nil  nil))))
 #+END_SRC
+*** Keybind hacks
+I wanted to replace =indent-for-tab-command= with =cdlatex-tab= in the cdlatex contexts which is usually everywhere in an org file outside of snippets and source blocks. You'll often run through your snippets but still have to navigate the math, this is where having =cdlatex-tab= always available becomes massively useful.
+#+begin_src emacs-lisp
+(defun my/org-cdlatex-tab ()
+  (interactive)
+  (cond
+   ;; Inside a snippet → yasnippet takes priority
+   ((and (bound-and-true-p yas-minor-mode)
+         (yas-active-snippets))
+    (yas-next-field-or-maybe-expand))
 
-Add binding to insert-mode.
+   ;; Inside a source block → use default tab behavior
+   ((org-in-src-block-p)
+    (indent-for-tab-command))
+
+   ;; Else → use cdlatex
+   (t
+    (cdlatex-tab))))
+#+end_src
+
+Add the binding to insert-state with cdlatex minor mode map for decent precedence. Note you can still use TAB's default behavior(indent-for-tab-command) by hitting "C-i" if you need to.
 #+BEGIN_SRC emacs-lisp
-;; (map! :map org-cdlatex-mode-map
-;;       :i [tab] #'cdlatex-tab)
+(map! :map org-cdlatex-mode-map
+      :i "<tab>" #'my/org-cdlatex-tab)
 #+END_SRC
 
-Rebind conflicting corfu's =[tab]= binding to =[M-tab]= which evaluates =completion-at-point=
+Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much because the completion popup usually opens automatically.
 #+BEGIN_SRC emacs-lisp
 (map! :map corfu-map
       :i [tab] nil
@@ -281,19 +300,28 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]= which evaluates =complet
     ;; symbols, these are mostly handled by laas
     ";s" (lambda () (interactive) (cdlatex-math-symbol)) ;; symbols prefix
 
-    ;; commands(copy from karthink)
+    ;; commands(copy from karthink). We double escape '\' if we're preceding escapable chars
     "mk" '(yas "\\\\( $0 \\\\)") ;; We're trying to pass the string "\\( $0 \\)"
     "dm" '(yas "\\[ $0 \\]")
 
     :cond #'texmathp
     ;; math commands
+    ";c" nil
+    ";ce" '(yas "\\left. $1 \\right|_{$2}$0")
+
+    ;; misc
     "lm" '(yas "\\\\lim_{${1:x} \\\\to ${2:\\\\infty}}$0")
     "sm" '(yas "\\sum_{${1:i}={$2:0}}^{${3:N}}$0")
 
     ";i" nil
     ";id" '(yas "\\\\int_{${1:-\\\\infty}}^{${2:\\\\infty}}$0")
-    ";in" '(yas "\\\\int$1${2:dx}$0")
-    ";d" '(yas "\\\\frac{\\\\mathrm{d}$1}{\\\\mathrm{d}${2:t}}$0")
+    ";in" '(yas "\\\\int $1${2:dx}$0")
+    ";2in" '(yas "\\\\iint$1${2:dA}$0")
+    ";3in" '(yas "\\\\iiint$1${2:dV}$0")
+
+    ";d" nil
+    ";di" '(yas "\\\\frac{\\\\mathrm{d}$1}{\\\\mathrm{d}${2:t}}$0")
+    ";do" '(yas "\\\\frac{\\\\partial$1}{\\\\partial${2:t}}$0")
 
     ;; modifiers
     ";m" (lambda () (interactive) (org-cdlatex-math-modify)) ;; modifiers prefix
@@ -306,7 +334,6 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]= which evaluates =complet
     ";(" '(yas "\\left( $0 \\right") ;; note that the right paren is not there(it autoexpands)
     ";[" '(yas "\\left[ $0 \\right")
     ";|" '(yas "\\left| $0 \\right|")
-    ;;TODO write a cdlatex modifier that only inserts a '|' on the right
     ))
 #+END_SRC
 ** evil-tex
