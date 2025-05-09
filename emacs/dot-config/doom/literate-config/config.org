@@ -341,6 +341,10 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much bec
 (use-package! evil-tex
 :hook (org-mode-hook . evil-tex-mode))
 #+END_SRC
+** org-agenda
+#+begin_src emacs-lisp
+(setq org-agenda-files '("~/dotfiles/emacs/dot-config/doom/literate-config/config.org" "~/zettelkasten/"))
+#+end_src
 * Information
 ** RSS feeds
 #+begin_src emacs-lisp
