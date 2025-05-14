@@ -4,10 +4,13 @@
 
 #+title: Config
 
-* Rudimentary configuration
-** Confpkg
-Clump parts of config into "self-contained packets of functionality"
-*** Design
+* Introduction
+This is my attempt at a literate configuration of doom emacs. [[*Confpkg]] is shamelessly lifted from [[https://tecosaur.github.io/emacs-config/config.html#doom-configuration][tecosaur's]] literate config.
+
+* Confpkg
+Clump parts of config into "self-contained packets of functionality".
+
+** Design
 It's already natural to organize blocks of config under sections, and we can use =:noweb-ref= with a =header-args:emacs-lisp= property to direct all child source blocks into a single parent. We could have two parents, one tangling to =subconf/config-X.el= and the other to =config.el=, however this will duplicate any evaluations required to generate the content, which isn't great (particularly for things which take a moment, like checking for LaTeX packages). Instead we can /just/ write to the =subconf/*= files and then at the end of tangling extract their contents into =config.el=.
 
 To set this up within each section, instead of manually repeating a common form we can generate the form and supply the relevant section properties via a babel call keyword, like so:
@@ -20,7 +23,8 @@ To set this up within each section, instead of manually repeating a common form 
 ;; Code that configures the subject...
 ,#+end_src
 #+end_src
-*** Preparation
+
+** Preparation
 This approach is built around =#+call= invocations that affect the tangling. Unfortunately for this use-case, babel call keywords are not executed on tangle. However, a *noweb ref* can be executed on tangle if we choose to expand its evaluation result instead of its body. And so we can fudge the behaviour we want by tangling a noweb ref to a temp file, where the referenced block(=confpkg-prepare=) executes all babel calls in the buffer.
 #+name: confpkg-prepare
 #+begin_src emacs-lisp :noweb no-export
@@ -40,7 +44,7 @@ And here's the tangled noweb-ref that will execute =confpk-prepare=.
 <<confpkg-prepare()>>
 #+end_src
 
-*** Setup
+** Setup
 Before generating the template with babel, we want to keep track of:
 + How many config groups are created
 + Information about each config group
@@ -90,7 +94,7 @@ Now to have this take effect, we can just use a babel call keyword. Thanks to
 the preparation step this will be executed during tangling.
 #+call: confpkg-setup[:results none]()
 
-*** Package generation
+** Package generation
 Now we actually implement the =confpkg= babel function. We could just direct the
 output into the =subconf/config-X.el= file without any extra steps, but why not be
 a bit fancier and make it more like a package.
@@ -224,7 +228,7 @@ residue.
       (org-entry-delete nil "header-args:emacs-lisp"))))
 #+end_src
 
-*** Identify cross-package dependencies
+** Identify cross-package dependencies
 :PROPERTIES:
 :header-args:emacs-lisp: :noweb-ref confpkg-dependency-analysis
 :END:
@@ -307,7 +311,7 @@ necessary ~require~ statements.
         (set-buffer-modified-p nil)))))
 #+end_src
 
-*** Commenting out ~package!~ statements
+** Commenting out ~package!~ statements
 
 It's easy enough to set ~package!~ statements to tangle to =packages.el=, however
 with our noweb ref approach they will /also/ go to the config files. This could be
@@ -352,7 +356,7 @@ are needed for each block of config.
         (set-buffer-modified-p nil)))))
 #+end_src
 
-*** Creating the config file
+** Creating the config file
 
 After all the subconfig files have been tangled, we need to collect their
 content and put them together into =config.el=. For this, all that's needed is a
@@ -478,7 +482,7 @@ Applying lexical binding to the config file is good for a number of reasons,
 among which it's (slightly) faster than dynamic binding (see [[https://nullprogram.com/blog/2016/12/22/][this blog post]] for
 more info).
 
-*** Quieter output
+** Quieter output
 
 All the babel evaluation here ends up being quite noisy (along with a few other
 things during tangle), let's see if we can change that.
@@ -500,7 +504,7 @@ things during tangle), let's see if we can change that.
 
 #+call: confpkg-quieter-output()
 
-*** Reporting load time information
+** Reporting load time information
 
 #+call: confpkg("Confpkg timings")
 
@@ -734,7 +738,7 @@ NODE defaults to the root node."
         (pop-to-buffer buf)))))
 #+end_src
 
-*** Finalize
+** Finalize
 
 At last, to clean up the content inserted by the babel calls we can just revert
 the buffer. As long as ~org-babel-pre-tangle-hook~ hasn't been modified,
@@ -759,31 +763,55 @@ the function from the hook and call the =config.el= creation function.
 Within ~confpkg-tangle-finalize~ we carefully order each step so that
 the most important steps go first, to minimise the impact should a particular
 step fail.
+
+* General configuration
 ** Personal information
+#+call: confpkg()
+I'm not exactly sure where this information is used but here goes anyway.
+
 #+BEGIN_SRC emacs-lisp
 (setq user-full-name "Aesbetic"
       user-mail-address "aesbetic@gmail.com")
 #+END_SRC
+
 ** Better defaults
-Make changes to the *defaults of core emacs features* here.
+#+call: confpkg("defaults")
+Changes to core-emacs default behavior should be made here.
+
 *** Simple settings
-Small tweaks on top of Doom defaults.
+Small tweaks on top of defaults.
 #+BEGIN_SRC emacs-lisp
-(setq evil-want-fine-undo t)
+(setq shell-file-name (executable-find "bash")) ;; fish is Non-POSIX unfortunately
+
+;; default location for org files (needs to be set before org loads)
+(setq org-directory "~/zettelkasten/")
 #+END_SRC
-*** Auto-customizations
-Load the custom.el file if it exists.
+
+*** Customize
+Autoload the custom.el file if it exists.
 #+BEGIN_SRC emacs-lisp
 (when (file-exists-p custom-file)
   (load custom-file))
 #+END_SRC
+
 *** Frames
 Remove the title bar because it's unaesthetic.
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'default-frame-alist '(undecorated-round . t))
 #+END_SRC
+
 *** Windows
+**** Window operations
+I find symbolic keybinds to be more intuitive, so let's add them for window split creation.
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      "-" #'evil-window-split
+      "|" #'evil-window-vsplit)
+#+END_SRC
+
 **** Split prompt
+#+call: confpkg(after="evil")
+
 Ask what buffer to switch to after making a new window split because it's a common operation I do.
 
 First make newly-split window the active window
@@ -791,29 +819,28 @@ First make newly-split window the active window
 (setq evil-split-window-below t
       evil-vsplit-window-right t)
 #+END_SRC
+
 Then, show a buffer prompt
 #+BEGIN_SRC emacs-lisp
 (defadvice! prompt-for-buffer (&rest _)
   :after '(evil-window-split evil-window-vsplit)
   (consult-buffer))
 #+END_SRC
-**** Window operations
-Window rotation is nice, and can be found under SPC w r and SPC w R. Layout rotation is also nice though. Let's stash this under SPC w SPC, inspired by Tmux's use of C-b SPC to rotate windows.
-#+BEGIN_SRC emacs-lisp
-(map! :map evil-window-map
-      "SPC" #'rotate-layout)
-#+END_SRC
-      
-I find symbolic keybinds to be more intuitive, so let's add them for window split creation.
-#+BEGIN_SRC emacs-lisp
-(map! :leader
-      "-" #'evil-window-split
-      "|" #'evil-window-vsplit)
-#+END_SRC
+
 *** Buffers
+**** Settings
 Enable relative line numbers because it's a habit from vim
 #+BEGIN_SRC emacs-lisp
 (setq display-line-numbers-type 'relative)
+#+END_SRC
+
+**** Navigation
+General buffer navigation
+#+BEGIN_SRC emacs-lisp
+(map!  :m "H" #'evil-beginning-of-visual-line
+       :m "L" #'evil-end-of-visual-line
+       :m "0" #'evil-window-top
+       :m "$" #'evil-window-bottom)
 #+END_SRC
 
 Make working with wrapped lines easy
@@ -822,21 +849,286 @@ Make working with wrapped lines easy
        :nv "k" #'evil-previous-visual-line)
 #+END_SRC
 
-General buffer navigation
-#+BEGIN_SRC emacs-lisp
-(map!  :m "H" #'evil-beginning-of-visual-line
-       :m "L" #'evil-end-of-visual-line
-       :m "0" #'evil-window-top
-       :m "$" #'evil-window-bottom)
-#+END_SRC
 *** Files
 Bind "<leader>ff" to switch to src/header pair replacing the find-file offered by doom. This is okay because "<leader>." does finding files for me.
 #+BEGIN_SRC emacs-lisp
 (map! :leader :desc "Find other file" "f f" #'ff-find-other-file)
 #+END_SRC
-* UI
-** System
-*** TODO Theme: apply rose-pine for the soho vibes :theme:
+
+** Doom configuration
+#+call: confpkg("doom-config")
+Changes to doom functionality should be made here.
+
+*** Modules
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref none
+:END:
+Modules need to be declared in [[file:init.el][init.el]]. Doom comes with a lot of features so when you find some flashy new functionality, you should first check whether doom has a related module.
+
+#+name: init.el
+#+begin_src emacs-lisp :tangle "init.el" :noweb no-export :noweb-ref none
+;;; init.el -*- lexical-binding: t; -*-
+
+;; This file controls what Doom modules are enabled and what order they load in.
+;; Press 'K' on a module to view its documentation, and 'gd' to browse its directory.
+
+(doom! :input
+       <<doom-input>>
+
+       :completion
+       <<doom-completion>>
+
+       :ui
+       <<doom-ui>>
+
+       :editor
+       <<doom-editor>>
+
+       :emacs
+       <<doom-emacs>>
+
+       :term
+       <<doom-term>>
+
+       :checkers
+       <<doom-checkers>>
+
+       :tools
+       <<doom-tools>>
+
+       :os
+       <<doom-os>>
+
+       :lang
+       <<doom-lang>>
+
+       :email
+       <<doom-email>>
+
+       :app
+       <<doom-app>>
+
+       :config
+       <<doom-config>>
+       )
+#+end_src
+
+**** Structure
+Enable the =literate= module which tangles source blocks from =$DOOMDIR/config.org= to =config.el= on =doom sync=. There's also the =default= module which sets up default bindings, etc.
+
+#+name: doom-config
+#+begin_src emacs-lisp
+literate
+(default +bindings +smartparens)
+#+end_src
+
+**** Input
+#+name: doom-input
+#+begin_src emacs-lisp
+;;bidi              ; (tfel ot) thgir etirw uoy gnipleh
+;;chinese
+;;japanese
+;;layout            ; auie,ctsrnm is the superior home row
+#+end_src
+
+**** Interface
+Group of doom modules that make up the emacs interface.
+
+#+name: doom-completion
+#+begin_src emacs-lisp
+;;company           ; the ultimate code completion backend
+(corfu +orderless)  ; complete with cap(f), cape and a flying feather!
+;;helm              ; the *other* search engine for love and life
+;;ido               ; the other *other* search engine...
+;;ivy               ; a search engine for love and life
+vertico           ; the search engine of the future
+#+end_src
+
+#+name: doom-ui
+#+begin_src emacs-lisp
+;;deft              ; notational velocity for Emacs
+doom              ; what makes DOOM look the way it does
+doom-dashboard    ; a nifty splash screen for Emacs
+;;doom-quit         ; DOOM quit-message prompts when you quit Emacs
+;;(emoji +unicode)  ; 🙂
+hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
+;;indent-guides     ; highlighted indent columns
+;;ligatures         ; ligatures and symbols to make your code pretty again
+;;minimap           ; show a map of the code on the side
+;;modeline          ; snazzy, Atom-inspired modeline, plus API
+;;nav-flash         ; blink cursor line after big motions
+;;neotree           ; a project drawer, like NERDTree for vim
+ophints           ; highlight the region an operation acts on
+(popup +defaults)   ; tame sudden yet inevitable temporary windows
+;;tabs              ; a tab bar for Emacs
+;;treemacs          ; a project drawer, like neotree but cooler
+;;unicode           ; extended unicode support for various languages
+(vc-gutter +pretty) ; vcs diff in the fringe
+vi-tilde-fringe   ; fringe tildes to mark beyond EOB
+;;window-select     ; visually switch windows
+workspaces        ; tab emulation, persistence & separate workspaces
+zen               ; distraction-free coding or writing (TODO)
+#+end_src
+
+#+name: doom-editor
+#+begin_src emacs-lisp
+(evil +everywhere); come to the dark side, we have cookies
+file-templates    ; auto-snippets for empty files
+fold              ; (nigh) universal code folding
+;;(format +onsave)  ; automated prettiness
+;;god               ; run Emacs commands without modifier keys
+;;lispy             ; vim for lisp, for people who don't like vim
+;;multiple-cursors  ; editing in many places at once
+;;objed             ; text object editing for the innocent
+;;parinfer          ; turn lisp into python, sort of
+;;rotate-text       ; cycle region at point between text candidates
+snippets          ; my elves. They type so I don't have to
+;;word-wrap         ; soft wrapping with language-aware indent
+#+end_src
+
+#+name: doom-emacs
+#+begin_src emacs-lisp
+dired             ; making dired pretty [functional]
+electric          ; smarter, keyword-based electric-indent
+;;eww               ; the internet is gross
+;;ibuffer           ; interactive buffer management
+undo              ; persistent, smarter undo for your inevitable mistakes
+vc                ; version-control and Emacs, sitting in a tree
+#+end_src
+
+#+name: doom-term
+#+begin_src emacs-lisp
+;;eshell            ; the elisp shell that works everywhere
+;;shell             ; simple shell REPL for Emacs
+;;term              ; basic terminal emulator for Emacs
+vterm             ; the best terminal emulation in Emacs
+#+end_src
+
+#+name: doom-checkers
+#+begin_src emacs-lisp
+syntax              ; tasing you for every semicolon you forget
+;;(spell +flyspell) ; tasing you for misspelling mispelling
+;;grammar           ; tasing grammar mistake every you make
+#+end_src
+
+#+name: doom-tools
+#+begin_src emacs-lisp
+;;ansible
+;;biblio            ; Writes a PhD for you (citation needed)
+;;collab            ; buffers with friends
+;;debugger          ; FIXME stepping through code, to help you add bugs
+;;direnv
+;;docker
+;;editorconfig      ; let someone else argue about tabs vs spaces
+;;ein               ; tame Jupyter notebooks with emacs
+(eval +overlay)     ; run code, run (also, repls)
+lookup              ; navigate your code and its documentation
+;;lsp               ; M-x vscode
+magit             ; a git porcelain for Emacs
+;;make              ; run make tasks from Emacs
+;;pass              ; password manager for nerds
+pdf               ; pdf enhancements
+;;prodigy           ; FIXME managing external services & code builders
+;;terraform         ; infrastructure as code
+;;tmux              ; an API for interacting with tmux
+;;tree-sitter       ; syntax and parsing, sitting in a tree...
+;;upload            ; map local to remote projects via ssh/ftp
+#+end_src
+
+#+name: doom-os
+#+begin_src emacs-lisp
+(:if (featurep :system 'macos) macos)  ; improve compatibility with macOS
+;;tty               ; improve the terminal Emacs experience
+#+end_src
+
+**** Language support
+Language modules are lazy-loaded so we might as well enable all we want.
+#+name: doom-lang
+#+begin_src emacs-lisp
+;;agda              ; types of types of types of types...
+;;beancount         ; mind the GAAP
+;;(cc +lsp)         ; C > C++ == 1
+;;clojure           ; java with a lisp
+;;common-lisp       ; if you've seen one lisp, you've seen them all
+;;coq               ; proofs-as-programs
+;;crystal           ; ruby at the speed of c
+;;csharp            ; unity, .NET, and mono shenanigans
+;;data              ; config/data formats
+;;(dart +flutter)   ; paint ui and not much else
+;;dhall
+;;elixir            ; erlang done right
+;;elm               ; care for a cup of TEA?
+emacs-lisp        ; drown in parentheses
+;;erlang            ; an elegant language for a more civilized age
+;;ess               ; emacs speaks statistics
+;;factor
+;;faust             ; dsp, but you get to keep your soul
+;;fortran           ; in FORTRAN, GOD is REAL (unless declared INTEGER)
+;;fsharp            ; ML stands for Microsoft's Language
+;;fstar             ; (dependent) types and (monadic) effects and Z3
+;;gdscript          ; the language you waited for
+;;(go +lsp)         ; the hipster dialect
+;;(graphql +lsp)    ; Give queries a REST
+;;(haskell +lsp)    ; a language that's lazier than I am
+;;hy                ; readability of scheme w/ speed of python
+;;idris             ; a language you can depend on
+;;json              ; At least it ain't XML
+;;(java +lsp)       ; the poster child for carpal tunnel syndrome
+;;javascript        ; all(hope(abandon(ye(who(enter(here))))))
+;;julia             ; a better, faster MATLAB
+;;kotlin            ; a better, slicker Java(Script)
+(latex +cdlatex)             ; writing papers in Emacs has never been so fun
+;;lean              ; for folks with too much to prove
+;;ledger            ; be audit you can be
+;;lua               ; one-based indices? one-based indices
+markdown          ; writing docs for people to ignore
+;;nim               ; python + lisp at the speed of c
+;;nix               ; I hereby declare "nix geht mehr!"
+;;ocaml             ; an objective camel
+(org +roam2)               ; organize your plain life in plain text
+;;php               ; perl's insecure younger brother
+;;plantuml          ; diagrams for confusing people more
+;;graphviz          ; diagrams for confusing yourself even more
+;;purescript        ; javascript, but functional
+;;python            ; beautiful is better than ugly
+;;qt                ; the 'cutest' gui framework ever
+;;racket            ; a DSL for DSLs
+;;raku              ; the artist formerly known as perl6
+;;rest              ; Emacs as a REST client
+;;rst               ; ReST in peace
+;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
+;;(rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+;;scala             ; java, but good
+;;(scheme +guile)   ; a fully conniving family of lisps
+sh                ; she sells {ba,z,fi}sh shells on the C xor
+;;sml
+;;solidity          ; do you need a blockchain? No.
+;;swift             ; who asked for emoji variables?
+;;terra             ; Earth and Moon in alignment for performance.
+;;web               ; the tubes
+;;yaml              ; JSON, but readable
+;;zig               ; C, but simpler
+#+end_src
+
+**** Applications
+#+name: doom-email
+#+begin_src emacs-lisp
+;;(mu4e +org +gmail)
+;;notmuch
+;;(wanderlust +gmail)
+#+end_src
+
+#+name: doom-app
+#+begin_src emacs-lisp
+;;calendar
+;;emms
+;;everywhere        ; *leave* Emacs!? You must be joking
+;;irc               ; how neckbeards socialize
+;;(rss +org)        ; emacs as an RSS reader
+#+end_src
+
+*** System aesthetics
+**** TODO Theme: apply rose-pine for the soho vibes :theme:
 Load theme, taking current system APPEARANCE into consideration.
 #+BEGIN_SRC emacs-lisp
 (defun my/apply-theme (appearance)
@@ -847,7 +1139,8 @@ Load theme, taking current system APPEARANCE into consideration.
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 #+END_SRC
 *Note:* I might remove this if it gets dark outside too quick.
-*** Fonts
+
+**** Fonts
 Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respectively. I'm choosing not to use "doom-font" to keep things migratable.
 #+BEGIN_SRC emacs-lisp
 (when (member "Roboto Mono" (font-family-list))
@@ -858,7 +1151,31 @@ Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respective
   ;; variable pitch font will be a little larger than fixed fonts
 (set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.20))
 #+END_SRC
+
+* Functionality and Packages
+
+** editor
+#+call: confpkg()
+
+*** evil
+#+begin_src emacs-lisp
+(setq evil-want-fine-undo t)
+#+end_src
+
+** window management
+#+call: confpkg()
+
+Window rotation is nice, and can be found under SPC w r and SPC w R. Layout rotation is also nice though. Let's stash this under SPC w SPC, inspired by Tmux's use of C-b SPC to rotate windows.
+#+BEGIN_SRC emacs-lisp
+(map! :map evil-window-map
+      "SPC" #'rotate-layout)
+#+END_SRC
+
+* Applications
+* Language configuration
 * Org
+#+call: confpkg(after="org")
+
 ** Aesthetics
 *** Fonts
 Set Roboto Mono as header font and resize headings.
@@ -951,6 +1268,8 @@ Basic appearance settings. I've noticed ":scale" doesn't seem to do anything, th
 #+END_SRC
 
 * Keybinds
+#+call: confpkg()
+
 ** Navigation
 *** Workspace
 Bind workspace navigation to be more like t-smart
