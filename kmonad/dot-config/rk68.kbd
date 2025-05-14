@@ -44,14 +44,14 @@
 
 (deflayer right-mods
 	grv	_	_	_	_	_	_	_	_	_
-	_	_ _ _	esc	_	rmet rctl lalt	_
+	tab	_ _ _	esc	_	rmet rctl lalt	_
 	_	_	_	_	_	_	_	_	_	_
 	_  _  _	 _  _  _
 )
 
 (deflayer left-mods
 	_	_	_	_	_	_	_	_	_	_
-	_  lalt lctl lmet _	left down up right	_
+	tab lalt lctl lmet _	left down up right	_
 	_	_	_	_	_	_	_	_	_	_
 	_  _  _	 _  _  _
 )
