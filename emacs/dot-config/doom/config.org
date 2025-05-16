@@ -1127,30 +1127,43 @@ sh                ; she sells {ba,z,fi}sh shells on the C xor
 rss        ; emacs as an RSS reader
 #+end_src
 
-*** System aesthetics
-**** TODO Theme: apply rose-pine for the soho vibes :theme:
-Load theme, taking current system APPEARANCE into consideration.
+*** Doom UI
+**** Theme
+Load theme, taking current system appearance into consideration.
 #+BEGIN_SRC emacs-lisp
 (defun my/apply-theme (appearance)
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
-    ('light (load-theme 'tango t))
-    ('dark (load-theme 'doom-lantern t))))
+    ('light (setq doom-theme 'tango)
+            (load-theme 'tango t))
+    ('dark (setq doom-theme 'doom-lantern)
+           (load-theme 'doom-lantern t))
+    ))
+
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 #+END_SRC
 *Note:* I might remove this if it gets dark outside too quick.
 
 **** Fonts
-Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respectively. I'm choosing not to use "doom-font" to keep things migratable.
+Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respectively.
+
 #+BEGIN_SRC emacs-lisp
 (when (member "Roboto Mono" (font-family-list))
-  (set-face-attribute 'default nil :family "Roboto Mono" :height 150)
-  (set-face-attribute 'fixed-pitch nil :family "Roboto Mono"))
+  (setq doom-font (font-spec :family "Roboto Mono" :height 15.0)))
+  ;; (set-face-attribute 'default nil :family "Roboto Mono" :height 150)
+  ;; (set-face-attribute 'fixed-pitch nil :family "Roboto Mono"))
 
 (when (member "Source Sans Pro" (font-family-list))
   ;; variable pitch font will be a little larger than fixed fonts
-(set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.20))
+  (setq doom-variable-pitch-font (font-spec :family "Source Sans Pro" :size 18.0)))
+  ;; (set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.20))
 #+END_SRC
+
+*** Dashboard
+Doom has a minimal dashboard that helps with startup times. Let's add a clean custom banner as well.
+#+begin_src emacs-lisp
+(setq fancy-splash-image "~/.config/doom/misc/splash-images/emacs-e-template.svg")
+#+end_src
 
 * Functionality and Packages
 
