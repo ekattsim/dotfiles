@@ -782,9 +782,7 @@ Changes to core-emacs default behavior should be made here.
 Small tweaks on top of defaults.
 #+BEGIN_SRC emacs-lisp
 (setq shell-file-name (executable-find "bash")) ;; fish is Non-POSIX unfortunately
-
-;; default location for org files (needs to be set before org loads)
-(setq org-directory "~/zettelkasten/")
+(setq org-directory "~/zettelkasten/") ;; default location for org files (needs to be set before org loads)
 #+END_SRC
 
 *** Customize
@@ -798,61 +796,6 @@ Autoload the custom.el file if it exists.
 Remove the title bar because it's unaesthetic.
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'default-frame-alist '(undecorated-round . t))
-#+END_SRC
-
-*** Windows
-**** Window operations
-I find symbolic keybinds to be more intuitive, so let's add them for window split creation.
-#+BEGIN_SRC emacs-lisp
-(map! :leader
-      "-" #'evil-window-split
-      "|" #'evil-window-vsplit)
-#+END_SRC
-
-**** Split prompt
-#+call: confpkg(after="evil")
-
-Ask what buffer to switch to after making a new window split because it's a common operation I do.
-
-First make newly-split window the active window
-#+BEGIN_SRC emacs-lisp
-(setq evil-split-window-below t
-      evil-vsplit-window-right t)
-#+END_SRC
-
-Then, show a buffer prompt
-#+BEGIN_SRC emacs-lisp
-(defadvice! prompt-for-buffer (&rest _)
-  :after '(evil-window-split evil-window-vsplit)
-  (consult-buffer))
-#+END_SRC
-
-*** Buffers
-**** Settings
-Enable relative line numbers because it's a habit from vim
-#+BEGIN_SRC emacs-lisp
-(setq display-line-numbers-type 'relative)
-#+END_SRC
-
-**** Navigation
-General buffer navigation
-#+BEGIN_SRC emacs-lisp
-(map!  :m "H" #'evil-beginning-of-visual-line
-       :m "L" #'evil-end-of-visual-line
-       :m "0" #'evil-window-top
-       :m "$" #'evil-window-bottom)
-#+END_SRC
-
-Make working with wrapped lines easy
-#+BEGIN_SRC emacs-lisp
-(map!  :nv "j" #'evil-next-visual-line
-       :nv "k" #'evil-previous-visual-line)
-#+END_SRC
-
-*** Files
-Bind "<leader>ff" to switch to src/header pair replacing the find-file offered by doom. This is okay because "<leader>." does finding files for me.
-#+BEGIN_SRC emacs-lisp
-(map! :leader :desc "Find other file" "f f" #'ff-find-other-file)
 #+END_SRC
 
 ** Doom configuration
@@ -1295,7 +1238,10 @@ This will be my relief.
 Let's stash layout rotation under SPC w SPC, inspired by Tmux's use of C-b SPC to rotate windows.
  #+BEGIN_SRC emacs-lisp
 (use-package! rotate
-  :bind ("SPC w SPC" . #'rotate-layout)
+  :commands #'rotate-layout
+  :init
+  (map! :map evil-window-map
+        "SPC" #'rotate-layout)
   )
  #+END_SRC
 **** Split prompt
@@ -1331,7 +1277,11 @@ Bind workspace navigation to be more like t-smart
 #+END_SRC
 **** Projects
 ** Tools
+#+call: confpkg()
+
 *** Org
+#+call: confpkg("org-packages")
+
 **** Org-Superstar
 #+begin_src emacs-lisp :tangle "packages.el"
 (package! org-superstar)
@@ -1353,48 +1303,14 @@ Plain-list bullets are invisible because they have the org-indent face. We can m
   (set-face-attribute 'org-list-dt nil :inherit 'default)
 )
 #+END_SRC
-*** Roam
-Make "~/zettelkasten" the org-roam directory
+**** evil-tex
+Provides useful text objects, movements, etc for LaTeX editing.
 #+BEGIN_SRC emacs-lisp
-(setq org-roam-directory "~/zettelkasten")
-#+END_SRC
-*** Latex Previews
-**** Load/Enable
-Configure org-latex-preview to be load after org and enable auto-mode which reveals source text under the fragment being pointed to.
-#+BEGIN_SRC emacs-lisp
-(use-package org-latex-preview
-:after org
-:hook (org-mode-hook . org-latex-preview-auto-mode)
+(use-package! evil-tex
+:hook (org-mode-hook . evil-tex-mode))
 #+END_SRC
 
-**** Appearance Settings
-Basic appearance settings.
-#+BEGIN_SRC emacs-lisp
-:config
-;; enable latex-previews startup option
-(setq org-startup-with-latex-preview t)
-
-;; Increase preview width
-(plist-put org-latex-preview-appearance-options
-:page-width 1.0)
-(plist-put org-latex-preview-appearance-options
-:zoom 1.2)
-
-;; enable consistent equation numbering
-(setq org-latex-preview-numbered t)
-#+END_SRC
-
-**** Latency and Performance
-#+BEGIN_SRC emacs-lisp
-;; real time previews of latex fagments as you type
-(setq org-latex-preview-live t)
-(setq org-latex-preview-live-debounce 0.25)  ;; reducing delay before preview
-
-;; png is faster than svg
-(setq org-latex-preview-process-default 'dvipng)
-)
-#+END_SRC
-*** org-cdlatex
+**** org-cdlatex
 Org-cdlatex is the foundation to editing latex in org-mode. It removes much of the hassle of defining common latex macros and templates. Doing this with a snippet engine would've been pretty boring, so now we can just focus on adding more complex snippets like the auto-expanding ones to our snippet engine of choice: =aas=.
 
 Change the symbol/modifier cycling key to ';'. Note for some reason these don't change the existing activating keymap bind; we do this later with =aas= though.
@@ -1440,7 +1356,7 @@ Modify available symbols and modifiers
      (?B    "\\mathbb"        nil          t    nil  nil)
      (?a    "\\abs"           nil          t    nil  nil))))
 #+END_SRC
-**** Keybind hacks
+***** Keybind hacks
 I wanted to replace =indent-for-tab-command= with =cdlatex-tab= in the cdlatex contexts which is usually everywhere in an org file outside of snippets and source blocks. You'll often run through your snippets but still have to navigate the math, this is where having =cdlatex-tab= always available becomes massively useful.
 #+begin_src emacs-lisp
 (defun my/org-cdlatex-tab ()
@@ -1472,7 +1388,13 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much bec
       :i [tab] nil
       :i [m-tab] #'completion-at-point)
 #+END_SRC
-*** laas
+**** laas
+=laas= is
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! laas)
+#+end_src
+
 #+BEGIN_SRC emacs-lisp
 (use-package! laas
   :hook (org-mode-hook . laas-mode)
@@ -1537,15 +1459,119 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much bec
     ";|" '(yas "\\left| $0 \\right|")
     ))
 #+END_SRC
-*** evil-tex
+*** Roam
+Installed and pre-configured as part of the =:lang org +roam2= doom module.
+
+Make "~/zettelkasten" the org-roam directory
 #+BEGIN_SRC emacs-lisp
-(use-package! evil-tex
-:hook (org-mode-hook . evil-tex-mode))
+(setq org-roam-directory "~/zettelkasten")
 #+END_SRC
-*** org-agenda
-#+begin_src emacs-lisp
-(setq org-agenda-files '("~/dotfiles/emacs/dot-config/doom/literate-config/config.org" "~/zettelkasten/"))
+* Language configuration
+** Org
+#+call: confpkg()
+
+*** Installation
+This declaration is from org-latex-preview
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! org :recipe
+  (:host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror" :fork
+         (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")
+         :files
+         (:defaults "etc")
+         :build t :pre-build
+         (with-temp-file "org-version.el"
+           (require 'lisp-mnt)
+           (let
+               ((version
+                 (with-temp-buffer
+                   (insert-file-contents "lisp/org.el")
+                   (lm-header "version")))
+                (git-version
+                 (string-trim
+                  (with-temp-buffer
+                    (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
+                    (buffer-string)))))
+             (insert
+              (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
+              (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
+              "(provide 'org-version)\n"))))
+  :pin nil)
+
+(unpin! org)
 #+end_src
+
+*** Aesthetics
+#+call: confpkg(name="org-aesthetics", after="org")
+
+**** Fonts
+Set Roboto Mono as header font and resize headings.
+#+BEGIN_SRC emacs-lisp
+;; Resize Org headings
+(dolist (face '((org-level-1 . 1.35)
+                (org-level-2 . 1.3)
+                (org-level-3 . 1.2)
+                (org-level-4 . 1.1)
+                (org-level-5 . 1.1)
+                (org-level-6 . 1.1)
+                (org-level-7 . 1.1)
+                (org-level-8 . 1.1)))
+  (set-face-attribute (car face) nil :family "Roboto Mono" :weight 'bold :height (cdr face)))
+
+;; Make the document title a bit bigger
+(set-face-attribute 'org-document-title nil :family "Roboto Mono" :weight 'bold :height 1.8)
+#+END_SRC
+**** Decluttering
+Don't be a litterbug!
+#+BEGIN_SRC emacs-lisp
+(setq org-adapt-indentation t
+      org-hide-leading-stars t
+      org-hide-emphasis-markers t)  ;; hide markers(bold, italics, etc)
+      ;; messes with cursor positions in cdlatex templates
+      ;; org-pretty-entities t) ;; allow LaTeX-like syntax to insert special symbols
+#+END_SRC
+**** Source Blocks
+#+BEGIN_SRC emacs-lisp
+(setq org-src-fontify-natively t
+      org-src-tab-acts-natively t
+      org-edit-src-content-indentation 0)
+#+END_SRC
+*** Latex Previews
+**** Load/Enable
+Configure org-latex-preview to be load after org and enable auto-mode which reveals source text under the fragment being pointed to.
+#+BEGIN_SRC emacs-lisp
+(use-package! org-latex-preview
+:after org
+:hook (org-mode-hook . org-latex-preview-auto-mode)
+#+END_SRC
+
+**** Appearance Settings
+Basic appearance settings.
+#+BEGIN_SRC emacs-lisp
+:config
+;; enable latex-previews startup option
+(setq org-startup-with-latex-preview t)
+
+;; Increase preview width
+(plist-put org-latex-preview-appearance-options
+:page-width 1.0)
+(plist-put org-latex-preview-appearance-options
+:zoom 1.2)
+
+;; enable consistent equation numbering
+(setq org-latex-preview-numbered t)
+#+END_SRC
+
+**** Latency and Performance
+#+BEGIN_SRC emacs-lisp
+;; real time previews of latex fagments as you type
+(setq org-latex-preview-live t)
+(setq org-latex-preview-live-debounce 0.25)  ;; reducing delay before preview
+
+;; png is faster than svg
+(setq org-latex-preview-process-default 'dvipng)
+)
+#+END_SRC
+
 * Applications
 #+call: confpkg()
 
@@ -1560,21 +1586,9 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much bec
         "https://old.reddit.com/r/hardware.rss"))
   )
 #+end_src
-* Keybinds
-#+call: confpkg()
 
-** Navigation
-*** Workspace
-Bind workspace navigation to be more like t-smart
-#+BEGIN_SRC emacs-lisp
-(map! :ni "C-t" #'+workspace/switch-to
-      :ni [C-tab] #'+workspace/other)
-#+END_SRC
-*** Code
-I don't want to spam j's and k's anymore
-#+BEGIN_SRC emacs-lisp
-(after! evil-snipe
-  (setq evil-snipe-smart-case t
-        evil-snipe-scope 'visible
-        ))
-#+END_SRC
+** agenda
+*** org-agenda
+ #+begin_src emacs-lisp
+(setq org-agenda-files '("~/dotfiles/emacs/dot-config/doom/literate-config/config.org" "~/zettelkasten/"))
+ #+end_src
