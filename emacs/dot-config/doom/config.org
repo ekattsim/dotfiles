@@ -1459,6 +1459,21 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much bec
     ";|" '(yas "\\left| $0 \\right|")
     ))
 #+END_SRC
+**** org-pdftools
+This package comes in handy for custom org link types, but pdf links weren't working because the package makes depracated calls. A minor patch was made and here I've updated where the package is fetched from to my fork.
+#+begin_src emacs-lisp :tangle "packages.el"
+;; (package! org-pdftools
+;;   :recipe (:host github
+;;            :repo "ekattsim/org-pdftools"
+;;            :branch "update-depracated-cl_calls"))
+
+(package! org-pdftools
+  :recipe (:fork (:repo "ekattsim/org-pdftools"
+                  :branch "update-depracated-cl_calls")))
+
+(unpin! org-pdftools)
+#+end_src
+
 *** Roam
 Installed and pre-configured as part of the =:lang org +roam2= doom module.
 
