@@ -1080,8 +1080,8 @@ Load theme, taking current system appearance into consideration.
     ('light (setq doom-theme 'tango)
             (load-theme 'tango t))
     ('dark (setq doom-theme 'doom-lantern)
-           (load-theme 'doom-lantern t))
-    ))
+           (load-theme 'doom-lantern t)))
+  (load-file "~/.config/doom/subconf/config-org-aesthetics.el"))
 
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 #+END_SRC
@@ -1216,6 +1216,8 @@ Make working with wrapped lines easy
 
 *** Completion
 ** System
+#+call: confpkg()
+
 *** Windows
  #+call: confpkg()
 
@@ -1487,6 +1489,7 @@ Make "~/zettelkasten" the org-roam directory
 
 *** Installation
 This declaration is from org-latex-preview
+
 #+begin_src emacs-lisp :tangle "packages.el"
 (package! org :recipe
   (:host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror" :fork
