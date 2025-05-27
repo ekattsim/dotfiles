@@ -1479,9 +1479,9 @@ This package comes in handy for custom org link types, but pdf links weren't wor
 *** Roam
 Installed and pre-configured as part of the =:lang org +roam2= doom module.
 
-Make "~/zettelkasten" the org-roam directory
+Make "~/org/zettelkasten" the org-roam directory. Make sure only roam nodes are present in this directory.
 #+BEGIN_SRC emacs-lisp
-(setq org-roam-directory "~/zettelkasten")
+(setq org-roam-directory "~/org/zettelkasten")
 #+END_SRC
 * Language configuration
 ** Org
@@ -1619,8 +1619,173 @@ Open web links in nyxt. I cannot set it to default on macOS because I haven't bu
   )
 #+end_src
 
-** agenda
-*** org-agenda
+** Agenda
+Take a look at [[id:9edd2c6e-2950-4689-b2e8-3c283297cd71][A new way of organization]]. In this section we'll mostly focus on the projects.
+
+*** Setup
+Central directory for org relative paths to resolve from. This will also house both our project and zettelkasten directories.
+#+begin_src emacs-lisp
+(setq org-directory "~/org")
+#+end_src
+
+Create a variable for the project directory. The zettelkasten directory is created as =org-roam-directory= in [[*Roam]].
+#+begin_src emacs-lisp
+(defvar org-project-directory (expand-file-name "projects" org-directory))
+#+end_src
+
+Hopefully these will be the only locations with TODO items.
  #+begin_src emacs-lisp
-(setq org-agenda-files '("~/dotfiles/emacs/dot-config/doom/literate-config/config.org" "~/zettelkasten/"))
- #+end_src
+(setq org-agenda-files (list +org-capture-todo-file org-project-directory (expand-file-name "config.org" doom-user-dir)))
+#+end_src
+
+Make sure that all org headings with backlinks also have an ID property. This is useful because heading titles can change but ids don't usually.
+#+begin_src emacs-lisp
+(setq org-id-link-to-org-use-id t)
+#+end_src
+
+*** Utilities
+
+I need a function that can refile org-heading at point to a new a file. I'll be using this on my existing todo headings to link them to their project files.
+#+begin_src emacs-lisp
+(defun my/org-heading-to-project-file ()
+  "Cut the current Org heading and its subtree, and paste it into a new project file.
+The project file name is derived from the heading title and saved in `org-project-directory`.
+Prompts for overwrite if the target file already exists."
+  (interactive)
+  (unless (org-at-heading-p)
+    (user-error "Not at an Org heading"))
+
+  ;; generate project-file path from heading-title
+  (let* ((heading-title (org-get-heading t t t t))
+         (sanitized-title (replace-regexp-in-string "[/?<>\\:*|\"&]" "_" heading-title))
+         (project-file (expand-file-name (concat sanitized-title ".org")
+                                         (or org-project-directory org-directory))))
+
+    ;; Ask to confirm overwrite if file exists
+    (if (and (file-exists-p project-file)
+             (not (y-or-n-p (format "File '%s' already exists. Overwrite?" (file-name-nondirectory project-file)))))
+        (user-error "Operation cancelled.")
+      (progn
+        ;; cut subtree from current buffer
+        (org-back-to-heading t)
+        (org-cut-subtree)
+
+        ;; paste subtree
+        (find-file project-file)
+        (yank)
+
+        ;; promote subtree until top-level
+        (goto-char (point-min))
+        (while (> (org-outline-level) 1)
+          (org-promote-subtree))
+
+        ;; save project-file
+        (save-buffer)
+        (message "Org heading moved to '%s'" project-file))
+      )))
+#+end_src
+
+Find a project file under =org-project-directory= and bind it.
+#+begin_src emacs-lisp
+(defun my/find-in-projects ()
+  (interactive)
+  (ido-find-file-in-dir (or org-project-directory org-directory)))
+
+(map! :map doom-leader-notes-map
+      "p" #'my/find-in-projects)
+#+end_src
+
+*** Settings
+*** Archiving
+Set archive location, most likely only used on project files.
+#+begin_src emacs-lisp
+(setq org-archive-location (concat org-project-directory "/archives/%s_archive::"))
+#+end_src
+
+*** Workflow and Agenda view
+Let's define the fundamental action cycle.
+#+begin_src emacs-lisp
+(setq org-todo-keywords '((sequence "INBOX(I)" "TODO(t)" "NEXT(n)" "WAIT(w)" "IDEA(i)" "|" "DONE(d)" "KILL(k)")))
+
+;; Customized view for the daily workflow. (Command: "C-c a n")
+(setq org-agenda-custom-commands
+  '(("n" "Agenday / NEXT / INBOX / WAIT / IDEA"
+     ((agenda "" nil)
+      (todo "INBOX" ((org-agenda-prefix-format '((todo . " %i %c: %-17?(org-entry-get nil \"CREATED\")")))))
+      (todo "NEXT" nil)
+      (todo "WAIT" nil)
+      (todo "IDEA" nil))
+     nil)))
+#+end_src
+
+Show the daily agenda by default. Also known as agenday, that's gonna catch on.
+#+begin_src emacs-lisp
+(setq org-agenda-span 'day
+   org-agenda-start-on-weekday nil
+   org-agenda-start-day nil)
+#+end_src
+
+In this workflow all TODOs have to be scheduled, so let's an advice over the =org-todo= and =org-agenda-todo= functions.
+#+begin_src emacs-lisp
+(defadvice! schedule-todo (_arg)
+  :after '(org-todo org-agenda-todo)
+  (save-excursion
+    (let ((inhibit-message t))
+      (when (equal (org-get-todo-state) "TODO")
+        (org-schedule nil)))))
+#+end_src
+
+*** Capture TODOs
+#+call: confpkg(name="org-capture", after="org")
+
+The workflow in my mind is that you would capture random TODOs to an inbox which you could then refile later with org-agenda. The capture mechanism is already implemented by [[file:~/dotfiles/emacs/dot-config/emacs/modules/lang/org/config.el::'(("t" "Personal todo" entry][doom's org module]], but there are a few changes I want to make.
+
+Let's change the location of the TODOs inbox to be in the org-directory.
+#+begin_src emacs-lisp
+(setq +org-capture-todo-file (expand-file-name "inbox.org" org-directory))
+#+end_src
+
+Now let's make some changes to the default templates like todo template's description and removing the notes template since that is handled by roam.
+#+begin_src emacs-lisp
+(setq org-capture-templates
+      (cons '("t" "todo" entry (file+headline +org-capture-todo-file "Inbox")
+              "* INBOX %?\n:PROPERTIES:\n:CREATED: %u\n:END:" :prepend t)
+            (cddr org-capture-templates)))
+#+end_src
+
+*** add dependency support for WAIT items
+Some WAIT items are blocked because they are waiting for other tasks to be done first. In practice this means that you have to manually keep track of these dependencies like figuring out which WAIT item to put into the NEXT pile after completing a dependency TODO item.
+
+We can automate this by allowing WAIT items to store a dependency list of items. When all of the items in this list are DONE, the WAIT item automatically becomes a NEXT item making it available for us to work on it.
+
+We could have a function that on a DONE hook checks if the DONE was a dependency. If it was then decrement the dependency count by one. Finally check if dependency count = 0, then change item's TODO keyword from WAIT item to NEXT.
+
+#+begin_src emacs-lisp
+(defun my/org-task-done-hook ()
+  "When a task is marked DONE, check if it unblocks any WAIT tasks."
+  (when (string= org-state "DONE")
+    (let ((done-id (org-id-get)))
+      (my/org-update-dependent-tasks done-id))))
+
+(defun my/org-update-dependent-tasks (done-id)
+  "Update all WAIT tasks that list DONE-ID as a dependency."
+  (org-map-entries
+   (lambda ()
+     (let ((deps-str (org-entry-get (point) "Dependencies")))
+       (when deps-str
+         (let ((new-deps (remove-org-id-link-from-deps deps-str done-id)))
+           (org-set-property "Dependencies" new-deps)
+           (when (string-empty-p new-deps)
+             (org-todo "NEXT"))))))
+   "/+WAIT" 'agenda))
+
+(defun remove-org-id-link-from-deps (deps-str done-id)
+  "Remove the Org link with DONE-ID from DEPS-STR and trim excess whitespace."
+  (string-trim
+   (replace-regexp-in-string
+    (format "\\[\\[id:%s\\]\\[.*?\\]\\][[:space:]]*" (regexp-quote done-id))
+    ""
+    deps-str)))
+
+(add-hook 'org-after-todo-state-change-hook #'my/org-task-done-hook)
+#+end_src
