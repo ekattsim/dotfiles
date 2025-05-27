@@ -782,7 +782,7 @@ Changes to core-emacs default behavior should be made here.
 Small tweaks on top of defaults.
 #+BEGIN_SRC emacs-lisp
 (setq shell-file-name (executable-find "bash")) ;; fish is Non-POSIX unfortunately
-(setq org-directory "~/zettelkasten/") ;; default location for org files (needs to be set before org loads)
+
 #+END_SRC
 
 *** Customize
@@ -1081,7 +1081,7 @@ Load theme, taking current system appearance into consideration.
             (load-theme 'tango t))
     ('dark (setq doom-theme 'doom-lantern)
            (load-theme 'doom-lantern t)))
-  (load-file "~/.config/doom/subconf/config-org-aesthetics.el"))
+  (load-file "~/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
 
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 #+END_SRC
@@ -1538,6 +1538,7 @@ Set Roboto Mono as header font and resize headings.
 ;; Make the document title a bit bigger
 (set-face-attribute 'org-document-title nil :family "Roboto Mono" :weight 'bold :height 1.8)
 #+END_SRC
+
 **** Decluttering
 Don't be a litterbug!
 #+BEGIN_SRC emacs-lisp
@@ -1547,12 +1548,14 @@ Don't be a litterbug!
       ;; messes with cursor positions in cdlatex templates
       ;; org-pretty-entities t) ;; allow LaTeX-like syntax to insert special symbols
 #+END_SRC
+
 **** Source Blocks
 #+BEGIN_SRC emacs-lisp
 (setq org-src-fontify-natively t
       org-src-tab-acts-natively t
       org-edit-src-content-indentation 0)
 #+END_SRC
+
 *** Latex Previews
 **** Load/Enable
 Configure org-latex-preview to be load after org and enable auto-mode which reveals source text under the fragment being pointed to.
@@ -1589,6 +1592,17 @@ Basic appearance settings.
 (setq org-latex-preview-process-default 'dvipng)
 )
 #+END_SRC
+
+*** Links
++Try to open arbitrary files in emacs+. Not needed anymore since org-link type =file+emacs= exists.
+#+begin_src emacs-lisp
+;; (add-to-list 'org-file-apps '(t . emacs))
+#+end_src
+
+Open web links in nyxt. I cannot set it to default on macOS because I haven't built the required .app package.
+#+begin_src emacs-lisp
+;; (setcdr (assoc "\\.x?html?\\'" org-file-apps) "")
+#+end_src
 
 * Applications
 #+call: confpkg()
