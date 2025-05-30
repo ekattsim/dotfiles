@@ -1359,6 +1359,7 @@ Modify available symbols and modifiers
 
 **** Keybind hacks
 I wanted to replace =indent-for-tab-command= with =cdlatex-tab= in the cdlatex contexts which is usually everywhere in an org file outside of snippets and source blocks. You'll often run through your snippets but still have to navigate the math, this is where having =cdlatex-tab= always available becomes massively useful.
+
 #+begin_src emacs-lisp
 (defun my/org-cdlatex-tab ()
   (interactive)
@@ -1389,77 +1390,6 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much bec
       :i [tab] nil
       :i [m-tab] #'completion-at-point)
 #+END_SRC
-=laas= is
-*** laas
-
-#+begin_src emacs-lisp :tangle "packages.el"
-(package! laas)
-#+end_src
-
-#+BEGIN_SRC emacs-lisp
-(use-package! laas
-  :hook (org-mode-hook . laas-mode)
-  :config
-  (aas-set-snippets 'laas-mode
-    ;; org mode snippets
-    "<src" '(yas "#+begin_src ${1:$$(yas-completing-read \"Language: \" (mapcar #'car org-babel-load-languages))}\n$0\n#+end_src")
-
-    ;; auto environments under ;e
-    ";e" nil
-
-    ;; arbitrary environment
-    ";ee" '(yas "\\begin{$1}\n $0 \n\\end{$1}")
-
-    ";ea" (lambda () (interactive) (insert "ali*") (cdlatex-tab)) ;; align*
-    ";eq" (lambda () (interactive) (insert "equ") (cdlatex-tab)) ;; equation
-
-    ;; TODO figure out how to get "M-RET" behavior for items
-    ";ei" (lambda () (interactive) (insert "ite") (cdlatex-tab)) ;; itemize
-    ";en" (lambda () (interactive) (insert "enu") (cdlatex-tab)) ;; enumerate
-
-    ";es" (lambda () (interactive) (insert "sn") (cdlatex-tab)) ;; section
-    "sb" (lambda () (interactive) (insert "ss") (cdlatex-tab)) ;; subsection
-    "ssb" (lambda () (interactive) (insert "sss") (cdlatex-tab)) ;; subsubsection
-
-    ;; symbols, these are mostly handled by laas
-    ";s" (lambda () (interactive) (cdlatex-math-symbol)) ;; symbols prefix
-
-    ;; commands(copy from karthink). We double escape '\' if we're preceding escapable chars
-    "mk" '(yas "\\\\( $0 \\\\)") ;; We're trying to pass the string "\\( $0 \\)"
-    "dm" '(yas "\\[ $0 \\]")
-
-    :cond #'texmathp
-    ;; math commands
-    ";c" nil
-    ";ce" '(yas "\\left. $1 \\right|_{$2}$0")
-
-    ;; misc
-    "lm" '(yas "\\\\lim_{${1:x} \\\\to ${2:\\\\infty}}$0")
-    "sm" '(yas "\\sum_{${1:i}={$2:0}}^{${3:N}}$0")
-
-    ";i" nil
-    ";id" '(yas "\\\\int_{${1:-\\\\infty}}^{${2:\\\\infty}}$0")
-    ";in" '(yas "\\\\int $1${2:dx}$0")
-    ";2in" '(yas "\\\\iint$1${2:dA}$0")
-    ";3in" '(yas "\\\\iiint$1${2:dV}$0")
-
-    ";d" nil
-    ";di" '(yas "\\\\frac{\\\\mathrm{d}$1}{\\\\mathrm{d}${2:t}}$0")
-    ";do" '(yas "\\\\frac{\\\\partial$1}{\\\\partial${2:t}}$0")
-
-    ;; modifiers
-    ";m" (lambda () (interactive) (org-cdlatex-math-modify)) ;; modifiers prefix
-    ";t" (lambda () (interactive)
-           (let ((last-command-event ?^)
-                 (last-command nil))
-             (org-cdlatex-underscore-caret)))
-    ";v" '(yas "\\vec{$0}")
-    ";q" '(yas "\\sqrt{$0}")
-    ";(" '(yas "\\left( $0 \\right") ;; note that the right paren is not there(it autoexpands)
-    ";[" '(yas "\\left[ $0 \\right")
-    ";|" '(yas "\\left| $0 \\right|")
-    ))
-#+END_SRC
 
 *** org-pdftools
 This package comes in handy for custom org link types, but pdf links weren't working because the package makes depracated calls. A minor patch was made and here I've updated where the package is fetched from to my fork.
@@ -1483,6 +1413,143 @@ Make "~/org/zettelkasten" the org-roam directory. Make sure only roam nodes are 
 #+BEGIN_SRC emacs-lisp
 (setq org-roam-directory "~/org/zettelkasten")
 #+END_SRC
+
+** Snippets
+#+call: confpkg()
+
+*** smartparens
+I just want to disable a couple default pairs in latex math mode. This is because idk yet.
+#+begin_src emacs-lisp
+(sp-pair "(" ")" :unless '(sp-in-math-p))
+(sp-pair "[" nil :unless '(sp-in-math-p))
+(sp-pair "{" nil :unless '(sp-in-math-p))
+#+end_src
+
+*** laas
+#+call: confpkg("org-laas")
+
+=laas= is a set of LaTeX snippets built on =aas= that are designed to work efficiently with existing tools like =cdlatex=.
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! laas)
+#+end_src
+
+I don't really make any proper latex documents, so I'm limiting my snippets to just org mode.
+
+#+BEGIN_SRC emacs-lisp
+(use-package! laas
+  :hook (org-mode-hook . laas-mode)
+  :config
+  (aas-set-snippets 'laas-mode
+#+END_SRC
+
+**** org snippets
+
+Useful snippets while working with the org files in general.
+
+#+BEGIN_SRC emacs-lisp
+"<src" '(yas "#+begin_src ${1:$$(yas-completing-read \"Language: \" (mapcar #'car org-babel-load-languages))}\n$0\n#+end_src")
+#+END_SRC
+
+**** latex environments
+
+Environments auto-expanding snippets are under the ";e" prefix. Note that these involve only the commonly used envs, for anything else use =org-cdlatex-environment-indent=.
+
+#+BEGIN_SRC emacs-lisp
+";e" nil
+
+";ee" '(yas "\\begin{$1}\n $0 \n\\end{$1}") ;; arbitrary environment
+";ea" (lambda () (interactive) (insert "ali*") (cdlatex-tab)) ;; align*
+";eq" (lambda () (interactive) (insert "equ") (cdlatex-tab)) ;; equation
+
+;; TODO figure out how to get "M-RET" behavior for items
+";ei" (lambda () (interactive) (insert "ite") (cdlatex-tab)) ;; itemize
+";en" (lambda () (interactive) (insert "enu") (cdlatex-tab)) ;; enumerate
+
+";es" (lambda () (interactive) (insert "sn") (cdlatex-tab)) ;; section
+"sb" (lambda () (interactive) (insert "ss") (cdlatex-tab)) ;; subsection
+"ssb" (lambda () (interactive) (insert "sss") (cdlatex-tab)) ;; subsubsection
+ #+END_SRC
+
+**** latex symbols
+
+ Symbol expansions are handled by =cdlatex-math-symbol=, here we just set the prefix using laas.
+
+ #+BEGIN_SRC emacs-lisp
+";s" (lambda () (interactive) (cdlatex-math-symbol)) ;; symbols prefix
+ #+END_SRC
+
+**** latex entry
+
+ Snippets to enter latex math mode. We start using yasnippet from now on because of the increased complexity, laas internall calls =yas-expand-snippet.=
+
+ #+BEGIN_SRC emacs-lisp
+;; (copied from karthink). We double escape '\' if we're preceding escapable chars
+"mk" '(yas "\\\\( $1 \\\\)$0 ") ;; We're trying to pass the string "\\( $1 \\)$0"
+"dm" '(yas "\\[ $1 \\]$0")
+ #+END_SRC
+
+**** latex commands
+
+ Here we create math-only autosnippets for commonly used latex commands. We don't lump them all into a single prefix like we've been doing, intuitiveness takes precedence. Still I try to keep things under the ';' though.
+
+ #+BEGIN_SRC emacs-lisp
+:cond #'texmathp
+
+;; general commands prefix
+";c" nil
+";ce" '(yas "\\left. $1 \\right|_{$2}$0")
+
+;; calculus stuff
+"lm" '(yas "\\\\lim_{${1:x} \\\\to ${2:\\\\infty}}$0")
+"sm" '(yas "\\sum_{${1:i}={$2:0}}^{${3:N}}$0")
+
+
+;; integrals
+";i" nil
+";id" '(yas "\\\\int_{${1:-\\\\infty}}^{${2:\\\\infty}} $0")
+";in" '(yas "\\\\int $1${2:dx}$0")
+";2in" '(yas "\\\\iint $1${2:dA}$0")
+";3in" '(yas "\\\\iiint $1${2:dV}$0")
+
+;; derivatives
+";d" nil
+";di" '(yas "\\\\frac{\\\\mathrm{d}$1}{\\\\mathrm{d}${2:t}}$0")
+";do" '(yas "\\\\frac{\\\\partial$1}{\\\\partial${2:t}}$0")
+#+END_SRC
+
+**** latex modifiers
+
+Like symbols, most of them are implemented by =cdlatex=, we just make them more accessible by changing the prefix. Also note that =laas= also provides a few useful modifiers like the fraction and subscript handling which is sprinkled around.
+
+#+BEGIN_SRC emacs-lisp
+;; modifiers
+";m" (lambda () (interactive) (org-cdlatex-math-modify)) ;; modifiers prefix
+
+";t" (lambda () (interactive)
+       (let ((last-command-event ?^)
+             (last-command nil))
+         (org-cdlatex-underscore-caret)))
+
+";v" '(yas "\\vec{$1}$0")
+";q" '(yas "\\sqrt{$1}$0")
+
+;; I've disabled smartparens in latex math mode
+"(" '(yas "($1)$0")
+"[" '(yas "[$1]$0")
+";{" '(yas "\\\\{$1\\\\}$0")
+
+";(" '(yas "\\left( $0 \\right)")
+";[" '(yas "\\left[ $0 \\right]")
+";|" '(yas "\\left| $0 \\right|")
+#+END_SRC
+
+**** misc
+
+#+begin_src emacs-lisp
+;;"[M-RET]" '(yas "\\\\\n &=$0")
+))
+#+end_src
 
 * Language configuration
 ** Org
