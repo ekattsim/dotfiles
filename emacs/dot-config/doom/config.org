@@ -774,7 +774,7 @@ I'm not exactly sure where this information is used but here goes anyway.
       user-mail-address "aesbetic@gmail.com")
 #+END_SRC
 
-** Better defaults
+** System settings
 #+call: confpkg("defaults")
 Changes to core-emacs default behavior should be made here.
 
@@ -796,6 +796,58 @@ Autoload the custom.el file if it exists.
 Remove the title bar because it's unaesthetic.
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'default-frame-alist '(undecorated-round . t))
+#+END_SRC
+
+*** Windows
+ #+call: confpkg()
+
+**** Window operations
+I find symbolic keybinds to be more intuitive, so let's add them for window split creation.
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      "-" #'evil-window-split
+      "|" #'evil-window-vsplit)
+#+END_SRC
+
+**** Layout Rotation
+Ever have fullscreen emacs with a nice vsplit going? Me? All the time. But since I run a tiling WM, minimizing to a half-screen emacs happens all the time too. Now a vsplit looks hideous and we need to switch layout to a regular hsplit.
+
+This will be my relief.
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! rotate)
+#+end_src
+
+Let's stash layout rotation under SPC w SPC, inspired by Tmux's use of C-b SPC to rotate windows.
+ #+BEGIN_SRC emacs-lisp
+(use-package! rotate
+  :commands #'rotate-layout
+  :init
+  (map! :map evil-window-map
+        "SPC" #'rotate-layout)
+  )
+ #+END_SRC
+**** Split prompt
+#+call: confpkg(after="evil")
+
+Ask what buffer to switch to after making a new window split because it's a common operation I do.
+
+First make newly-split window the active window
+#+BEGIN_SRC emacs-lisp
+(setq evil-split-window-below t
+      evil-vsplit-window-right t)
+#+END_SRC
+
+Then, show a buffer prompt
+#+BEGIN_SRC emacs-lisp
+(defadvice! prompt-for-buffer (&rest _)
+  :after '(evil-window-split evil-window-vsplit)
+  (consult-buffer))
+#+END_SRC
+
+*** Files
+Bind "<leader>ff" to switch to src/header pair replacing the find-file offered by doom. This is okay because "<leader>." does finding files for me.
+#+BEGIN_SRC emacs-lisp
+(map! :leader :desc "Find other file" "f f" #'ff-find-other-file)
 #+END_SRC
 
 ** Doom configuration
@@ -1175,7 +1227,7 @@ Enable relative line numbers because it's a habit from vim
 (setq display-line-numbers-type 'relative)
 #+END_SRC
 
-*** Navigation
+*** Evil
 **** evil
 The ultimate convenience. We don't need to make any package declarations because we have the =:editor (evil +everywhere)= doom module enabled.
 
@@ -1215,76 +1267,22 @@ Make working with wrapped lines easy
 #+END_SRC
 
 *** Completion
-** System
+** Organization
 #+call: confpkg()
 
-*** Windows
- #+call: confpkg()
-
-**** Window operations
-I find symbolic keybinds to be more intuitive, so let's add them for window split creation.
-#+BEGIN_SRC emacs-lisp
-(map! :leader
-      "-" #'evil-window-split
-      "|" #'evil-window-vsplit)
-#+END_SRC
-
-**** Layout Rotation
-Ever have fullscreen emacs with a nice vsplit going? Me? All the time. But since I run a tiling WM, minimizing to a half-screen emacs happens all the time too. Now a vsplit looks hideous and we need to switch layout to a regular hsplit.
-
-This will be my relief.
-#+begin_src emacs-lisp :tangle "packages.el"
-(package! rotate)
-#+end_src
-
-Let's stash layout rotation under SPC w SPC, inspired by Tmux's use of C-b SPC to rotate windows.
- #+BEGIN_SRC emacs-lisp
-(use-package! rotate
-  :commands #'rotate-layout
-  :init
-  (map! :map evil-window-map
-        "SPC" #'rotate-layout)
-  )
- #+END_SRC
-**** Split prompt
-#+call: confpkg(after="evil")
-
-Ask what buffer to switch to after making a new window split because it's a common operation I do.
-
-First make newly-split window the active window
-#+BEGIN_SRC emacs-lisp
-(setq evil-split-window-below t
-      evil-vsplit-window-right t)
-#+END_SRC
-
-Then, show a buffer prompt
-#+BEGIN_SRC emacs-lisp
-(defadvice! prompt-for-buffer (&rest _)
-  :after '(evil-window-split evil-window-vsplit)
-  (consult-buffer))
-#+END_SRC
-
-*** Files
-Bind "<leader>ff" to switch to src/header pair replacing the find-file offered by doom. This is okay because "<leader>." does finding files for me.
-#+BEGIN_SRC emacs-lisp
-(map! :leader :desc "Find other file" "f f" #'ff-find-other-file)
-#+END_SRC
-
-*** Organization
-**** Workspace
+*** Workspace
 Bind workspace navigation to be more like t-smart
 #+BEGIN_SRC emacs-lisp
 (map! :ni "C-t" #'+workspace/switch-to
       :ni [C-tab] #'+workspace/other)
 #+END_SRC
-**** Projects
-** Tools
-#+call: confpkg()
 
-*** Org
+*** Projects
+
+** Org packages
 #+call: confpkg("org-packages")
 
-**** Org-Superstar
+*** Org-Superstar
 #+begin_src emacs-lisp :tangle "packages.el"
 (package! org-superstar)
 #+end_src
@@ -1305,14 +1303,14 @@ Plain-list bullets are invisible because they have the org-indent face. We can m
   (set-face-attribute 'org-list-dt nil :inherit 'default)
 )
 #+END_SRC
-**** evil-tex
+*** evil-tex
 Provides useful text objects, movements, etc for LaTeX editing.
 #+BEGIN_SRC emacs-lisp
 (use-package! evil-tex
 :hook (org-mode-hook . evil-tex-mode))
 #+END_SRC
 
-**** org-cdlatex
+*** org-cdlatex
 Org-cdlatex is the foundation to editing latex in org-mode. It removes much of the hassle of defining common latex macros and templates. Doing this with a snippet engine would've been pretty boring, so now we can just focus on adding more complex snippets like the auto-expanding ones to our snippet engine of choice: =aas=.
 
 Change the symbol/modifier cycling key to ';'. Note for some reason these don't change the existing activating keymap bind; we do this later with =aas= though.
@@ -1358,7 +1356,8 @@ Modify available symbols and modifiers
      (?B    "\\mathbb"        nil          t    nil  nil)
      (?a    "\\abs"           nil          t    nil  nil))))
 #+END_SRC
-***** Keybind hacks
+
+**** Keybind hacks
 I wanted to replace =indent-for-tab-command= with =cdlatex-tab= in the cdlatex contexts which is usually everywhere in an org file outside of snippets and source blocks. You'll often run through your snippets but still have to navigate the math, this is where having =cdlatex-tab= always available becomes massively useful.
 #+begin_src emacs-lisp
 (defun my/org-cdlatex-tab ()
@@ -1390,8 +1389,8 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much bec
       :i [tab] nil
       :i [m-tab] #'completion-at-point)
 #+END_SRC
-**** laas
 =laas= is
+*** laas
 
 #+begin_src emacs-lisp :tangle "packages.el"
 (package! laas)
@@ -1461,7 +1460,8 @@ Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much bec
     ";|" '(yas "\\left| $0 \\right|")
     ))
 #+END_SRC
-**** org-pdftools
+
+*** org-pdftools
 This package comes in handy for custom org link types, but pdf links weren't working because the package makes depracated calls. A minor patch was made and here I've updated where the package is fetched from to my fork.
 #+begin_src emacs-lisp :tangle "packages.el"
 ;; (package! org-pdftools
@@ -1483,6 +1483,7 @@ Make "~/org/zettelkasten" the org-roam directory. Make sure only roam nodes are 
 #+BEGIN_SRC emacs-lisp
 (setq org-roam-directory "~/org/zettelkasten")
 #+END_SRC
+
 * Language configuration
 ** Org
 #+call: confpkg()
@@ -1695,7 +1696,6 @@ Find a project file under =org-project-directory= and bind it.
       "p" #'my/find-in-projects)
 #+end_src
 
-*** Settings
 *** Archiving
 Set archive location, most likely only used on project files.
 #+begin_src emacs-lisp
