@@ -1586,6 +1586,13 @@ This declaration is from org-latex-preview
 (unpin! org)
 #+end_src
 
+*** Settings
+
+Central directory for org relative paths to resolve from. This will also house both our project and zettelkasten directories.
+#+begin_src emacs-lisp
+(setq org-directory "~/org")
+#+end_src
+
 *** Aesthetics
 #+call: confpkg(name="org-aesthetics", after="org")
 
@@ -1688,14 +1695,11 @@ Open web links in nyxt. I cannot set it to default on macOS because I haven't bu
 #+end_src
 
 ** Agenda
+#+call: confpkg(after="org-agenda")
+
 Take a look at [[id:9edd2c6e-2950-4689-b2e8-3c283297cd71][A new way of organization]]. In this section we'll mostly focus on the projects.
 
 *** Setup
-Central directory for org relative paths to resolve from. This will also house both our project and zettelkasten directories.
-#+begin_src emacs-lisp
-(setq org-directory "~/org")
-#+end_src
-
 Create a variable for the project directory. The zettelkasten directory is created as =org-roam-directory= in [[*Roam]].
 #+begin_src emacs-lisp
 (defvar org-project-directory (expand-file-name "projects" org-directory))
@@ -1772,7 +1776,7 @@ Set archive location, most likely only used on project files.
 *** Workflow and Agenda view
 Let's define the fundamental action cycle.
 #+begin_src emacs-lisp
-(setq org-todo-keywords '((sequence "INBOX(I)" "TODO(t)" "NEXT(n)" "WAIT(w)" "IDEA(i)" "|" "DONE(d)" "KILL(k)")))
+(setq org-todo-keywords '((sequence "TODO(t)" "INBOX(I)" "NEXT(n)" "WAIT(w)" "IDEA(i)" "|" "DONE(d)" "KILL(k)")))
 
 ;; Customized view for the daily workflow. (Command: "C-c a n")
 (setq org-agenda-custom-commands
@@ -1792,18 +1796,23 @@ Show the daily agenda by default. Also known as agenday, that's gonna catch on.
    org-agenda-start-day nil)
 #+end_src
 
-In this workflow all TODOs have to be scheduled, so let's an advice over the =org-todo= and =org-agenda-todo= functions.
+Shorten deadline reminders to 2d by default. 2 weeks prior warnings is too much org-mode.
 #+begin_src emacs-lisp
-(defadvice! schedule-todo (_arg)
-  :after '(org-todo org-agenda-todo)
-  (save-excursion
-    (let ((inhibit-message t))
-      (when (equal (org-get-todo-state) "TODO")
-        (org-schedule nil)))))
+(setq org-deadline-warning-days 2)
 #+end_src
 
+In this workflow all TODOs have to be scheduled, so let's add an advice over the =org-todo= and =org-agenda-todo= functions.
+#+begin_src emacs-lisp
+(defadvice! schedule-after-todo (_arg)
+  :after '(org-todo org-agenda-todo)
+  (save-excursion
+    (when (and (equal (org-get-todo-state) "TODO")
+               (not (org-get-scheduled-time (point))))
+      (org-schedule nil))))
+#+end_src)
+
 *** Capture TODOs
-#+call: confpkg(name="org-capture", after="org")
+#+call: confpkg(name="org-capture", after=["org"])
 
 The workflow in my mind is that you would capture random TODOs to an inbox which you could then refile later with org-agenda. The capture mechanism is already implemented by [[file:~/dotfiles/emacs/dot-config/emacs/modules/lang/org/config.el::'(("t" "Personal todo" entry][doom's org module]], but there are a few changes I want to make.
 
