@@ -1502,15 +1502,15 @@ Environments auto-expanding snippets are under the ";e" prefix. Note that these 
 
 ;; calculus stuff
 "lm" '(yas "\\\\lim_{${1:x} \\\\to ${2:\\\\infty}}$0")
-"sm" '(yas "\\sum_{${1:i}={$2:0}}^{${3:N}}$0")
+"sm" '(yas "\\sum_{${1:i}={${2:0}}}^{${3:N}}$0")
 
 
 ;; integrals
 ";i" nil
-";id" '(yas "\\\\int_{${1:-\\\\infty}}^{${2:\\\\infty}} $0")
-";in" '(yas "\\\\int $1${2:dx}$0")
-";2in" '(yas "\\\\iint $1${2:dA}$0")
-";3in" '(yas "\\\\iiint $1${2:dV}$0")
+";id" '(yas "\\\\int_{${1:-\\\\infty}}^{${2:\\\\infty}} $3~${0:dx}")
+";in" '(yas "\\\\int $1~${0:dx}")
+";2in" '(yas "\\\\iint $1~${0:dA}")
+";3in" '(yas "\\\\iiint $1~${0:dV}")
 
 ;; derivatives
 ";d" nil
@@ -1522,14 +1522,12 @@ Environments auto-expanding snippets are under the ";e" prefix. Note that these 
 
 Like symbols, most of them are implemented by =cdlatex=, we just make them more accessible by changing the prefix. Also note that =laas= also provides a few useful modifiers like the fraction and subscript handling which is sprinkled around.
 
+
 #+BEGIN_SRC emacs-lisp
 ;; modifiers
-";m" (lambda () (interactive) (org-cdlatex-math-modify)) ;; modifiers prefix
+";m" #'my/org-cdlatex-math-modify-snippet
 
-";t" (lambda () (interactive)
-       (let ((last-command-event ?^)
-             (last-command nil))
-         (org-cdlatex-underscore-caret)))
+";t" '(yas "^{$1}$0")
 
 ";v" '(yas "\\vec{$1}$0")
 ";q" '(yas "\\sqrt{$1}$0")
@@ -1539,16 +1537,37 @@ Like symbols, most of them are implemented by =cdlatex=, we just make them more 
 "[" '(yas "[$1]$0")
 ";{" '(yas "\\\\{$1\\\\}$0")
 
-";(" '(yas "\\left( $0 \\right)")
-";[" '(yas "\\left[ $0 \\right]")
-";|" '(yas "\\left| $0 \\right|")
+";(" '(yas "\\left( $1 \\right)$0")
+";[" '(yas "\\left[ $1 \\right]$0")
+";|" '(yas "\\left| $1 \\right|$0")
 #+END_SRC
 
 **** misc
 
+Close the use-package paren.
 #+begin_src emacs-lisp
 ;;"[M-RET]" '(yas "\\\\\n &=$0")
 ))
+#+end_src
+
+This function adds a final '$0' tabstop to =org-cdlatex-math-modify= expansions.
+#+begin_src emacs-lisp
+(defun my/org-cdlatex-math-modify-snippet ()
+  (interactive)
+  (let ((start (point)))
+    (org-cdlatex-math-modify)
+    (let* ((end (point))
+           (text (buffer-substring-no-properties start end)))
+      (delete-region start end)
+      (if (string-match "}" text)
+        ;; Insert $1 before the last closing brace
+        (setq text
+              (replace-regexp-in-string
+               "}" "$1}" text t t))
+        (delete-region (point) (+ (point) 1))
+        (setq text
+              (concat text "$1}")))
+      (yas-expand-snippet (concat text "$0")))))
 #+end_src
 
 * Language configuration
@@ -1809,7 +1828,7 @@ In this workflow all TODOs have to be scheduled, so let's add an advice over the
     (when (and (equal (org-get-todo-state) "TODO")
                (not (org-get-scheduled-time (point))))
       (org-schedule nil))))
-#+end_src)
+#+end_src
 
 *** Capture TODOs
 #+call: confpkg(name="org-capture", after=["org"])
