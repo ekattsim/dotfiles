@@ -1858,16 +1858,20 @@ We could have a function that on a DONE hook checks if the DONE was a dependency
 #+begin_src emacs-lisp
 (defun my/org-task-done-hook ()
   "When a task is marked DONE, check if it unblocks any WAIT tasks."
-  (when (string= org-state "DONE")
-    (let ((done-id (org-id-get)))
-      (my/org-update-dependent-tasks done-id))))
+  (when (equal (org-get-todo-state) "DONE")
+    (let ((done-id (org-id-get nil t)))
+      (if done-id
+          (progn
+            (print! "DONE ID value: %s" done-id)
+            (my/org-update-dependent-tasks done-id))
+        (print! "DONE ID is nil")))))
 
 (defun my/org-update-dependent-tasks (done-id)
   "Update all WAIT tasks that list DONE-ID as a dependency."
   (org-map-entries
    (lambda ()
      (let ((deps-str (org-entry-get (point) "Dependencies")))
-       (when deps-str
+       (when (and (deps-str) (not (string-empty-p deps-str)))
          (let ((new-deps (remove-org-id-link-from-deps deps-str done-id)))
            (org-set-property "Dependencies" new-deps)
            (when (string-empty-p new-deps)
@@ -1882,5 +1886,8 @@ We could have a function that on a DONE hook checks if the DONE was a dependency
     ""
     deps-str)))
 
-(add-hook 'org-after-todo-state-change-hook #'my/org-task-done-hook)
+;; (add-hook 'org-after-todo-state-change-hook #'my/org-task-done-hook)
+(defadvice! my/update-dependencies-after-done (_arg)
+  :after '(org-todo org-agenda-todo)
+  (my/org-task-done-hook))
 #+end_src
