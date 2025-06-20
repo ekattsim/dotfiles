@@ -950,7 +950,7 @@ pdf               ; pdf enhancements
 ;;prodigy           ; FIXME managing external services & code builders
 ;;terraform         ; infrastructure as code
 ;;tmux              ; an API for interacting with tmux
-;;tree-sitter       ; syntax and parsing, sitting in a tree...
+tree-sitter       ; syntax and parsing, sitting in a tree...
 ;;upload            ; map local to remote projects via ssh/ftp
 #+end_src
 
@@ -1009,7 +1009,7 @@ markdown          ; writing docs for people to ignore
 ;;plantuml          ; diagrams for confusing people more
 ;;graphviz          ; diagrams for confusing yourself even more
 ;;purescript        ; javascript, but functional
-;;python            ; beautiful is better than ugly
+(python +lsp +tree-sitter)            ; beautiful is better than ugly
 ;;qt                ; the 'cutest' gui framework ever
 ;;racket            ; a DSL for DSLs
 ;;raku              ; the artist formerly known as perl6
@@ -1893,4 +1893,43 @@ We could have a function that on a DONE hook checks if the DONE was a dependency
 (defadvice! my/update-dependencies-after-done (_arg)
   :after '(org-todo org-agenda-todo)
   (my/org-task-done-hook))
+#+end_src
+
+** eglot
+
+*** eglot-booster
+:PROPERTIES:
+:ID:       7af01b58-d326-464e-94a8-bcaf1f3b3fe5
+:END:
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! eglot-booster
+  :recipe (:host github
+           :repo "jdtsmith/eglot-booster"))
+#+end_src
+
+Configures eglot to use [[https://github.com/blahgeek/emacs-lsp-booster][lsp-booster]].
+
+#+begin_src emacs-lisp
+(use-package! eglot-booster
+  :after eglot
+  :config
+  (setq eglot-booster-io-only t))
+  (eglot-booster-mode)
+#+end_src
+
+** tramp
+#+call: confpkg(after="tramp")
+
+Some optimizations from [[https://www.gnu.org/software/emacs/manual/html_node/tramp/Frequently-Asked-Questions.html][tramp FAQ]]
+
+#+begin_src emacs-lisp
+(setq remote-file-name-inhibit-cache nil)
+(setq vc-ignore-dir-regexp
+      (format "%s\\|%s"
+                    vc-ignore-dir-regexp
+                    tramp-file-name-regexp))
+(setq remote-file-name-inhibit-locks t)
+
+(setq tramp-verbose 1)
 #+end_src
