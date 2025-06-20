@@ -1314,6 +1314,8 @@ Provides useful text objects, movements, etc for LaTeX editing.
 #+END_SRC
 
 *** org-cdlatex
+#+call: confpkg("cdlatex")
+
 Org-cdlatex is the foundation to editing latex in org-mode. It removes much of the hassle of defining common latex macros and templates. Doing this with a snippet engine would've been pretty boring, so now we can just focus on adding more complex snippets like the auto-expanding ones to our snippet engine of choice: =aas=.
 
 Change the symbol/modifier cycling key to ';'. Note for some reason these don't change the existing activating keymap bind; we do this later with =aas= though.
@@ -1322,9 +1324,9 @@ Change the symbol/modifier cycling key to ';'. Note for some reason these don't 
   (setq cdlatex-math-symbol-prefix ?\;)
   (setq cdlatex-math-modify-prefix ?\;)
 
-  (map! :map org-cdlatex-mode-map
+  (map! :map cdlatex-mode-map
         "'" nil)
-  (map! :map org-cdlatex-mode-map
+  (map! :map cdlatex-mode-map
         "`" nil)
 #+END_SRC
 
@@ -1383,7 +1385,7 @@ I wanted to replace =indent-for-tab-command= with =cdlatex-tab= in the cdlatex c
 
 Add the binding to insert-state with cdlatex minor mode map for decent precedence. Note you can still use TAB's default behavior(indent-for-tab-command) by hitting "C-i" if you need to.
 #+BEGIN_SRC emacs-lisp
-(map! :map org-cdlatex-mode-map
+(map! :map cdlatex-mode-map
       :i "<tab>" #'my/org-cdlatex-tab)
 #+END_SRC
 
@@ -1522,6 +1524,9 @@ Environments auto-expanding snippets are under the ";e" prefix. Note that these 
 #+END_SRC
 
 **** latex modifiers
+:PROPERTIES:
+:ID:       bc3e121d-99df-46de-ae39-c42004f2f3b8
+:END:
 
 Like symbols, most of them are implemented by =cdlatex=, we just make them more accessible by changing the prefix. Also note that =laas= also provides a few useful modifiers like the fraction and subscript handling which is sprinkled around.
 
@@ -1531,6 +1536,8 @@ Like symbols, most of them are implemented by =cdlatex=, we just make them more 
 ";m" #'my/org-cdlatex-math-modify-snippet
 
 ";t" '(yas "^{$1}$0")
+"_" '(yas "_{$1}$0")
+"^" '(yas "^{$1}$0")
 
 ";v" '(yas "\\vec{$1}$0")
 ";q" '(yas "\\sqrt{$1}$0")
@@ -1551,6 +1558,14 @@ Close the use-package paren.
 #+begin_src emacs-lisp
 ;;"[M-RET]" '(yas "\\\\\n &=$0")
 ))
+#+end_src
+
+Unbind =org-cdlatex-underscore-caret=
+#+begin_src emacs-lisp
+(map! :map org-cdlatex-mode-map
+      "^" #'org-self-insert-command
+      "_" #'org-self-insert-command
+      )
 #+end_src
 
 This function adds a final '$0' tabstop to =org-cdlatex-math-modify= expansions.
@@ -1701,20 +1716,22 @@ Open web links in nyxt. I cannot set it to default on macOS because I haven't bu
 ;; (setcdr (assoc "\\.x?html?\\'" org-file-apps) "")
 #+end_src
 
+** LaTeX
+
+I have enabled the =(latex +cdlatex)= doom module and will be configuring that module and auctex here.
+
+*** Settings
+
+Change latex-view to be in emacs(pdf-viewer)
+
+#+begin_src emacs-lisp
+(setq +latex-viewers '(pdf-tools))
+(setq TeX-view-program-selection '((output-pdf "PDF Tools") (output-dvi "open") (output-html "open") (output-pdf "preview-pane")))
+#+end_src
+
+
 * Applications
 #+call: confpkg()
-
-** RSS feeds
-#+begin_src emacs-lisp
-(use-package! elfeed
-  :config
-  (setq elfeed-feeds
-      '("https://xkcd.com/rss.xml"
-        "https://hnrss.org/frontpage"
-        "https://old.reddit.com/r/slatestarcodex.rss"
-        "https://old.reddit.com/r/hardware.rss"))
-  )
-#+end_src
 
 ** Agenda
 #+call: confpkg(after="org-agenda")
