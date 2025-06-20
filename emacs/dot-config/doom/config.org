@@ -1729,6 +1729,23 @@ Change latex-view to be in emacs(pdf-viewer)
 (setq TeX-view-program-selection '((output-pdf "PDF Tools") (output-dvi "open") (output-html "open") (output-pdf "preview-pane")))
 #+end_src
 
+Make double quotes active again
+#+begin_src emacs-lisp
+(map! :map TeX-mode-map
+      "\"" #'self-insert-command)
+#+end_src
+
+** vhdl
+
+*** settings
+
+#+begin_src emacs-lisp
+(add-hook 'vhdl-mode-hook
+          (lambda ()
+            (setq indent-tabs-mode t)
+            (setq tab-width 4)
+            (setq vhdl-basic-offset 4)))
+#+end_src
 
 * Applications
 #+call: confpkg()
@@ -1910,6 +1927,17 @@ We could have a function that on a DONE hook checks if the DONE was a dependency
 (defadvice! my/update-dependencies-after-done (_arg)
   :after '(org-todo org-agenda-todo)
   (my/org-task-done-hook))
+#+end_src
+
+** RSS feeds
+#+begin_src emacs-lisp
+(use-package! elfeed
+  :config
+  (setq elfeed-feeds
+        '("https://xkcd.com/rss.xml"
+          "https://hnrss.org/frontpage"
+          "https://old.reddit.com/r/slatestarcodex.rss"
+          "https://old.reddit.com/r/hardware.rss")))
 #+end_src
 
 ** eglot
