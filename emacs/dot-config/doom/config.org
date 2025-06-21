@@ -2024,3 +2024,18 @@ Some optimizations from [[https://www.gnu.org/software/emacs/manual/html_node/tr
 
 (setq tramp-verbose 1)
 #+end_src
+
+** Geiser
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! geiser)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! geiser
+  :config
+  (setq geiser-mit-binary "/usr/local/bin/scheme")
+  (setq geiser-active-implementations '(mit)))
+#+end_src
+
+Here's a [[https://www.nongnu.org/geiser/Cheat-sheet.html#Cheat-sheet][cheatsheet.]]
