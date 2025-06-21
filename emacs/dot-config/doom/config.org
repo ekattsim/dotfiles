@@ -5,15 +5,21 @@
 #+title: Config
 
 * Introduction
+
 This is my attempt at a literate configuration of doom emacs. [[*Confpkg]] is shamelessly lifted from [[https://tecosaur.github.io/emacs-config/config.html#doom-configuration][tecosaur's]] literate config.
 
-* Confpkg
+* Meta configuration
+
+** Confpkg
+
 Clump parts of config into "self-contained packets of functionality".
 
-** Design
+*** Design
+
 It's already natural to organize blocks of config under sections, and we can use =:noweb-ref= with a =header-args:emacs-lisp= property to direct all child source blocks into a single parent. We could have two parents, one tangling to =subconf/config-X.el= and the other to =config.el=, however this will duplicate any evaluations required to generate the content, which isn't great (particularly for things which take a moment, like checking for LaTeX packages). Instead we can /just/ write to the =subconf/*= files and then at the end of tangling extract their contents into =config.el=.
 
 To set this up within each section, instead of manually repeating a common form we can generate the form and supply the relevant section properties via a babel call keyword, like so:
+
 #+begin_src org
 ,* Subject
 
@@ -24,8 +30,10 @@ To set this up within each section, instead of manually repeating a common form 
 ,#+end_src
 #+end_src
 
-** Preparation
+*** Preparation
+
 This approach is built around =#+call= invocations that affect the tangling. Unfortunately for this use-case, babel call keywords are not executed on tangle. However, a *noweb ref* can be executed on tangle if we choose to expand its evaluation result instead of its body. And so we can fudge the behaviour we want by tangling a noweb ref to a temp file, where the referenced block(=confpkg-prepare=) executes all babel calls in the buffer.
+
 #+name: confpkg-prepare
 #+begin_src emacs-lisp :noweb no-export
 (condition-case nil
@@ -39,13 +47,16 @@ This approach is built around =#+call= invocations that affect the tangling. Unf
 #+end_src
 
 And here's the tangled noweb-ref that will execute =confpk-prepare=.
+
 #+header: :tangle (expand-file-name (make-temp-name "emacs-org-babel-excuses/confpkg-prepare-") temporary-file-directory)
 #+begin_src emacs-lisp :noweb no-export :mkdirp yes :export-embed no
 <<confpkg-prepare()>>
 #+end_src
 
-** Setup
+*** Setup
+
 Before generating the template with babel, we want to keep track of:
+
 + How many config groups are created
 + Information about each config group
 
@@ -53,6 +64,7 @@ To do this we can simply create two variables. Due to temp-buffer shenanigans,
 we'll have to use global variables here.
 
 Then we need to set up the two final phases of this process:
+
 + Creating =config.el=
 + Cleaning up the superfluous generated content
 
@@ -61,6 +73,7 @@ again, it would be preferred if this was done locally, but it needs to be
 global. To avoid this causing headaches down the line we'll make sure when
 implementing the hook function to have it remove itself from the hook when
 executed.
+
 #+name: confpkg-setup
 #+begin_src emacs-lisp :results silent :noweb no-export
 (setq confpkg--num 0
@@ -83,6 +96,7 @@ executed.
 
 To avoid generating cruft, it would also be good to get rid of old tangled
 config files at the start.
+
 #+name: confpkg-clear-old-files
 #+begin_src emacs-lisp
 (make-directory "subconf" t)
@@ -92,9 +106,11 @@ config files at the start.
 
 Now to have this take effect, we can just use a babel call keyword. Thanks to
 the preparation step this will be executed during tangling.
+
 #+call: confpkg-setup[:results none]()
 
-** Package generation
+*** Package generation
+
 Now we actually implement the =confpkg= babel function. We could just direct the
 output into the =subconf/config-X.el= file without any extra steps, but why not be
 a bit fancier and make it more like a package.
@@ -103,6 +119,7 @@ To do this, we'll have =confpkg= load a template and then fill it in using
 ~format-spec~. To make sure this is actually used, we'll call ~org-set-property~ to
 modify the parent heading, and register the config group with the variables we
 created earlier.
+
 #+name: confpkg
 #+begin_src elisp :var name="" needs="" after="" pre="" prefix="config-" via="copy" emacs-minimum="29.1" :results raw :noweb no-export
 ;; Babel block for use with #+call
@@ -176,6 +193,7 @@ created earlier.
 #+end_src
 
 Now all that's needed is a template to be used.
+
 #+name: confpkg-template
 #+begin_src emacs-lisp :eval no
 ;;; %p.el --- Generated package (no.%n) from my config -*- lexical-binding: t; -*-
@@ -218,6 +236,7 @@ modifications from =#+call: confpkg= may persist. If I've been good with my
 committing, resolving this should be as simple as reverting unstaged changes.
 So... back in reality, it would be nice to have a way to clean up =confpkg=
 residue.
+
 #+name: confpkg-cleanup
 #+begin_src emacs-lisp :results none
 (org-fold-core-ignore-fragility-checks
@@ -228,7 +247,7 @@ residue.
       (org-entry-delete nil "header-args:emacs-lisp"))))
 #+end_src
 
-** Identify cross-package dependencies
+*** Identify cross-package dependencies
 :PROPERTIES:
 :header-args:emacs-lisp: :noweb-ref confpkg-dependency-analysis
 :END:
@@ -311,7 +330,7 @@ necessary ~require~ statements.
         (set-buffer-modified-p nil)))))
 #+end_src
 
-** Commenting out ~package!~ statements
+*** Commenting out ~package!~ statements
 
 It's easy enough to set ~package!~ statements to tangle to =packages.el=, however
 with our noweb ref approach they will /also/ go to the config files. This could be
@@ -356,7 +375,7 @@ are needed for each block of config.
         (set-buffer-modified-p nil)))))
 #+end_src
 
-** Creating the config file
+*** Creating the config file
 
 After all the subconfig files have been tangled, we need to collect their
 content and put them together into =config.el=. For this, all that's needed is a
@@ -482,7 +501,7 @@ Applying lexical binding to the config file is good for a number of reasons,
 among which it's (slightly) faster than dynamic binding (see [[https://nullprogram.com/blog/2016/12/22/][this blog post]] for
 more info).
 
-** Quieter output
+*** Quieter output
 
 All the babel evaluation here ends up being quite noisy (along with a few other
 things during tangle), let's see if we can change that.
@@ -504,7 +523,7 @@ things during tangle), let's see if we can change that.
 
 #+call: confpkg-quieter-output()
 
-** Reporting load time information
+*** Reporting load time information
 
 #+call: confpkg("Confpkg timings")
 
@@ -738,7 +757,7 @@ NODE defaults to the root node."
         (pop-to-buffer buf)))))
 #+end_src
 
-** Finalize
+*** Finalize
 
 At last, to clean up the content inserted by the babel calls we can just revert
 the buffer. As long as ~org-babel-pre-tangle-hook~ hasn't been modified,
@@ -764,24 +783,11 @@ Within ~confpkg-tangle-finalize~ we carefully order each step so that
 the most important steps go first, to minimise the impact should a particular
 step fail.
 
-* General configuration
-** Personal information
-#+call: confpkg()
-I'm not exactly sure where this information is used but here goes anyway.
-
-#+BEGIN_SRC emacs-lisp
-(setq user-full-name "Aesbetic"
-      user-mail-address "aesbetic@gmail.com")
-#+END_SRC
-
-** Doom configuration
-#+call: confpkg("doom-config")
-Changes to doom functionality should be made here.
-
-*** Modules
+** Doom modules
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle no :noweb-ref none
 :END:
+
 Modules need to be declared in [[file:init.el][init.el]]. Doom comes with a lot of features so when you find some flashy new functionality, you should first check whether doom has a related module.
 
 #+name: init.el
@@ -832,7 +838,8 @@ Modules need to be declared in [[file:init.el][init.el]]. Doom comes with a lot 
        )
 #+end_src
 
-**** Structure
+*** Structure
+
 Enable the =literate= module which tangles source blocks from =$DOOMDIR/config.org= to =config.el= on =doom sync=. There's also the =default= module which sets up default bindings, etc.
 
 #+name: doom-config
@@ -841,7 +848,8 @@ literate
 (default +bindings +smartparens)
 #+end_src
 
-**** Input
+*** Input
+
 #+name: doom-input
 #+begin_src emacs-lisp
 ;;bidi              ; (tfel ot) thgir etirw uoy gnipleh
@@ -850,7 +858,8 @@ literate
 ;;layout            ; auie,ctsrnm is the superior home row
 #+end_src
 
-**** Interface
+*** Interface
+
 Group of doom modules that make up the emacs interface.
 
 #+name: doom-completion
@@ -960,8 +969,13 @@ tree-sitter       ; syntax and parsing, sitting in a tree...
 ;;tty               ; improve the terminal Emacs experience
 #+end_src
 
-**** Language support
+*** Language support
+:PROPERTIES:
+:ID:       41ff62d2-069a-4c9e-a6ea-3ea737ea41ab
+:END:
+
 Language modules are lazy-loaded so we might as well enable all we want.
+
 #+name: doom-lang
 #+begin_src emacs-lisp
 ;;agda              ; types of types of types of types...
@@ -1029,7 +1043,8 @@ sh                ; she sells {ba,z,fi}sh shells on the C xor
 ;;zig               ; C, but simpler
 #+end_src
 
-**** Applications
+*** Applications
+
 #+name: doom-email
 #+begin_src emacs-lisp
 ;;(mu4e +org +gmail)
@@ -1046,50 +1061,13 @@ sh                ; she sells {ba,z,fi}sh shells on the C xor
 rss        ; emacs as an RSS reader
 #+end_src
 
-*** Doom UI
-**** Theme
-Load theme, taking current system appearance into consideration.
-#+BEGIN_SRC emacs-lisp
-(defun my/apply-theme (appearance)
-  (mapc #'disable-theme custom-enabled-themes)
-  (pcase appearance
-    ('light (setq doom-theme 'tango)
-            (load-theme 'tango t))
-    ('dark (setq doom-theme 'doom-lantern)
-           (load-theme 'doom-lantern t)))
-  (load-file "~/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
-
-(add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
-#+END_SRC
-*Note:* I might remove this if it gets dark outside too quick.
-
-**** Fonts
-Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respectively.
-
-#+BEGIN_SRC emacs-lisp
-(when (member "Roboto Mono" (font-family-list))
-  (setq doom-font (font-spec :family "Roboto Mono" :height 15.0)))
-  ;; (set-face-attribute 'default nil :family "Roboto Mono" :height 150)
-  ;; (set-face-attribute 'fixed-pitch nil :family "Roboto Mono"))
-
-(when (member "Source Sans Pro" (font-family-list))
-  ;; variable pitch font will be a little larger than fixed fonts
-  (setq doom-variable-pitch-font (font-spec :family "Source Sans Pro" :size 18.0)))
-  ;; (set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.20))
-#+END_SRC
-
-*** Dashboard
-Doom has a minimal dashboard that helps with startup times. Let's add a clean custom banner as well.
-#+begin_src emacs-lisp
-(setq fancy-splash-image "~/.config/doom/misc/splash-images/emacs-e-template.svg")
-#+end_src
-
 ** Package management
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle "packages.el" :noweb-ref none
 :END:
 
 Tangle the default instructions to packages.el. This is also where all the package declarations will be tangled to.
+
 #+begin_src emacs-lisp
 ;; -*- no-byte-compile: t; -*-
 
@@ -1141,35 +1119,50 @@ Tangle the default instructions to packages.el. This is also where all the packa
 ;; (unpin! t)
 #+end_src
 
-* Functionality
-** System settings
+* System settings
 #+call: confpkg("defaults")
-Changes to core-emacs default behavior should be made here.
 
-*** Simple settings
-Small tweaks on top of defaults.
+Changes to emacs default behavior should be made here.
+
+** Admin stuff
+#+call: confpkg()
+
+I'm not exactly sure where this information is used but here goes anyway.
+
 #+BEGIN_SRC emacs-lisp
-(setq shell-file-name (executable-find "bash")) ;; fish is Non-POSIX unfortunately
-
+(setq user-full-name "Aesbetic"
+      user-mail-address "aesbetic@gmail.com")
 #+END_SRC
 
-*** Customize
+** IPC defaults
+
+Settings that change how emacs communicates with its environment.
+
+#+BEGIN_SRC emacs-lisp
+(setq shell-file-name (executable-find "bash")) ;; fish is Non-POSIX unfortunately
+#+END_SRC
+
+** Customize
+
 Autoload the custom.el file if it exists.
+
 #+BEGIN_SRC emacs-lisp
 (when (file-exists-p custom-file)
   (load custom-file))
 #+END_SRC
 
-*** Frames
+** Frames
+
 Remove the title bar because it's unaesthetic.
+
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'default-frame-alist '(undecorated-round . t))
 #+END_SRC
 
-*** Windows
+** Windows
  #+call: confpkg()
 
-**** Window operations
+*** Window operations
 I find symbolic keybinds to be more intuitive, so let's add them for window split creation.
 #+BEGIN_SRC emacs-lisp
 (map! :leader
@@ -1177,7 +1170,7 @@ I find symbolic keybinds to be more intuitive, so let's add them for window spli
       "|" #'evil-window-vsplit)
 #+END_SRC
 
-**** Layout Rotation
+*** Layout Rotation
 Ever have fullscreen emacs with a nice vsplit going? Me? All the time. But since I run a tiling WM, minimizing to a half-screen emacs happens all the time too. Now a vsplit looks hideous and we need to switch layout to a regular hsplit.
 
 This will be my relief.
@@ -1194,7 +1187,7 @@ Let's stash layout rotation under SPC w SPC, inspired by Tmux's use of C-b SPC t
         "SPC" #'rotate-layout)
   )
  #+END_SRC
-**** Split prompt
+*** Split prompt
 #+call: confpkg(after="evil")
 
 Ask what buffer to switch to after making a new window split because it's a common operation I do.
@@ -1212,12 +1205,58 @@ Then, show a buffer prompt
   (consult-buffer))
 #+END_SRC
 
-*** Files
+** Files
 Bind "<leader>ff" to switch to src/header pair replacing the find-file offered by doom. This is okay because "<leader>." does finding files for me.
 #+BEGIN_SRC emacs-lisp
 (map! :leader :desc "Find other file" "f f" #'ff-find-other-file)
 #+END_SRC
 
+
+System and meta configuration that needs to be evaluated first goes here.
+
+** Doom configuration
+#+call: confpkg("doom-config")
+*** Doom UI
+**** Theme
+Load theme, taking current system appearance into consideration.
+#+BEGIN_SRC emacs-lisp
+(defun my/apply-theme (appearance)
+  (mapc #'disable-theme custom-enabled-themes)
+  (pcase appearance
+    ('light (setq doom-theme 'tango)
+            (load-theme 'tango t))
+    ('dark (setq doom-theme 'doom-lantern)
+           (load-theme 'doom-lantern t)))
+  (load-file "~/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
+
+(add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
+#+END_SRC
+*Note:* I might remove this if it gets dark outside too quick.
+
+**** Fonts
+Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respectively.
+
+#+BEGIN_SRC emacs-lisp
+(when (member "Roboto Mono" (font-family-list))
+  (setq doom-font (font-spec :family "Roboto Mono" :height 15.0)))
+  ;; (set-face-attribute 'default nil :family "Roboto Mono" :height 150)
+  ;; (set-face-attribute 'fixed-pitch nil :family "Roboto Mono"))
+
+(when (member "Source Sans Pro" (font-family-list))
+  ;; variable pitch font will be a little larger than fixed fonts
+  (setq doom-variable-pitch-font (font-spec :family "Source Sans Pro" :size 18.0)))
+  ;; (set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.20))
+#+END_SRC
+
+*** Dashboard
+
+Doom has a minimal dashboard that helps with startup times. Let's add a clean custom banner as well.
+
+#+begin_src emacs-lisp
+(setq fancy-splash-image "~/.config/doom/misc/splash-images/emacs-e-template.svg")
+#+end_src
+
+* Functionality
 ** Editor
 :PROPERTIES:
 :ID:       5310f553-4074-4870-888c-95f86879fb69
