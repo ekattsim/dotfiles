@@ -1802,7 +1802,10 @@ Create a variable for the project directory. The zettelkasten directory is creat
 
 Hopefully these will be the only locations with TODO items.
  #+begin_src emacs-lisp
-(setq org-agenda-files (list +org-capture-todo-file org-project-directory (expand-file-name "config.org" doom-user-dir)))
+(setq org-agenda-files (list +org-capture-todo-file
+                             org-project-directory
+                             org-roam-directory
+                             (expand-file-name "config.org" doom-user-dir)))
 #+end_src
 
 Make sure that all org headings with backlinks also have an ID property. This is useful because heading titles can change but ids don't usually.
@@ -1869,11 +1872,13 @@ Set archive location, most likely only used on project files.
 #+end_src
 
 *** Workflow and Agenda view
+
 Let's define the fundamental action cycle.
+
 #+begin_src emacs-lisp
 (setq org-todo-keywords '((sequence "TODO(t)" "INBOX(I)" "NEXT(n)" "WAIT(w)" "IDEA(i)" "|" "DONE(d)" "KILL(k)")))
 
-;; Customized view for the daily workflow. (Command: "C-c a n")
+;; Customized view for the daily workflow.
 (setq org-agenda-custom-commands
   '(("n" "Agenday / NEXT / INBOX / WAIT / IDEA"
      ((agenda "" nil)
@@ -1885,6 +1890,7 @@ Let's define the fundamental action cycle.
 #+end_src
 
 Show the daily agenda by default. Also known as agenday, that's gonna catch on.
+
 #+begin_src emacs-lisp
 (setq org-agenda-span 'day
    org-agenda-start-on-weekday nil
@@ -1892,18 +1898,19 @@ Show the daily agenda by default. Also known as agenday, that's gonna catch on.
 #+end_src
 
 Shorten deadline reminders to 2d by default. 2 weeks prior warnings is too much org-mode.
+
 #+begin_src emacs-lisp
 (setq org-deadline-warning-days 2)
 #+end_src
 
 In this workflow all TODOs have to be scheduled, so let's add an advice over the =org-todo= and =org-agenda-todo= functions.
+
 #+begin_src emacs-lisp
 (defadvice! schedule-after-todo (_arg)
   :after '(org-todo org-agenda-todo)
-  (save-excursion
-    (when (and (equal (org-get-todo-state) "TODO")
-               (not (org-get-scheduled-time (point))))
-      (org-schedule nil))))
+  (when (and (equal (org-get-todo-state) "TODO")
+             (not (org-get-scheduled-time (point))))
+    (org-schedule nil)))
 #+end_src
 
 *** Capture TODOs
