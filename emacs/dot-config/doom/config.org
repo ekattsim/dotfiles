@@ -4,17 +4,17 @@
 
 #+title: Config
 
-* Introduction
+* introduction
 
 This is my attempt at a literate configuration of doom emacs. [[*Confpkg]] is shamelessly lifted from [[https://tecosaur.github.io/emacs-config/config.html#doom-configuration][tecosaur's]] literate config.
 
-* Meta configuration
+* meta configuration
 
-** Confpkg
+** confpkg
 
 Clump parts of config into "self-contained packets of functionality".
 
-*** Design
+*** design
 
 It's already natural to organize blocks of config under sections, and we can use =:noweb-ref= with a =header-args:emacs-lisp= property to direct all child source blocks into a single parent. We could have two parents, one tangling to =subconf/config-X.el= and the other to =config.el=, however this will duplicate any evaluations required to generate the content, which isn't great (particularly for things which take a moment, like checking for LaTeX packages). Instead we can /just/ write to the =subconf/*= files and then at the end of tangling extract their contents into =config.el=.
 
@@ -30,7 +30,7 @@ To set this up within each section, instead of manually repeating a common form 
 ,#+end_src
 #+end_src
 
-*** Preparation
+*** preparation
 
 This approach is built around =#+call= invocations that affect the tangling. Unfortunately for this use-case, babel call keywords are not executed on tangle. However, a *noweb ref* can be executed on tangle if we choose to expand its evaluation result instead of its body. And so we can fudge the behaviour we want by tangling a noweb ref to a temp file, where the referenced block(=confpkg-prepare=) executes all babel calls in the buffer.
 
@@ -53,7 +53,7 @@ And here's the tangled noweb-ref that will execute =confpk-prepare=.
 <<confpkg-prepare()>>
 #+end_src
 
-*** Setup
+*** setup
 
 Before generating the template with babel, we want to keep track of:
 
@@ -109,7 +109,7 @@ the preparation step this will be executed during tangling.
 
 #+call: confpkg-setup[:results none]()
 
-*** Package generation
+*** package generation
 
 Now we actually implement the =confpkg= babel function. We could just direct the
 output into the =subconf/config-X.el= file without any extra steps, but why not be
@@ -247,7 +247,7 @@ residue.
       (org-entry-delete nil "header-args:emacs-lisp"))))
 #+end_src
 
-*** Identify cross-package dependencies
+*** identify cross-package dependencies
 :PROPERTIES:
 :header-args:emacs-lisp: :noweb-ref confpkg-dependency-analysis
 :END:
@@ -330,7 +330,7 @@ necessary ~require~ statements.
         (set-buffer-modified-p nil)))))
 #+end_src
 
-*** Commenting out ~package!~ statements
+*** commenting out ~package!~ statements
 
 It's easy enough to set ~package!~ statements to tangle to =packages.el=, however
 with our noweb ref approach they will /also/ go to the config files. This could be
@@ -375,7 +375,7 @@ are needed for each block of config.
         (set-buffer-modified-p nil)))))
 #+end_src
 
-*** Creating the config file
+*** creating the config file
 
 After all the subconfig files have been tangled, we need to collect their
 content and put them together into =config.el=. For this, all that's needed is a
@@ -501,7 +501,7 @@ Applying lexical binding to the config file is good for a number of reasons,
 among which it's (slightly) faster than dynamic binding (see [[https://nullprogram.com/blog/2016/12/22/][this blog post]] for
 more info).
 
-*** Quieter output
+*** quieter output
 
 All the babel evaluation here ends up being quite noisy (along with a few other
 things during tangle), let's see if we can change that.
@@ -523,7 +523,7 @@ things during tangle), let's see if we can change that.
 
 #+call: confpkg-quieter-output()
 
-*** Reporting load time information
+*** reporting load time information
 
 #+call: confpkg("Confpkg timings")
 
@@ -757,7 +757,7 @@ NODE defaults to the root node."
         (pop-to-buffer buf)))))
 #+end_src
 
-*** Finalize
+*** finalize
 
 At last, to clean up the content inserted by the babel calls we can just revert
 the buffer. As long as ~org-babel-pre-tangle-hook~ hasn't been modified,
@@ -783,7 +783,7 @@ Within ~confpkg-tangle-finalize~ we carefully order each step so that
 the most important steps go first, to minimise the impact should a particular
 step fail.
 
-** Doom modules
+** doom modules
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle no :noweb-ref none
 :END:
@@ -838,7 +838,7 @@ Modules need to be declared in [[file:init.el][init.el]]. Doom comes with a lot 
        )
 #+end_src
 
-*** Structure
+*** structure
 
 Enable the =literate= module which tangles source blocks from =$DOOMDIR/config.org= to =config.el= on =doom sync=. There's also the =default= module which sets up default bindings, etc.
 
@@ -848,7 +848,7 @@ literate
 (default +bindings +smartparens)
 #+end_src
 
-*** Input
+*** input
 
 #+name: doom-input
 #+begin_src emacs-lisp
@@ -858,9 +858,9 @@ literate
 ;;layout            ; auie,ctsrnm is the superior home row
 #+end_src
 
-*** Interface
+*** interface
 
-Group of doom modules that make up the emacs interface.
+group of doom modules that make up the emacs interface.
 
 #+name: doom-completion
 #+begin_src emacs-lisp
@@ -874,28 +874,28 @@ vertico           ; the search engine of the future
 
 #+name: doom-ui
 #+begin_src emacs-lisp
-;;deft              ; notational velocity for Emacs
-doom              ; what makes DOOM look the way it does
-doom-dashboard    ; a nifty splash screen for Emacs
-;;doom-quit         ; DOOM quit-message prompts when you quit Emacs
+;;deft              ; notational velocity for emacs
+doom              ; what makes doom look the way it does
+doom-dashboard    ; a nifty splash screen for emacs
+;;doom-quit         ; doom quit-message prompts when you quit emacs
 ;;(emoji +unicode)  ; 🙂
-hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
+hl-todo           ; highlight todo/fixme/note/deprecated/hack/review
 ;;indent-guides     ; highlighted indent columns
 ;;ligatures         ; ligatures and symbols to make your code pretty again
 ;;minimap           ; show a map of the code on the side
-;;modeline          ; snazzy, Atom-inspired modeline, plus API
+;;modeline          ; snazzy, atom-inspired modeline, plus api
 ;;nav-flash         ; blink cursor line after big motions
-;;neotree           ; a project drawer, like NERDTree for vim
+;;neotree           ; a project drawer, like nerdtree for vim
 ophints           ; highlight the region an operation acts on
 (popup +defaults)   ; tame sudden yet inevitable temporary windows
-;;tabs              ; a tab bar for Emacs
+;;tabs              ; a tab bar for emacs
 ;;treemacs          ; a project drawer, like neotree but cooler
 ;;unicode           ; extended unicode support for various languages
 (vc-gutter +pretty) ; vcs diff in the fringe
-vi-tilde-fringe   ; fringe tildes to mark beyond EOB
+vi-tilde-fringe   ; fringe tildes to mark beyond eob
 ;;window-select     ; visually switch windows
 workspaces        ; tab emulation, persistence & separate workspaces
-zen               ; distraction-free coding or writing (TODO)
+zen               ; distraction-free coding or writing (todo)
 #+end_src
 
 #+name: doom-editor
@@ -904,13 +904,13 @@ zen               ; distraction-free coding or writing (TODO)
 file-templates    ; auto-snippets for empty files
 fold              ; (nigh) universal code folding
 ;;(format +onsave)  ; automated prettiness
-;;god               ; run Emacs commands without modifier keys
+;;god               ; run emacs commands without modifier keys
 ;;lispy             ; vim for lisp, for people who don't like vim
 ;;multiple-cursors  ; editing in many places at once
 ;;objed             ; text object editing for the innocent
 ;;parinfer          ; turn lisp into python, sort of
 ;;rotate-text       ; cycle region at point between text candidates
-snippets          ; my elves. They type so I don't have to
+snippets          ; my elves. they type so i don't have to
 ;;word-wrap         ; soft wrapping with language-aware indent
 #+end_src
 
@@ -921,15 +921,15 @@ electric          ; smarter, keyword-based electric-indent
 ;;eww               ; the internet is gross
 ;;ibuffer           ; interactive buffer management
 undo              ; persistent, smarter undo for your inevitable mistakes
-vc                ; version-control and Emacs, sitting in a tree
+vc                ; version-control and emacs, sitting in a tree
 #+end_src
 
 #+name: doom-term
 #+begin_src emacs-lisp
 ;;eshell            ; the elisp shell that works everywhere
-;;shell             ; simple shell REPL for Emacs
-;;term              ; basic terminal emulator for Emacs
-vterm             ; the best terminal emulation in Emacs
+;;shell             ; simple shell repl for emacs
+;;term              ; basic terminal emulator for emacs
+vterm             ; the best terminal emulation in emacs
 #+end_src
 
 #+name: doom-checkers
@@ -942,81 +942,81 @@ syntax              ; tasing you for every semicolon you forget
 #+name: doom-tools
 #+begin_src emacs-lisp
 ;;ansible
-;;biblio            ; Writes a PhD for you (citation needed)
+;;biblio            ; writes a phd for you (citation needed)
 ;;collab            ; buffers with friends
-;;debugger          ; FIXME stepping through code, to help you add bugs
+;;debugger          ; fixme stepping through code, to help you add bugs
 ;;direnv
 ;;docker
 ;;editorconfig      ; let someone else argue about tabs vs spaces
-;;ein               ; tame Jupyter notebooks with emacs
+;;ein               ; tame jupyter notebooks with emacs
 (eval +overlay)     ; run code, run (also, repls)
 lookup              ; navigate your code and its documentation
-(lsp +eglot)               ; M-x vscode
-magit             ; a git porcelain for Emacs
-;;make              ; run make tasks from Emacs
+(lsp +eglot)               ; m-x vscode
+magit             ; a git porcelain for emacs
+;;make              ; run make tasks from emacs
 ;;pass              ; password manager for nerds
 pdf               ; pdf enhancements
-;;prodigy           ; FIXME managing external services & code builders
+;;prodigy           ; fixme managing external services & code builders
 ;;terraform         ; infrastructure as code
-;;tmux              ; an API for interacting with tmux
+;;tmux              ; an api for interacting with tmux
 tree-sitter       ; syntax and parsing, sitting in a tree...
 ;;upload            ; map local to remote projects via ssh/ftp
 #+end_src
 
 #+name: doom-os
 #+begin_src emacs-lisp
-(:if (featurep :system 'macos) macos)  ; improve compatibility with macOS
-;;tty               ; improve the terminal Emacs experience
+(:if (featurep :system 'macos) macos)  ; improve compatibility with macos
+;;tty               ; improve the terminal emacs experience
 #+end_src
 
-*** Language support
-:PROPERTIES:
-:ID:       41ff62d2-069a-4c9e-a6ea-3ea737ea41ab
-:END:
+*** language support
+:properties:
+:id:       41ff62d2-069a-4c9e-a6ea-3ea737ea41ab
+:end:
 
-Language modules are lazy-loaded so we might as well enable all we want.
+language modules are lazy-loaded so we might as well enable all we want.
 
 #+name: doom-lang
 #+begin_src emacs-lisp
 ;;agda              ; types of types of types of types...
-;;beancount         ; mind the GAAP
-(cc +lsp)         ; C > C++ == 1
+;;beancount         ; mind the gaap
+(cc +lsp)         ; c > c++ == 1
 ;;clojure           ; java with a lisp
 ;;common-lisp       ; if you've seen one lisp, you've seen them all
 ;;coq               ; proofs-as-programs
 ;;crystal           ; ruby at the speed of c
-;;csharp            ; unity, .NET, and mono shenanigans
+;;csharp            ; unity, .net, and mono shenanigans
 ;;data              ; config/data formats
 ;;(dart +flutter)   ; paint ui and not much else
 ;;dhall
 ;;elixir            ; erlang done right
-;;elm               ; care for a cup of TEA?
+;;elm               ; care for a cup of tea?
 emacs-lisp        ; drown in parentheses
 ;;erlang            ; an elegant language for a more civilized age
 ;;ess               ; emacs speaks statistics
 ;;factor
 ;;faust             ; dsp, but you get to keep your soul
-;;fortran           ; in FORTRAN, GOD is REAL (unless declared INTEGER)
-;;fsharp            ; ML stands for Microsoft's Language
-;;fstar             ; (dependent) types and (monadic) effects and Z3
+;;fortran           ; in fortran, god is real (unless declared integer)
+;;fsharp            ; ml stands for microsoft's language
+;;fstar             ; (dependent) types and (monadic) effects and z3
 ;;gdscript          ; the language you waited for
 ;;(go +lsp)         ; the hipster dialect
-;;(graphql +lsp)    ; Give queries a REST
-;;(haskell +lsp)    ; a language that's lazier than I am
+;;(graphql +lsp)    ; give queries a rest
+;;(haskell +lsp)    ; a language that's lazier than i am
 ;;hy                ; readability of scheme w/ speed of python
 ;;idris             ; a language you can depend on
-;;json              ; At least it ain't XML
+;;json              ; at least it ain't xml
 ;;(java +lsp)       ; the poster child for carpal tunnel syndrome
 ;;javascript        ; all(hope(abandon(ye(who(enter(here))))))
-;;julia             ; a better, faster MATLAB
-;;kotlin            ; a better, slicker Java(Script)
-(latex +cdlatex)             ; writing papers in Emacs has never been so fun
+;;julia             ; a better, faster matlab
+;;kotlin            ; a better, slicker java(script)
+(latex +cdlatex)             ; writing papers in emacs has never been so fun
 ;;lean              ; for folks with too much to prove
 ;;ledger            ; be audit you can be
 lua               ; one-based indices? one-based indices
 markdown          ; writing docs for people to ignore
 ;;nim               ; python + lisp at the speed of c
-;;nix               ; I hereby declare "nix geht mehr!"
+;;nix               ; i hereby declare "nix geht mehr!"
 ;;ocaml             ; an objective camel
 (org +roam2)               ; organize your plain life in plain text
 ;;php               ; perl's insecure younger brother
@@ -1025,25 +1025,25 @@ markdown          ; writing docs for people to ignore
 ;;purescript        ; javascript, but functional
 (python +lsp +tree-sitter)            ; beautiful is better than ugly
 ;;qt                ; the 'cutest' gui framework ever
-;;racket            ; a DSL for DSLs
+;;racket            ; a dsl for dsls
 ;;raku              ; the artist formerly known as perl6
-;;rest              ; Emacs as a REST client
-;;rst               ; ReST in peace
-;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-;;(rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+;;rest              ; emacs as a rest client
+;;rst               ; rest in peace
+;;(ruby +rails)     ; 1.step {|i| p "ruby is #{i.even? ? 'love' : 'life'}"}
+;;(rust +lsp)       ; fe2o3.unwrap().unwrap().unwrap().unwrap()
 ;;scala             ; java, but good
 ;;(scheme +guile)   ; a fully conniving family of lisps
-sh                ; she sells {ba,z,fi}sh shells on the C xor
+sh                ; she sells {ba,z,fi}sh shells on the c xor
 ;;sml
-;;solidity          ; do you need a blockchain? No.
+;;solidity          ; do you need a blockchain? no.
 ;;swift             ; who asked for emoji variables?
-;;terra             ; Earth and Moon in alignment for performance.
+;;terra             ; earth and moon in alignment for performance.
 ;;web               ; the tubes
-;;yaml              ; JSON, but readable
-;;zig               ; C, but simpler
+;;yaml              ; json, but readable
+;;zig               ; c, but simpler
 #+end_src
 
-*** Applications
+*** applications
 
 #+name: doom-email
 #+begin_src emacs-lisp
@@ -1056,12 +1056,12 @@ sh                ; she sells {ba,z,fi}sh shells on the C xor
 #+begin_src emacs-lisp
 ;;calendar
 ;;emms
-;;everywhere        ; *leave* Emacs!? You must be joking
+;;everywhere        ; *leave* emacs!? you must be joking
 ;;irc               ; how neckbeards socialize
-rss        ; emacs as an RSS reader
+rss        ; emacs as an rss reader
 #+end_src
 
-** Package management
+** package management
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle "packages.el" :noweb-ref none
 :END:
@@ -1119,30 +1119,7 @@ Tangle the default instructions to packages.el. This is also where all the packa
 ;; (unpin! t)
 #+end_src
 
-* System settings
-#+call: confpkg("defaults")
-
-Changes to emacs default behavior should be made here.
-
-** Admin stuff
-#+call: confpkg()
-
-I'm not exactly sure where this information is used but here goes anyway.
-
-#+BEGIN_SRC emacs-lisp
-(setq user-full-name "Aesbetic"
-      user-mail-address "aesbetic@gmail.com")
-#+END_SRC
-
-** IPC defaults
-
-Settings that change how emacs communicates with its environment.
-
-#+BEGIN_SRC emacs-lisp
-(setq shell-file-name (executable-find "bash")) ;; fish is Non-POSIX unfortunately
-#+END_SRC
-
-** Customize
+** customize
 
 Autoload the custom.el file if it exists.
 
@@ -1151,7 +1128,23 @@ Autoload the custom.el file if it exists.
   (load custom-file))
 #+END_SRC
 
-** Frames
+* system configuration
+#+call: confpkg("system")
+
+As is often pointed out, Emacs is more of an operating system than a text editor. This section concerns itself with configuring the system part.
+
+** Admin stuff
+
+I'm not exactly sure where this information is used but here goes anyway.
+
+#+BEGIN_SRC emacs-lisp
+(setq user-full-name "Aesbetic"
+      user-mail-address "aesbetic@gmail.com")
+#+END_SRC
+
+** UI
+
+*** General
 
 Remove the title bar because it's unaesthetic.
 
@@ -1159,66 +1152,11 @@ Remove the title bar because it's unaesthetic.
 (add-to-list 'default-frame-alist '(undecorated-round . t))
 #+END_SRC
 
-** Windows
- #+call: confpkg()
+*** Theme
 
-*** Window operations
-I find symbolic keybinds to be more intuitive, so let's add them for window split creation.
-#+BEGIN_SRC emacs-lisp
-(map! :leader
-      "-" #'evil-window-split
-      "|" #'evil-window-vsplit)
-#+END_SRC
-
-*** Layout Rotation
-Ever have fullscreen emacs with a nice vsplit going? Me? All the time. But since I run a tiling WM, minimizing to a half-screen emacs happens all the time too. Now a vsplit looks hideous and we need to switch layout to a regular hsplit.
-
-This will be my relief.
-#+begin_src emacs-lisp :tangle "packages.el"
-(package! rotate)
-#+end_src
-
-Let's stash layout rotation under SPC w SPC, inspired by Tmux's use of C-b SPC to rotate windows.
- #+BEGIN_SRC emacs-lisp
-(use-package! rotate
-  :commands #'rotate-layout
-  :init
-  (map! :map evil-window-map
-        "SPC" #'rotate-layout)
-  )
- #+END_SRC
-*** Split prompt
-#+call: confpkg(after="evil")
-
-Ask what buffer to switch to after making a new window split because it's a common operation I do.
-
-First make newly-split window the active window
-#+BEGIN_SRC emacs-lisp
-(setq evil-split-window-below t
-      evil-vsplit-window-right t)
-#+END_SRC
-
-Then, show a buffer prompt
-#+BEGIN_SRC emacs-lisp
-(defadvice! prompt-for-buffer (&rest _)
-  :after '(evil-window-split evil-window-vsplit)
-  (consult-buffer))
-#+END_SRC
-
-** Files
-Bind "<leader>ff" to switch to src/header pair replacing the find-file offered by doom. This is okay because "<leader>." does finding files for me.
-#+BEGIN_SRC emacs-lisp
-(map! :leader :desc "Find other file" "f f" #'ff-find-other-file)
-#+END_SRC
-
-
-System and meta configuration that needs to be evaluated first goes here.
-
-** Doom configuration
-#+call: confpkg("doom-config")
-*** Doom UI
-**** Theme
 Load theme, taking current system appearance into consideration.
+
+*Note:* I might remove this if it gets dark outside too quick.
 #+BEGIN_SRC emacs-lisp
 (defun my/apply-theme (appearance)
   (mapc #'disable-theme custom-enabled-themes)
@@ -1231,9 +1169,9 @@ Load theme, taking current system appearance into consideration.
 
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 #+END_SRC
-*Note:* I might remove this if it gets dark outside too quick.
 
-**** Fonts
+*** Fonts
+
 Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respectively.
 
 #+BEGIN_SRC emacs-lisp
@@ -1248,53 +1186,59 @@ Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respective
   ;; (set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.20))
 #+END_SRC
 
-*** Dashboard
+** OS Integration
 
-Doom has a minimal dashboard that helps with startup times. Let's add a clean custom banner as well.
+Unfortunately fish is not POSIX compliant.
 
-#+begin_src emacs-lisp
-(setq fancy-splash-image "~/.config/doom/misc/splash-images/emacs-e-template.svg")
-#+end_src
+#+BEGIN_SRC emacs-lisp
+(setq shell-file-name (executable-find "bash"))
+#+END_SRC
 
-* Functionality
-** Editor
+** Peformance Hacking
+
+* core functionality
+#+call: confpkg("core")
+
+** editor
 :PROPERTIES:
 :ID:       5310f553-4074-4870-888c-95f86879fb69
 :END:
-#+call: confpkg()
 
-*** Settings
+*** editor settings
+
 Enable relative line numbers because it's a habit from vim
+
 #+BEGIN_SRC emacs-lisp
 (setq display-line-numbers-type 'relative)
 #+END_SRC
 
-*** Evil
-**** evil
+*** evil
+#+call: confpkg(after="evil")
+
 The ultimate convenience. We don't need to make any package declarations because we have the =:editor (evil +everywhere)= doom module enabled.
 
+**** evil settings
+
+This enables precise undo steps.
+
 #+begin_src emacs-lisp
-(after! evil
-  (setq evil-want-fine-undo t)) ;; precise undo steps
+(setq evil-want-fine-undo t) ;; precise undo steps
 #+end_src
 
-**** evil-snipe
-I don't want to spam j's and k's anymore
-#+BEGIN_SRC emacs-lisp
-(after! evil-snipe
-  (setq evil-snipe-smart-case t
-        evil-snipe-scope 'visible
-        ))
-#+END_SRC
-
 **** evil-escape
+
 I have no clue why this is enabled by default
+
 #+begin_src emacs-lisp :tangle "packages.el"
 (package! evil-escape :disable t)
 #+end_src
 
-**** Keybinds
-General buffer navigation
+*** navigation
+
+**** keybindings
+
+I think flipping this makes a lot sense and they should merge this to vim bindings.
+
 #+BEGIN_SRC emacs-lisp
 (map!  :m "H" #'evil-beginning-of-line
        :m "L" #'evil-end-of-line
@@ -1303,166 +1247,285 @@ General buffer navigation
 #+END_SRC
 
 Make working with wrapped lines easy
+
 #+BEGIN_SRC emacs-lisp
 (map!  :nv "j" #'evil-next-visual-line
        :nv "k" #'evil-previous-visual-line)
 #+END_SRC
 
-*** Completion
-** Organization
-#+call: confpkg()
+**** evil-snipe
+#+call: confpkg(after="evil-snipe")
 
-*** Workspace
-Bind workspace navigation to be more like t-smart
+I don't want to spam j's and k's anymore
+
 #+BEGIN_SRC emacs-lisp
-(map! :ni "C-t" #'+workspace/switch-to
-      :ni [C-tab] #'+workspace/other)
+(setq evil-snipe-smart-case t
+      evil-snipe-scope 'visible)
 #+END_SRC
 
-*** Projects
 
-** Org packages
-#+call: confpkg("org-packages")
+*** completion
 
-*** Org-Superstar
+** window management
+
+*** window splits
+
+I find symbolic keybinds to be more intuitive, so let's add them for window split creation.
+
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      "-" #'evil-window-split
+      "|" #'evil-window-vsplit)
+#+END_SRC
+
+**** split prompt
+
+Ask what buffer to switch to after making a new window split because it's a common operation I do.
+
+First make newly-split window the active window
+
+#+BEGIN_SRC emacs-lisp
+(setq evil-split-window-below t
+      evil-vsplit-window-right t)
+#+END_SRC
+
+Then, show a buffer prompt
+
+#+BEGIN_SRC emacs-lisp
+(defadvice! prompt-for-buffer (&rest _)
+  :after '(evil-window-split evil-window-vsplit)
+  (consult-buffer))
+#+END_SRC
+
+*** layout rotation
+
+Ever have fullscreen emacs with a nice vsplit going? Me? All the time. But since I run a tiling WM, minimizing to a half-screen emacs happens all the time too. Now a vsplit looks hideous and we need to switch layout to a regular hsplit.
+
+This will be my relief.
 #+begin_src emacs-lisp :tangle "packages.el"
-(package! org-superstar)
+(package! rotate)
 #+end_src
 
-#+BEGIN_SRC emacs-lisp
-(use-package! org-superstar
-  :hook (org-mode-hook . (lambda () (org-superstar-mode 1)))
-  :after org
-  :config
-  (setq org-superstar-leading-bullet " "
-        org-superstar-headline-bullets-list '("●" "○" "◆" "◇" "•" "⚬")
-        org-superstar-item-bullet-alist '((42 . "⚬") (43 . "⚬") (45 . "⚬"))
-        org-superstar-prettify-item-bullets t)
-  #+END_SRC
+Let's stash layout rotation under SPC w SPC, inspired by Tmux's use of C-b SPC to rotate windows.
 
-Plain-list bullets are invisible because they have the org-indent face. We can make them visible by having them inherit the default face.
+ #+BEGIN_SRC emacs-lisp
+(use-package! rotate
+  :commands #'rotate-layout
+  :init
+  (map! :map evil-window-map
+        "SPC" #'rotate-layout))
+ #+END_SRC
+
+** file management
+
+Bind "<leader>ff" to switch to src/header pair replacing the find-file offered by doom. This is okay because "<leader>." does finding files for me.
+
 #+BEGIN_SRC emacs-lisp
-  (set-face-attribute 'org-list-dt nil :inherit 'default)
-)
-#+END_SRC
-*** evil-tex
-Provides useful text objects, movements, etc for LaTeX editing.
-#+BEGIN_SRC emacs-lisp
-(use-package! evil-tex
-:hook (org-mode-hook . evil-tex-mode))
+(map! :leader :desc "Find other file" "f f" #'ff-find-other-file)
 #+END_SRC
 
-*** org-cdlatex
-#+call: confpkg("cdlatex")
+* language configuration
 
-Org-cdlatex is the foundation to editing latex in org-mode. It removes much of the hassle of defining common latex macros and templates. Doing this with a snippet engine would've been pretty boring, so now we can just focus on adding more complex snippets like the auto-expanding ones to our snippet engine of choice: =aas=.
+** lsp & syntax-highlight
+#+call: confpkg("lsp")
 
-Change the symbol/modifier cycling key to ';'. Note for some reason these don't change the existing activating keymap bind; we do this later with =aas= though.
-#+BEGIN_SRC emacs-lisp
-(after! cdlatex
-  (setq cdlatex-math-symbol-prefix ?\;)
-  (setq cdlatex-math-modify-prefix ?\;)
+*** eglot-booster
+:PROPERTIES:
+:ID:       7af01b58-d326-464e-94a8-bcaf1f3b3fe5
+:END:
 
-  (map! :map cdlatex-mode-map
-        "'" nil)
-  (map! :map cdlatex-mode-map
-        "`" nil)
-#+END_SRC
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! eglot-booster
+  :recipe (:host github
+           :repo "jdtsmith/eglot-booster"))
+#+end_src
 
-Add custom environment snippets
-#+BEGIN_SRC emacs-lisp
-  (setq cdlatex-env-alist
-        '(("bmatrix" "\\begin{bmatrix}\n?\n\\end{bmatrix}" nil)
-          ("equation*" "\\begin{equation*}\n?\n\\end{equation*}" nil)))
-#+END_SRC
-Modify available symbols and modifiers
-#+BEGIN_SRC emacs-lisp
-   (setq cdlatex-math-symbol-alist
-   '( ;; adding missing functions to 3rd level symbols
-     (?_    ("\\downarrow"  ""           "\\inf"))
-     (?2    ("^2"           "\\sqrt{?}"     ""     ))
-     (?3    ("^3"           "\\sqrt[3]{?}"  ""     ))
-     (?^    ("\\uparrow"    ""           "\\sup"))
-     (?k    ("\\kappa"      ""           "\\ker"))
-     (?m    ("\\mu"         ""           "\\lim"))
-     (?c    (""             "\\circ"     "\\cos"))
-     (?d    ("\\delta"      "\\partial"  "\\dim"))
-     (?D    ("\\Delta"      "\\nabla"    "\\deg"))
-     ;; no idea why \Phi isnt on 'F' in first place, \phi is on 'f'.
-     (?F    ("\\Phi"))
-     ;; now just convenience
-     (?.    ("\\cdot " "\\dots "))
-     (?:    ("\\vdots " "\\ddots "))
-     (?*    ("\\cdot " "\\times " "\\star ")))
-
-   cdlatex-math-modify-alist
-   '( ;; adding modifiers
-     (?B    "\\mathbb"        nil          t    nil  nil)
-     (?a    "\\abs"           nil          t    nil  nil))))
-#+END_SRC
-
-**** Keybind hacks
-I wanted to replace =indent-for-tab-command= with =cdlatex-tab= in the cdlatex contexts which is usually everywhere in an org file outside of snippets and source blocks. You'll often run through your snippets but still have to navigate the math, this is where having =cdlatex-tab= always available becomes massively useful.
+Configures eglot to use [[https://github.com/blahgeek/emacs-lsp-booster][lsp-booster]].
 
 #+begin_src emacs-lisp
-(defun my/org-cdlatex-tab ()
-  (interactive)
-  (cond
-   ;; Inside a snippet → yasnippet takes priority
-   ((and (bound-and-true-p yas-minor-mode)
-         (yas-active-snippets))
-    (yas-next-field-or-maybe-expand))
-
-   ;; Inside a source block → use default tab behavior
-   ((org-in-src-block-p)
-    (indent-for-tab-command))
-
-   ;; Else → use cdlatex
-   (t
-    (cdlatex-tab))))
+(use-package! eglot-booster
+  :after eglot
+  :config
+  (setq eglot-booster-io-only t))
+  (eglot-booster-mode)
 #+end_src
 
-Add the binding to insert-state with cdlatex minor mode map for decent precedence. Note you can still use TAB's default behavior(indent-for-tab-command) by hitting "C-i" if you need to.
-#+BEGIN_SRC emacs-lisp
-(map! :map cdlatex-mode-map
-      :i "<tab>" #'my/org-cdlatex-tab)
-#+END_SRC
+** org
+#+call: confpkg()
 
-Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much because the completion popup usually opens automatically.
-#+BEGIN_SRC emacs-lisp
-(map! :map corfu-map
-      :i [tab] nil
-      :i [m-tab] #'completion-at-point)
-#+END_SRC
+*** Installation
+This declaration is from org-latex-preview
 
-*** org-pdftools
-This package comes in handy for custom org link types, but pdf links weren't working because the package makes depracated calls. A minor patch was made and here I've updated where the package is fetched from to my fork.
 #+begin_src emacs-lisp :tangle "packages.el"
-;; (package! org-pdftools
-;;   :recipe (:host github
-;;            :repo "ekattsim/org-pdftools"
-;;            :branch "update-depracated-cl_calls"))
+(package! org :recipe
+  (:host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror" :fork
+         (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")
+         :files
+         (:defaults "etc")
+         :build t :pre-build
+         (with-temp-file "org-version.el"
+           (require 'lisp-mnt)
+           (let
+               ((version
+                 (with-temp-buffer
+                   (insert-file-contents "lisp/org.el")
+                   (lm-header "version")))
+                (git-version
+                 (string-trim
+                  (with-temp-buffer
+                    (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
+                    (buffer-string)))))
+             (insert
+              (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
+              (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
+              "(provide 'org-version)\n"))))
+  :pin nil)
 
-(package! org-pdftools
-  :recipe (:fork (:repo "ekattsim/org-pdftools"
-                  :branch "update-depracated-cl_calls")))
-
-(unpin! org-pdftools)
+(unpin! org)
 #+end_src
 
-*** Roam
-Installed and pre-configured as part of the =:lang org +roam2= doom module.
+*** Settings
 
-Make "~/org/zettelkasten" the org-roam directory. Make sure only roam nodes are present in this directory.
+Central directory for org relative paths to resolve from. This will also house both our project and zettelkasten directories.
+
+#+begin_src emacs-lisp
+(setq org-directory "~/org")
+#+end_src
+
+Keep the final empty line of a subtree from being folded.
+
+#+begin_src emacs-lisp
+(setq org-cycle-separator-lines 1)
+#+end_src
+
+*** Aesthetics
+#+call: confpkg(name="org-aesthetics", after="org")
+
+**** Fonts
+Set Roboto Mono as header font and resize headings.
 #+BEGIN_SRC emacs-lisp
-(setq org-roam-directory "~/org/zettelkasten")
+;; Resize Org headings
+(dolist (face '((org-level-1 . 1.35)
+                (org-level-2 . 1.3)
+                (org-level-3 . 1.2)
+                (org-level-4 . 1.1)
+                (org-level-5 . 1.1)
+                (org-level-6 . 1.1)
+                (org-level-7 . 1.1)
+                (org-level-8 . 1.1)))
+  (set-face-attribute (car face) nil :family "Roboto Mono" :weight 'bold :height (cdr face)))
+
+;; Make the document title a bit bigger
+(set-face-attribute 'org-document-title nil :family "Roboto Mono" :weight 'bold :height 1.8)
 #+END_SRC
 
-** Snippets
+**** Decluttering
+Don't be a litterbug!
+#+BEGIN_SRC emacs-lisp
+(setq org-adapt-indentation t
+      org-hide-leading-stars t
+      org-hide-emphasis-markers t)  ;; hide markers(bold, italics, etc)
+      ;; messes with cursor positions in cdlatex templates
+      ;; org-pretty-entities t) ;; allow LaTeX-like syntax to insert special symbols
+#+END_SRC
+
+**** Source Blocks
+#+BEGIN_SRC emacs-lisp
+(setq org-src-fontify-natively t
+      org-src-tab-acts-natively t
+      org-edit-src-content-indentation 0)
+#+END_SRC
+
+*** Latex Previews
+**** Load/Enable
+Configure org-latex-preview to be load after org and enable auto-mode which reveals source text under the fragment being pointed to.
+#+BEGIN_SRC emacs-lisp
+(use-package! org-latex-preview
+:after org
+:hook (org-mode-hook . org-latex-preview-auto-mode)
+#+END_SRC
+
+**** Appearance Settings
+Basic appearance settings.
+#+BEGIN_SRC emacs-lisp
+:config
+;; enable latex-previews startup option
+(setq org-startup-with-latex-preview t)
+
+;; Increase preview width
+(plist-put org-latex-preview-appearance-options
+:page-width 1.0)
+(plist-put org-latex-preview-appearance-options
+:zoom 1.2)
+
+;; enable consistent equation numbering
+(setq org-latex-preview-numbered t)
+#+END_SRC
+
+**** Latency and Performance
+#+BEGIN_SRC emacs-lisp
+;; real time previews of latex fagments as you type
+(setq org-latex-preview-live t)
+(setq org-latex-preview-live-debounce 0.25)  ;; reducing delay before preview
+
+;; png is faster than svg
+(setq org-latex-preview-process-default 'dvipng)
+)
+#+END_SRC
+
+*** Links
++Try to open arbitrary files in emacs+. Not needed anymore since org-link type =file+emacs= exists.
+#+begin_src emacs-lisp
+;; (add-to-list 'org-file-apps '(t . emacs))
+#+end_src
+
+Open web links in nyxt. I cannot set it to default on macOS because I haven't built the required .app package.
+#+begin_src emacs-lisp
+;; (setcdr (assoc "\\.x?html?\\'" org-file-apps) "")
+#+end_src
+
+** latex
+#+call: confpkg()
+
+I have enabled the =(latex +cdlatex)= doom module and will be configuring that module and auctex here.
+
+*** Settings
+
+Change latex-view to be in emacs(pdf-viewer)
+
+#+begin_src emacs-lisp
+(setq +latex-viewers '(pdf-tools))
+(setq TeX-view-program-selection '((output-pdf "PDF Tools") (output-dvi "open") (output-html "open") (output-pdf "preview-pane")))
+#+end_src
+
+Make double quotes active again
+#+begin_src emacs-lisp
+(map! :map TeX-mode-map
+      "\"" #'self-insert-command)
+#+end_src
+
+** vhdl
+#+call: confpkg()
+
+*** settings
+
+#+begin_src emacs-lisp
+(add-hook 'vhdl-mode-hook
+          (lambda ()
+            (setq indent-tabs-mode t)
+            (setq tab-width 4)
+            (setq vhdl-basic-offset 4)))
+#+end_src
+
+* tools & applications
+#+call: confpkg()
+
+** snippets
 #+call: confpkg()
 
 *** smartparens
-I just want to disable a couple default pairs in latex math mode. This is because idk yet.
+
+I just want to disable a couple default pairs in latex math mode.
 #+begin_src emacs-lisp
 (sp-pair "(" ")" :unless '(sp-in-math-p))
 (sp-pair "[" nil :unless '(sp-in-math-p))
@@ -1600,6 +1663,7 @@ Close the use-package paren.
 #+end_src
 
 Unbind =org-cdlatex-underscore-caret=
+
 #+begin_src emacs-lisp
 (map! :map org-cdlatex-mode-map
       "^" #'org-self-insert-command
@@ -1608,6 +1672,7 @@ Unbind =org-cdlatex-underscore-caret=
 #+end_src
 
 This function adds a final '$0' tabstop to =org-cdlatex-math-modify= expansions.
+
 #+begin_src emacs-lisp
 (defun my/org-cdlatex-math-modify-snippet ()
   (interactive)
@@ -1627,169 +1692,206 @@ This function adds a final '$0' tabstop to =org-cdlatex-math-modify= expansions.
       (yas-expand-snippet (concat text "$0")))))
 #+end_src
 
-* Language configuration
-** Org
-#+call: confpkg()
+** org extensions
+#+call: confpkg("org-extensions")
 
-*** Installation
-This declaration is from org-latex-preview
+*** Org-Superstar
 
 #+begin_src emacs-lisp :tangle "packages.el"
-(package! org :recipe
-  (:host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror" :fork
-         (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")
-         :files
-         (:defaults "etc")
-         :build t :pre-build
-         (with-temp-file "org-version.el"
-           (require 'lisp-mnt)
-           (let
-               ((version
-                 (with-temp-buffer
-                   (insert-file-contents "lisp/org.el")
-                   (lm-header "version")))
-                (git-version
-                 (string-trim
-                  (with-temp-buffer
-                    (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
-                    (buffer-string)))))
-             (insert
-              (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
-              (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
-              "(provide 'org-version)\n"))))
-  :pin nil)
-
-(unpin! org)
+(package! org-superstar)
 #+end_src
 
-*** Settings
-
-Central directory for org relative paths to resolve from. This will also house both our project and zettelkasten directories.
-#+begin_src emacs-lisp
-(setq org-directory "~/org")
-#+end_src
-
-*** Aesthetics
-#+call: confpkg(name="org-aesthetics", after="org")
-
-**** Fonts
-Set Roboto Mono as header font and resize headings.
 #+BEGIN_SRC emacs-lisp
-;; Resize Org headings
-(dolist (face '((org-level-1 . 1.35)
-                (org-level-2 . 1.3)
-                (org-level-3 . 1.2)
-                (org-level-4 . 1.1)
-                (org-level-5 . 1.1)
-                (org-level-6 . 1.1)
-                (org-level-7 . 1.1)
-                (org-level-8 . 1.1)))
-  (set-face-attribute (car face) nil :family "Roboto Mono" :weight 'bold :height (cdr face)))
+(use-package! org-superstar
+  :hook (org-mode-hook . (lambda () (org-superstar-mode 1)))
+  :after org
+  :config
+  (setq org-superstar-leading-bullet " "
+        org-superstar-headline-bullets-list '("●" "○" "◆" "◇" "•" "⚬")
+        org-superstar-item-bullet-alist '((42 . "⚬") (43 . "⚬") (45 . "⚬"))
+        org-superstar-prettify-item-bullets t)
+  #+END_SRC
 
-;; Make the document title a bit bigger
-(set-face-attribute 'org-document-title nil :family "Roboto Mono" :weight 'bold :height 1.8)
+Plain-list bullets are invisible because they have the org-indent face. We can make them visible by having them inherit the default face.
+
+#+BEGIN_SRC emacs-lisp
+  (set-face-attribute 'org-list-dt nil :inherit 'default))
 #+END_SRC
 
-**** Decluttering
-Don't be a litterbug!
+*** evil-tex
+
+Provides useful text objects, movements, etc for LaTeX editing.
 #+BEGIN_SRC emacs-lisp
-(setq org-adapt-indentation t
-      org-hide-leading-stars t
-      org-hide-emphasis-markers t)  ;; hide markers(bold, italics, etc)
-      ;; messes with cursor positions in cdlatex templates
-      ;; org-pretty-entities t) ;; allow LaTeX-like syntax to insert special symbols
+(use-package! evil-tex
+:hook (org-mode-hook . evil-tex-mode))
 #+END_SRC
 
-**** Source Blocks
+*** org-cdlatex
+#+call: confpkg("cdlatex")
+
+Org-cdlatex is the foundation to editing latex in org-mode. It removes much of the hassle of defining common latex macros and templates. Doing this with a snippet engine would've been pretty boring, so now we can just focus on adding more complex snippets like the auto-expanding ones to our snippet engine of choice: =aas=.
+
+Change the symbol/modifier cycling key to ';'. Note for some reason these don't change the existing activating keymap bind; we do this later with =aas= though.
+
 #+BEGIN_SRC emacs-lisp
-(setq org-src-fontify-natively t
-      org-src-tab-acts-natively t
-      org-edit-src-content-indentation 0)
+(after! cdlatex
+  (setq cdlatex-math-symbol-prefix ?\;)
+  (setq cdlatex-math-modify-prefix ?\;)
+
+  (map! :map cdlatex-mode-map
+        "'" nil)
+  (map! :map cdlatex-mode-map
+        "`" nil)
 #+END_SRC
 
-*** Latex Previews
-**** Load/Enable
-Configure org-latex-preview to be load after org and enable auto-mode which reveals source text under the fragment being pointed to.
+Add custom environment snippets
+
 #+BEGIN_SRC emacs-lisp
-(use-package! org-latex-preview
-:after org
-:hook (org-mode-hook . org-latex-preview-auto-mode)
+  (setq cdlatex-env-alist
+        '(("bmatrix" "\\begin{bmatrix}\n?\n\\end{bmatrix}" nil)
+          ("equation*" "\\begin{equation*}\n?\n\\end{equation*}" nil)))
 #+END_SRC
 
-**** Appearance Settings
-Basic appearance settings.
+Modify available symbols and modifiers
+
 #+BEGIN_SRC emacs-lisp
-:config
-;; enable latex-previews startup option
-(setq org-startup-with-latex-preview t)
+   (setq cdlatex-math-symbol-alist
+   '( ;; adding missing functions to 3rd level symbols
+     (?_    ("\\downarrow"  ""           "\\inf"))
+     (?2    ("^2"           "\\sqrt{?}"     ""     ))
+     (?3    ("^3"           "\\sqrt[3]{?}"  ""     ))
+     (?^    ("\\uparrow"    ""           "\\sup"))
+     (?k    ("\\kappa"      ""           "\\ker"))
+     (?m    ("\\mu"         ""           "\\lim"))
+     (?c    (""             "\\circ"     "\\cos"))
+     (?d    ("\\delta"      "\\partial"  "\\dim"))
+     (?D    ("\\Delta"      "\\nabla"    "\\deg"))
+     ;; no idea why \Phi isnt on 'F' in first place, \phi is on 'f'.
+     (?F    ("\\Phi"))
+     ;; now just convenience
+     (?.    ("\\cdot " "\\dots "))
+     (?:    ("\\vdots " "\\ddots "))
+     (?*    ("\\cdot " "\\times " "\\star ")))
 
-;; Increase preview width
-(plist-put org-latex-preview-appearance-options
-:page-width 1.0)
-(plist-put org-latex-preview-appearance-options
-:zoom 1.2)
-
-;; enable consistent equation numbering
-(setq org-latex-preview-numbered t)
+   cdlatex-math-modify-alist
+   '( ;; adding modifiers
+     (?B    "\\mathbb"        nil          t    nil  nil)
+     (?a    "\\abs"           nil          t    nil  nil))))
 #+END_SRC
 
-**** Latency and Performance
-#+BEGIN_SRC emacs-lisp
-;; real time previews of latex fagments as you type
-(setq org-latex-preview-live t)
-(setq org-latex-preview-live-debounce 0.25)  ;; reducing delay before preview
+**** Keybind hacks
 
-;; png is faster than svg
-(setq org-latex-preview-process-default 'dvipng)
-)
+I wanted to replace =indent-for-tab-command= with =cdlatex-tab= in the cdlatex contexts which is usually everywhere in an org file outside of snippets and source blocks. You'll often run through your snippets but still have to navigate the math, this is where having =cdlatex-tab= always available becomes massively useful.
+
+#+begin_src emacs-lisp
+(defun my/org-cdlatex-tab ()
+  (interactive)
+  (cond
+   ;; Inside a snippet → yasnippet takes priority
+   ((and (bound-and-true-p yas-minor-mode)
+         (yas-active-snippets))
+    (yas-next-field-or-maybe-expand))
+
+   ;; Inside a source block → use default tab behavior
+   ((org-in-src-block-p)
+    (indent-for-tab-command))
+
+   ;; Else → use cdlatex
+   (t
+    (cdlatex-tab))))
+#+end_src
+
+Add the binding to insert-state with cdlatex minor mode map for decent precedence. Note you can still use TAB's default behavior(indent-for-tab-command) by hitting "C-i" if you need to.
+
+#+BEGIN_SRC emacs-lisp
+(map! :map cdlatex-mode-map
+      :i "<tab>" #'my/org-cdlatex-tab)
 #+END_SRC
 
-*** Links
-+Try to open arbitrary files in emacs+. Not needed anymore since org-link type =file+emacs= exists.
-#+begin_src emacs-lisp
-;; (add-to-list 'org-file-apps '(t . emacs))
+Rebind conflicting corfu's =[tab]= binding to =[M-tab]=. I don't use it much because the completion popup usually opens automatically.
+
+#+BEGIN_SRC emacs-lisp
+(map! :map corfu-map
+      :i [tab] nil
+      :i [m-tab] #'completion-at-point)
+#+END_SRC
+
+*** org-pdftools
+
+This package comes in handy for custom org link types, but pdf links weren't working because the package makes depracated calls. A minor patch was made and here I've updated where the package is fetched from to my fork.
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! org-pdftools
+  :recipe (:fork (:repo "ekattsim/org-pdftools"
+                  :branch "update-depracated-cl_calls")))
+
+(unpin! org-pdftools)
 #+end_src
 
-Open web links in nyxt. I cannot set it to default on macOS because I haven't built the required .app package.
-#+begin_src emacs-lisp
-;; (setcdr (assoc "\\.x?html?\\'" org-file-apps) "")
-#+end_src
+*** Roam
 
-** LaTeX
+Installed and pre-configured as part of the =:lang org +roam2= doom module.
 
-I have enabled the =(latex +cdlatex)= doom module and will be configuring that module and auctex here.
+Make "~/org/zettelkasten" the org-roam directory. Make sure only roam nodes are present in this directory.
+#+BEGIN_SRC emacs-lisp
+(setq org-roam-directory "~/org/zettelkasten")
+#+END_SRC
 
-*** Settings
-
-Change latex-view to be in emacs(pdf-viewer)
+** rss feeds
 
 #+begin_src emacs-lisp
-(setq +latex-viewers '(pdf-tools))
-(setq TeX-view-program-selection '((output-pdf "PDF Tools") (output-dvi "open") (output-html "open") (output-pdf "preview-pane")))
+(use-package! elfeed
+  :config
+  (setq elfeed-feeds
+        '("https://xkcd.com/rss.xml"
+          "https://hnrss.org/frontpage"
+          "https://old.reddit.com/r/slatestarcodex.rss"
+          "https://old.reddit.com/r/hardware.rss")))
 #+end_src
 
-Make double quotes active again
+** tramp
+#+call: confpkg(after="tramp")
+
+Some optimizations from [[https://www.gnu.org/software/emacs/manual/html_node/tramp/Frequently-Asked-Questions.html][tramp FAQ]]
+
 #+begin_src emacs-lisp
-(map! :map TeX-mode-map
-      "\"" #'self-insert-command)
+(setq remote-file-name-inhibit-cache nil)
+(setq vc-ignore-dir-regexp
+      (format "%s\\|%s"
+                    vc-ignore-dir-regexp
+                    tramp-file-name-regexp))
+(setq remote-file-name-inhibit-locks t)
+
+(setq tramp-verbose 1)
 #+end_src
 
-** vhdl
+** geiser
 
-*** settings
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! geiser)
+#+end_src
 
 #+begin_src emacs-lisp
-(add-hook 'vhdl-mode-hook
-          (lambda ()
-            (setq indent-tabs-mode t)
-            (setq tab-width 4)
-            (setq vhdl-basic-offset 4)))
+(use-package! geiser
+  :config
+  (setq geiser-mit-binary "/usr/local/bin/scheme")
+  (setq geiser-active-implementations '(mit)))
 #+end_src
 
-* Applications
+Here's the [[https://www.nongnu.org/geiser/Cheat-sheet.html#Cheat-sheet][cheatsheet]].
+
+* personal workflow
 #+call: confpkg()
 
-** Agenda
+** dashboard
+
+Doom has a minimal dashboard that helps with startup times. Let's add a clean custom banner as well.
+
+#+begin_src emacs-lisp
+(setq fancy-splash-image "~/.config/doom/misc/splash-images/emacs-e-template.svg")
+#+end_src
+
+** agenda
 #+call: confpkg(after="org-agenda")
 
 Take a look at [[id:9edd2c6e-2950-4689-b2e8-3c283297cd71][A new way of organization]]. In this section we'll mostly focus on the projects.
@@ -1975,67 +2077,12 @@ We could have a function that on a DONE hook checks if the DONE was a dependency
   (my/org-task-done-hook))
 #+end_src
 
-** RSS feeds
-#+begin_src emacs-lisp
-(use-package! elfeed
-  :config
-  (setq elfeed-feeds
-        '("https://xkcd.com/rss.xml"
-          "https://hnrss.org/frontpage"
-          "https://old.reddit.com/r/slatestarcodex.rss"
-          "https://old.reddit.com/r/hardware.rss")))
-#+end_src
+** project management
 
-** eglot
+** workspace management
 
-*** eglot-booster
-:PROPERTIES:
-:ID:       7af01b58-d326-464e-94a8-bcaf1f3b3fe5
-:END:
-
-#+begin_src emacs-lisp :tangle "packages.el"
-(package! eglot-booster
-  :recipe (:host github
-           :repo "jdtsmith/eglot-booster"))
-#+end_src
-
-Configures eglot to use [[https://github.com/blahgeek/emacs-lsp-booster][lsp-booster]].
-
-#+begin_src emacs-lisp
-(use-package! eglot-booster
-  :after eglot
-  :config
-  (setq eglot-booster-io-only t))
-  (eglot-booster-mode)
-#+end_src
-
-** tramp
-#+call: confpkg(after="tramp")
-
-Some optimizations from [[https://www.gnu.org/software/emacs/manual/html_node/tramp/Frequently-Asked-Questions.html][tramp FAQ]]
-
-#+begin_src emacs-lisp
-(setq remote-file-name-inhibit-cache nil)
-(setq vc-ignore-dir-regexp
-      (format "%s\\|%s"
-                    vc-ignore-dir-regexp
-                    tramp-file-name-regexp))
-(setq remote-file-name-inhibit-locks t)
-
-(setq tramp-verbose 1)
-#+end_src
-
-** Geiser
-
-#+begin_src emacs-lisp :tangle "packages.el"
-(package! geiser)
-#+end_src
-
-#+begin_src emacs-lisp
-(use-package! geiser
-  :config
-  (setq geiser-mit-binary "/usr/local/bin/scheme")
-  (setq geiser-active-implementations '(mit)))
-#+end_src
-
-Here's a [[https://www.nongnu.org/geiser/Cheat-sheet.html#Cheat-sheet][cheatsheet.]]
+Bind workspace navigation to be more like t-smart
+#+BEGIN_SRC emacs-lisp
+(map! :ni "C-t" #'+workspace/switch-to
+      :ni [C-tab] #'+workspace/other)
+#+END_SRC
