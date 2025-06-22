@@ -2,7 +2,7 @@
 :header-args:emacs-lisp: :results none :exports code
 :END:
 
-#+title: Config
+#+title: config
 
 * introduction
 
@@ -1892,17 +1892,21 @@ Doom has a minimal dashboard that helps with startup times. Let's add a clean cu
 #+end_src
 
 ** agenda
-#+call: confpkg(after="org-agenda")
+#+call: confpkg(after="org-agenda", pre="define-project-dir")
 
 Take a look at [[id:9edd2c6e-2950-4689-b2e8-3c283297cd71][A new way of organization]]. In this section we'll mostly focus on the projects.
 
 *** Setup
-Create a variable for the project directory. The zettelkasten directory is created as =org-roam-directory= in [[*Roam]].
+
+Create a variable for the project directory.
+
+#+name: define-project-dir
 #+begin_src emacs-lisp
 (defvar org-project-directory (expand-file-name "projects" org-directory))
 #+end_src
 
 Hopefully these will be the only locations with TODO items.
+
  #+begin_src emacs-lisp
 (setq org-agenda-files (list +org-capture-todo-file
                              org-project-directory
@@ -1911,13 +1915,16 @@ Hopefully these will be the only locations with TODO items.
 #+end_src
 
 Make sure that all org headings with backlinks also have an ID property. This is useful because heading titles can change but ids don't usually.
+
 #+begin_src emacs-lisp
 (setq org-id-link-to-org-use-id t)
 #+end_src
 
 *** Utilities
+#+call: confpkg()
 
 I need a function that can refile org-heading at point to a new a file. I'll be using this on my existing todo headings to link them to their project files.
+
 #+begin_src emacs-lisp
 (defun my/org-heading-to-project-file ()
   "Cut the current Org heading and its subtree, and paste it into a new project file.
@@ -1958,6 +1965,7 @@ Prompts for overwrite if the target file already exists."
 #+end_src
 
 Find a project file under =org-project-directory= and bind it.
+
 #+begin_src emacs-lisp
 (defun my/find-in-projects ()
   (interactive)
@@ -1968,7 +1976,9 @@ Find a project file under =org-project-directory= and bind it.
 #+end_src
 
 *** Archiving
+
 Set archive location, most likely only used on project files.
+
 #+begin_src emacs-lisp
 (setq org-archive-location (concat org-project-directory "/archives/%s_archive::"))
 #+end_src
@@ -2034,6 +2044,7 @@ Now let's make some changes to the default templates like todo template's descri
 #+end_src
 
 *** add dependency support for WAIT items
+
 Some WAIT items are blocked because they are waiting for other tasks to be done first. In practice this means that you have to manually keep track of these dependencies like figuring out which WAIT item to put into the NEXT pile after completing a dependency TODO item.
 
 We can automate this by allowing WAIT items to store a dependency list of items. When all of the items in this list are DONE, the WAIT item automatically becomes a NEXT item making it available for us to work on it.
