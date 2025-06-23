@@ -1837,6 +1837,30 @@ Make "~/org/zettelkasten" the org-roam directory. Make sure only roam nodes are 
 (setq org-roam-directory "~/org/zettelkasten")
 #+END_SRC
 
+*** edraw
+
+Brings the possiblity of hand-drawn notes into org mode. Hopefully I'll stop consuming so many notebooks with this.
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! edraw
+  :recipe (:host github
+           :repo "misohena/el-easydraw"))
+#+end_src
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  (require 'edraw-org)
+  (edraw-org-setup-exporter))
+#+end_src
+
+When exporting asynchronously with =org-export-in-background=, the instantiated emacs process only loads ox and not org. So let's load it after ox.el as well.
+
+#+begin_src emacs-lisp
+(with-eval-after-load "ox"
+  (require 'edraw-org)
+  (edraw-org-setup-exporter))
+#+end_src
+
 ** rss feeds
 
 #+begin_src emacs-lisp
