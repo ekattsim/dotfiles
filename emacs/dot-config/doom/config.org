@@ -1165,7 +1165,7 @@ Load theme, taking current system appearance into consideration.
             (load-theme 'tango t))
     ('dark (setq doom-theme 'doom-lantern)
            (load-theme 'doom-lantern t)))
-  (load-file "~/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
+  (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
 
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 #+END_SRC
@@ -1346,14 +1346,15 @@ Configures eglot to use [[https://github.com/blahgeek/emacs-lsp-booster][lsp-boo
 (use-package! eglot-booster
   :after eglot
   :config
-  (setq eglot-booster-io-only t))
-  (eglot-booster-mode)
+  (setq eglot-booster-io-only t)
+  (eglot-booster-mode))
 #+end_src
 
 ** org
-#+call: confpkg()
+#+call: confpkg(after="org")
 
 *** Installation
+
 This declaration is from org-latex-preview
 
 #+begin_src emacs-lisp :tangle "packages.el"
@@ -1402,7 +1403,9 @@ Keep the final empty line of a subtree from being folded.
 #+call: confpkg(name="org-aesthetics", after="org")
 
 **** Fonts
+
 Set Roboto Mono as header font and resize headings.
+
 #+BEGIN_SRC emacs-lisp
 ;; Resize Org headings
 (dolist (face '((org-level-1 . 1.35)
@@ -1420,7 +1423,9 @@ Set Roboto Mono as header font and resize headings.
 #+END_SRC
 
 **** Decluttering
+
 Don't be a litterbug!
+
 #+BEGIN_SRC emacs-lisp
 (setq org-adapt-indentation t
       org-hide-leading-stars t
@@ -1430,6 +1435,7 @@ Don't be a litterbug!
 #+END_SRC
 
 **** Source Blocks
+
 #+BEGIN_SRC emacs-lisp
 (setq org-src-fontify-natively t
       org-src-tab-acts-natively t
@@ -1437,8 +1443,11 @@ Don't be a litterbug!
 #+END_SRC
 
 *** Latex Previews
+
 **** Load/Enable
+
 Configure org-latex-preview to be load after org and enable auto-mode which reveals source text under the fragment being pointed to.
+
 #+BEGIN_SRC emacs-lisp
 (use-package! org-latex-preview
 :after org
@@ -1446,7 +1455,9 @@ Configure org-latex-preview to be load after org and enable auto-mode which reve
 #+END_SRC
 
 **** Appearance Settings
+
 Basic appearance settings.
+
 #+BEGIN_SRC emacs-lisp
 :config
 ;; enable latex-previews startup option
@@ -1463,6 +1474,7 @@ Basic appearance settings.
 #+END_SRC
 
 **** Latency and Performance
+
 #+BEGIN_SRC emacs-lisp
 ;; real time previews of latex fagments as you type
 (setq org-latex-preview-live t)
@@ -1845,7 +1857,7 @@ Installed and pre-configured as part of the =:lang org +roam2= doom module.
 
 Make "~/org/zettelkasten" the org-roam directory. Make sure only roam nodes are present in this directory.
 #+BEGIN_SRC emacs-lisp
-(setq org-roam-directory "~/org/zettelkasten")
+(setq org-roam-directory "/Users/abhijeetsurakanti/org/zettelkasten")
 #+END_SRC
 
 *** edraw
@@ -2122,8 +2134,6 @@ We could have a function that on a DONE hook checks if the DONE was a dependency
   :after '(org-todo org-agenda-todo)
   (my/org-task-done-hook))
 #+end_src
-
-** project management
 
 ** workspace management
 
