@@ -1484,6 +1484,17 @@ Open web links in nyxt. I cannot set it to default on macOS because I haven't bu
 ;; (setcdr (assoc "\\.x?html?\\'" org-file-apps) "")
 #+end_src
 
+*** exports
+:PROPERTIES:
+:ID:       e038c0dd-6188-43cd-af61-488024108f0c
+:END:
+
+Load the s5 backend from org-contrib
+
+#+begin_src emacs-lisp
+(add-to-list 'org-export-backends 's5)
+#+end_src
+
 ** latex
 #+call: confpkg()
 
@@ -2121,3 +2132,31 @@ Bind workspace navigation to be more like t-smart
 (map! :ni "C-t" #'+workspace/switch-to
       :ni [C-tab] #'+workspace/other)
 #+END_SRC
+
+** blog
+
+*** exporting (ox-tufte)
+:PROPERTIES:
+:ID:       4ae88203-9360-41d5-a54c-0a3059125235
+:END:
+
+The first thing to do is getting org to export some decent looking webpages. Org's default stylesheet spits out something like this [[https://motherfuckingwebsite.com/][motherfucking website]]. I was actually quite excited about this until I found a [[http://bettermotherfuckingwebsite.com/][better motherfucking website]].
+
+And when we take this to its logical extreme, we discover the pinnacle of web article styling: [[https://edwardtufte.github.io/tufte-css/][Tufte CSS]]. Contrary to the name, Tufte CSS also makes many demands of the HTML structure which means we'll have to modify/enhance the default ox-html backend. [[https://github.com/ox-tufte/ox-tufte?tab=readme-ov-file][ox-tufte]] does exactly this.
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! ox-tufte)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! ox-tufte)
+#+end_src
+
+I can't for the life of me figure out how to set the =html_head= option for ox-html from emacs-lisp. I'll just set the keyword in the SETUPFILE.org which I'll then load with the =SETUPFILE= in-buffer setting.
+
+#+begin_src org :tangle "misc/SETUPFILE.org"
+#+HTML_HEAD: <link rel="stylesheet" href="/Users/abhijeetsurakanti/dotfiles/emacs/dot-config/doom/misc/tufte.css">
+#+HTML_HEAD: <link rel="stylesheet" href="/Users/abhijeetsurakanti/dotfiles/emacs/dot-config/emacs/.local/straight/repos/ox-tufte/src/ox-tufte.css">
+#+end_src
+
+*** publishing (org-publish)
