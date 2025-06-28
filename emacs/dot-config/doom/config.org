@@ -1351,7 +1351,7 @@ Configures eglot to use [[https://github.com/blahgeek/emacs-lsp-booster][lsp-boo
 #+end_src
 
 ** org
-#+call: confpkg(after="org")
+#+call: confpkg(after="org", pre="set-org-dir")
 
 *** Installation
 
@@ -1389,6 +1389,7 @@ This declaration is from org-latex-preview
 
 Central directory for org relative paths to resolve from. This will also house both our project and zettelkasten directories.
 
+#+name: set-org-dir
 #+begin_src emacs-lisp
 (setq org-directory "~/org")
 #+end_src
@@ -1952,6 +1953,12 @@ Create a variable for the project directory.
 (defvar org-project-directory (expand-file-name "projects" org-directory))
 #+end_src
 
+Let's change the location of the TODOs inbox to be in the org-directory.
+
+#+begin_src emacs-lisp
+(setq +org-capture-todo-file (expand-file-name "inbox.org" org-directory))
+#+end_src
+
 Hopefully these will be the only locations with TODO items.
 
  #+begin_src emacs-lisp
@@ -2076,11 +2083,6 @@ In this workflow all TODOs have to be scheduled, so let's add an advice over the
 #+call: confpkg(name="org-capture", after=["org"])
 
 The workflow in my mind is that you would capture random TODOs to an inbox which you could then refile later with org-agenda. The capture mechanism is already implemented by [[file:~/dotfiles/emacs/dot-config/emacs/modules/lang/org/config.el::'(("t" "Personal todo" entry][doom's org module]], but there are a few changes I want to make.
-
-Let's change the location of the TODOs inbox to be in the org-directory.
-#+begin_src emacs-lisp
-(setq +org-capture-todo-file (expand-file-name "inbox.org" org-directory))
-#+end_src
 
 Now let's make some changes to the default templates like todo template's description and removing the notes template since that is handled by roam.
 #+begin_src emacs-lisp
