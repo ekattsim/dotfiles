@@ -1240,8 +1240,8 @@ I have no clue why this is enabled by default
 I think flipping this makes a lot sense and they should merge this to vim bindings.
 
 #+BEGIN_SRC emacs-lisp
-(map!  :m "H" #'evil-beginning-of-line
-       :m "L" #'evil-end-of-line
+(map!  :m "H" #'evil-beginning-of-visual-line
+       :m "L" #'evil-end-of-visual-line
        :m "0" #'evil-window-top
        :m "$" #'evil-window-bottom)
 #+END_SRC
