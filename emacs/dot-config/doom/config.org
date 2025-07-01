@@ -3,6 +3,7 @@
 :END:
 
 #+title: config
+#+SETUPFILE: /Users/abhijeetsurakanti/dotfiles/emacs/dot-config/doom/misc/SETUPFILE.org
 
 * introduction
 
@@ -2167,7 +2168,9 @@ And when we take this to its logical extreme, we discover the pinnacle of web ar
 #+end_src
 
 #+begin_src emacs-lisp
-(use-package! ox-tufte)
+(use-package! ox-tufte
+  :config
+  (setq org-html-htmlize-output-type 'css)
 #+end_src
 
 I can't for the life of me figure out how to set the =html_head= option for ox-html from emacs-lisp. I'll just set the keyword in the SETUPFILE.org which I'll then load with the =SETUPFILE= in-buffer setting.
