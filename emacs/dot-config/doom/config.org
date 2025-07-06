@@ -1039,7 +1039,7 @@ sh                ; she sells {ba,z,fi}sh shells on the c xor
 ;;solidity          ; do you need a blockchain? no.
 ;;swift             ; who asked for emoji variables?
 ;;terra             ; earth and moon in alignment for performance.
-;;web               ; the tubes
+(web +lsp +tree-sitter)               ; the tubes
 ;;yaml              ; json, but readable
 ;;zig               ; c, but simpler
 #+end_src
@@ -1541,6 +1541,15 @@ Make double quotes active again
             (setq vhdl-basic-offset 4)))
 #+end_src
 
+** html
+#+call: confpkg()
+
+I have the =:editor file-templates= doom module enabled which configures file-templates (templates that expand automatically when entering empty files). I'd like to disable this specific [[file+emacs:~/dotfiles/emacs/dot-config/emacs/modules/editor/file-templates/templates/web-mode/__.html::<head>][file-template]].
+
+#+begin_src emacs-lisp
+(set-file-template! "\\.html$" :ignore t)
+#+end_src
+
 * tools & applications
 #+call: confpkg()
 
@@ -1550,6 +1559,7 @@ Make double quotes active again
 *** smartparens
 
 I just want to disable a couple default pairs in latex math mode.
+
 #+begin_src emacs-lisp
 (sp-pair "(" ")" :unless '(sp-in-math-p))
 (sp-pair "[" nil :unless '(sp-in-math-p))
@@ -2169,7 +2179,7 @@ And when we take this to its logical extreme, we discover the pinnacle of web ar
 #+begin_src emacs-lisp
 (use-package! ox-tufte
   :config
-  (setq org-html-htmlize-output-type 'css)
+  (setq org-html-htmlize-output-type 'css))
 #+end_src
 
 I can't for the life of me figure out how to set the =html_head= option for ox-html from emacs-lisp. I'll just set the keyword in the SETUPFILE.org which I'll then load with the =SETUPFILE= in-buffer setting.
