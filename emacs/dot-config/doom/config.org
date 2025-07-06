@@ -1347,8 +1347,7 @@ Configures eglot to use [[https://github.com/blahgeek/emacs-lsp-booster][lsp-boo
 (use-package! eglot-booster
   :after eglot
   :config
-  (setq eglot-booster-io-only t)
-  (eglot-booster-mode))
+  (setq eglot-booster-io-only t)) ;; emacs v30 introduced a faster JSON parser
 #+end_src
 
 ** org
