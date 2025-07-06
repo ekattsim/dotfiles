@@ -1162,8 +1162,8 @@ Load theme, taking current system appearance into consideration.
 (defun my/apply-theme (appearance)
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
-    ('light (setq doom-theme 'tango)
-            (load-theme 'tango t))
+    ('light (setq doom-theme 'doom-homage-white)
+            (load-theme 'doom-homage-white t))
     ('dark (setq doom-theme 'doom-lantern)
            (load-theme 'doom-lantern t)))
   (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
