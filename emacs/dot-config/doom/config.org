@@ -2189,4 +2189,13 @@ I can't for the life of me figure out how to set the =html_head= option for ox-h
 #+HTML_HEAD: <link rel="stylesheet" href="/Users/abhijeetsurakanti/dotfiles/emacs/dot-config/emacs/.local/straight/repos/ox-tufte/src/ox-tufte.css">
 #+end_src
 
+**** export settings
+#+call: confpkg(after="org")
+
+Disable automatic insertion of (sub/super)scripts.
+
+#+begin_src emacs-lisp
+(setq org-export-with-sub-superscripts nil)
+#+end_src
+
 *** publishing (org-publish)
