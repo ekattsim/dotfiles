@@ -2126,7 +2126,7 @@ We could have a function that on a DONE hook checks if the DONE was a dependency
   (org-map-entries
    (lambda ()
      (let ((deps-str (org-entry-get (point) "Dependencies")))
-       (when (and (deps-str) (not (string-empty-p deps-str)))
+       (when (and deps-str (not (string-empty-p deps-str)))
          (let ((new-deps (remove-org-id-link-from-deps deps-str done-id)))
            (org-set-property "Dependencies" new-deps)
            (when (string-empty-p new-deps)
