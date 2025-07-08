@@ -1541,13 +1541,31 @@ Make double quotes active again
             (setq vhdl-basic-offset 4)))
 #+end_src
 
-** html
+** web
 #+call: confpkg()
+
+*** templates
 
 I have the =:editor file-templates= doom module enabled which configures file-templates (templates that expand automatically when entering empty files). I'd like to disable this specific [[file+emacs:~/dotfiles/emacs/dot-config/emacs/modules/editor/file-templates/templates/web-mode/__.html::<head>][file-template]].
 
 #+begin_src emacs-lisp
 (set-file-template! "\\.html$" :ignore t)
+#+end_src
+
+*** auto-reload
+
+I want to work on my blog using only emacs as opposed to any npm dev packages. =impatient.el= is an emacs solution to auto-reloading page based on buffer changes. Obviously we still need a web-server which serves our html on localhost, that's where =simple-httpd= comes in.
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! simple-httpd)
+(package! impatient-mode)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! simple-httpd
+  :bind (:map doom-leader-open-map
+         ("w" . httpd-serve-directory)
+         ("W" . httpd-stop)))
 #+end_src
 
 * tools & applications
