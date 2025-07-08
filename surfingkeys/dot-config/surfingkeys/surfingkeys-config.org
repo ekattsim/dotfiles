@@ -1,6 +1,8 @@
 #+title: Surfingkeys Config
 
-* Test tangling js to txt
+For surfingkeys to load settings from a remote file, it needs to be a txt file. I already don't want to work with js, I'll be damned if I have to do it without from a txt file.
+
+But on the other hand I love working with emacs org-mode, so I'll do that instead. The following code block is [[https://orgmode.org/manual/Extracting-Source-Code.html][tangled]] into =surfingkeys-config.txt= in the same directory. I'll eventually organize this into a [[http://www.literateprogramming.com/][literate config]] as well and maintain both a copy of the txt file and the literate config org file.
 
 #+begin_src javascript :tangle "surfingkeys-config.txt"
 // an example to create a new mapping `ctrl-y`
@@ -37,7 +39,7 @@ settings.theme = `
 :root {
   /* Font */
   --font: 'Source Code Pro', Ubuntu, sans;
-  --font-size: 12;
+  --font-size: 15;
   --font-weight: bold;
 
   /* -------------- */
