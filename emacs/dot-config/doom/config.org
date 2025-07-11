@@ -1187,6 +1187,34 @@ Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respective
   ;; (set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.20))
 #+END_SRC
 
+*** Modeline
+
+Let's experiment with a more minimal modeline. I've been meaning to try out something from the [[https://github.com/rougier/nano-emacs?tab=readme-ov-file][nano-emacs]] collection so let's use their modeline package.
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! nano-modeline)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! nano-modeline
+  :hook ((prog-mode            . nano-modeline-prog-mode)
+         (text-mode            . nano-modeline-text-mode)
+         (org-mode             . nano-modeline-org-mode)
+         (pdf-view-mode        . nano-modeline-pdf-mode)
+         (mu4e-headers-mode    . nano-modeline-mu4e-headers-mode)
+         (mu4e-view-mode       . nano-modeline-mu4e-message-mode)
+         (elfeed-show-mode     . nano-modeline-elfeed-entry-mode)
+         (elfeed-search-mode   . nano-modeline-elfeed-search-mode)
+         (term-mode            . nano-modeline-term-mode)
+         (xwidget-webkit-mode  . nano-modeline-xwidget-mode)
+         (messages-buffer-mode . nano-modeline-message-mode)
+         (org-capture-mode     . nano-modeline-org-capture-mode)
+         (org-agenda-mode      . nano-modeline-org-agenda-mode))
+  :config
+  (setq nano-modeline-position #'nano-modeline-footer)
+  (nano-modeline-text-mode t))
+#+end_src
+
 ** OS Integration
 
 Unfortunately fish is not POSIX compliant.
