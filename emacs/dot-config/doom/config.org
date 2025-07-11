@@ -1585,6 +1585,27 @@ Enable =visual-line-mode= in help buffers
 #+begin_src emacs-lisp
 (add-hook! 'help-mode-hook #'visual-line-mode)
 #+end_src
+
+** scheme
+#+call: confpkg()
+
+*** geiser
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! geiser)
+(package! geiser-mit)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! geiser
+  :config
+  (setq geiser-mit-binary "/usr/local/bin/scheme")
+  (setq geiser-active-implementations '(mit)))
+#+end_src
+
+Here's the [[https://www.nongnu.org/geiser/Cheat-sheet.html#Cheat-sheet][cheatsheet]].
+
+
 * tools & applications
 #+call: confpkg()
 
@@ -1957,21 +1978,6 @@ Some optimizations from [[https://www.gnu.org/software/emacs/manual/html_node/tr
 
 (setq tramp-verbose 1)
 #+end_src
-
-** geiser
-
-#+begin_src emacs-lisp :tangle "packages.el"
-(package! geiser)
-#+end_src
-
-#+begin_src emacs-lisp
-(use-package! geiser
-  :config
-  (setq geiser-mit-binary "/usr/local/bin/scheme")
-  (setq geiser-active-implementations '(mit)))
-#+end_src
-
-Here's the [[https://www.nongnu.org/geiser/Cheat-sheet.html#Cheat-sheet][cheatsheet]].
 
 * personal workflow
 #+call: confpkg()
