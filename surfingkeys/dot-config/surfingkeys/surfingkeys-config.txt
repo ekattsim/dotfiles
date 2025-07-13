@@ -19,7 +19,7 @@ api.map("K", "D");
 api.unmap("<ctrl-i>");
 
 // home-row only hints
-api.Hints.setCharacters('asdfghjkleiown')
+api.Hints.setCharacters('jdksla;eiown')
 
 // Monokai
 api.Hints.style('border: solid 2px #2D2E2E; color:#F92660; background: initial; background-color: #272822;');
