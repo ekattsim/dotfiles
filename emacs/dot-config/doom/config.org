@@ -1410,6 +1410,27 @@ Configures eglot to use [[https://github.com/blahgeek/emacs-lsp-booster][lsp-boo
   (setq eglot-booster-io-only t)) ;; emacs v30 introduced a faster JSON parser
 #+end_src
 
+*** jinx
+:PROPERTIES:
+:ID:       09cb9ebc-6e05-4ae6-8162-588f3146d051
+:END:
+
+Fast [[https://rrthomas.github.io/enchant/][enchant-based]] spell checker.
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! jinx)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! jinx
+  :commands jinx-mode
+  :bind (("M-$" . jinx-correct)
+         ("C-M-$" . jinx-languages)))
+  :init
+  (dolist (hook '(typst-ts-mode-hook))
+    (add-hook hook #'jinx-mode))
+#+end_src
+
 ** org
 #+call: confpkg(after="org", pre="set-org-dir")
 
@@ -1659,6 +1680,7 @@ Here's the [[https://www.nongnu.org/geiser/Cheat-sheet.html#Cheat-sheet][cheatsh
 
 
 ** typst
+#+call: confpkg(needs="typst,tinymist")
 
 The future of typesetting looks bright.
 
@@ -1672,12 +1694,63 @@ The future of typesetting looks bright.
 Configure =typst-ts-preview-function= to open in emacs with pdf-view as a vsplit.
 
 #+begin_src emacs-lisp
-(after! typst-ts-mode
+(use-package! typst-ts-mode
+  :defer t
+  :config
   (setq typst-ts-preview-function
       (lambda (file)
         (select-window (split-window-right))
-        (find-file file))))
+        (find-file file)))
 #+end_src
+
+Setup [[id:09cb9ebc-6e05-4ae6-8162-588f3146d051][jinx]] integration.
+
+#+begin_src emacs-lisp
+(after! jinx
+  (add-to-list
+   'jinx-exclude-faces
+   '(typst-ts-mode
+     ;; not included font lock faces
+     ;; `font-lock-comment-face', `font-lock-string-face', `font-lock-doc-face'
+     ;; `font-lock-doc-markup-face'
+     font-lock-warning-face font-lock-function-name-face font-lock-function-call-face
+     font-lock-variable-name-face font-lock-variable-use-face font-lock-keyword-face
+     font-lock-comment-delimiter-face font-lock-type-face font-lock-constant-face
+     font-lock-builtin-face font-lock-preprocessor-face
+     font-lock-negation-char-face font-lock-escape-face font-lock-number-face
+     font-lock-operator-face font-lock-property-use-face font-lock-punctuation-face
+     font-lock-bracket-face font-lock-delimiter-face font-lock-misc-punctuation-face
+     ;; typst-ts-mode created faces
+     typst-ts-markup-item-indicator-face typst-ts-markup-term-indicator-face
+     typst-ts-markup-rawspan-indicator-face typst-ts-markup-rawspan-blob-face
+     typst-ts-markup-rawblock-indicator-face typst-ts-markup-rawblock-lang-face
+     typst-ts-markup-rawblock-blob-face
+     typst-ts-error-face typst-ts-shorthand-face typst-ts-markup-linebreak-face
+     typst-ts-markup-quote-face typst-ts-markup-url-face typst-ts-math-indicator-face)))
+#+end_src
+
+Add tinymist as an eglot-server-program for lsp.
+
+#+begin_src emacs-lisp
+(after! eglot
+  (add-to-list 'eglot-server-programs
+               `((typst-ts-mode) .
+                 ,(eglot-alternatives `(,typst-ts-lsp-download-path
+                                        "tinymist"
+                                        "typst-lsp")))))
+#+end_src
+
+Close the =use-package!= paren
+
+#+begin_src emacs-lisp
+)
+#+end_src
+
+
+* tools & applications
+#+call: confpkg()
+
+** pdf-tools
 
 Enable =auto-revert-mode= in =pdf-view-mode= and make it /fast/ by enabling revert on file notifications instead of polling.
 
@@ -1686,9 +1759,6 @@ Enable =auto-revert-mode= in =pdf-view-mode= and make it /fast/ by enabling reve
   (add-hook 'pdf-view-mode-hook #'auto-revert-mode)
   (setq auto-revert-use-notify t))
 #+end_src
-
-* tools & applications
-#+call: confpkg()
 
 ** snippets
 #+call: confpkg()
