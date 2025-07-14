@@ -1163,8 +1163,14 @@ Load theme, taking current system appearance into consideration.
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
     ('light (setq doom-theme 'doom-homage-white)
+            (when (not (featurep 'nano-modeline))
+                (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-nano-modeline.el")
+                (nano-modeline-text-mode t))
             (load-theme 'doom-homage-white t))
+
     ('dark (setq doom-theme 'doom-lantern)
+           (when (featurep 'nano-modeline)
+               (unload-feature 'nano-modeline))
            (load-theme 'doom-lantern t)))
   (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
 
@@ -1188,6 +1194,7 @@ Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respective
 #+END_SRC
 
 *** Modeline
+#+call: confpkg(name="nano-modeline")
 
 Let's experiment with a more minimal modeline. I've been meaning to try out something from the [[https://github.com/rougier/nano-emacs?tab=readme-ov-file][nano-emacs]] collection so let's use their modeline package.
 
@@ -1213,6 +1220,22 @@ Let's experiment with a more minimal modeline. I've been meaning to try out some
   :config
   (setq nano-modeline-position #'nano-modeline-footer)
   (nano-modeline-text-mode t))
+#+end_src
+
+I want to be able to unload this package in dark mode. Emacs provides a generic =unload-feature= function which can be configured further but defining a =FEATURE=unload-function=. We'll define this function because the generic unloading mostly just works on autoloaded functions and this package doesn't have any of those.
+
+#+begin_src emacs-lisp
+(defun nano-modeline-unload-function ()
+  ;; Reset mode-line-format globally
+  (setq-default mode-line-format (helpful--original-value 'mode-line-format))
+
+  ;; Kill local mode-line-format in all buffers
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (kill-local-variable 'mode-line-format)))
+
+  ;; Done — allow normal unload
+  nil)
 #+end_src
 
 ** OS Integration
