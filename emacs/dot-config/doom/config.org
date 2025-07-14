@@ -1658,6 +1658,35 @@ Web-mode does not have any registered lsp servers, so let's add one.
 Here's the [[https://www.nongnu.org/geiser/Cheat-sheet.html#Cheat-sheet][cheatsheet]].
 
 
+** typst
+
+The future of typesetting looks bright.
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! typst-ts-mode
+  :recipe (:type git
+           :host codeberg
+           :repo "meow_king/typst-ts-mode"))
+#+end_src
+
+Configure =typst-ts-preview-function= to open in emacs with pdf-view as a vsplit.
+
+#+begin_src emacs-lisp
+(after! typst-ts-mode
+  (setq typst-ts-preview-function
+      (lambda (file)
+        (select-window (split-window-right))
+        (find-file file))))
+#+end_src
+
+Enable =auto-revert-mode= in =pdf-view-mode= and make it /fast/ by enabling revert on file notifications instead of polling.
+
+#+begin_src emacs-lisp
+(after! pdf-tools
+  (add-hook 'pdf-view-mode-hook #'auto-revert-mode)
+  (setq auto-revert-use-notify t))
+#+end_src
+
 * tools & applications
 #+call: confpkg()
 
