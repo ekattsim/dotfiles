@@ -1425,10 +1425,10 @@ Fast [[https://rrthomas.github.io/enchant/][enchant-based]] spell checker.
 (use-package! jinx
   :commands jinx-mode
   :bind (("M-$" . jinx-correct)
-         ("C-M-$" . jinx-languages)))
+         ("C-M-$" . jinx-languages))
   :init
   (dolist (hook '(typst-ts-mode-hook))
-    (add-hook hook #'jinx-mode))
+    (add-hook hook #'jinx-mode)))
 #+end_src
 
 ** org
@@ -2176,8 +2176,7 @@ Make sure that all org headings with backlinks also have an ID property. This is
 (setq org-id-link-to-org-use-id t)
 #+end_src
 
-*** Utilities
-#+call: confpkg()
+*** Misc
 
 I need a function that can refile org-heading at point to a new a file. I'll be using this on my existing todo headings to link them to their project files.
 
@@ -2229,6 +2228,14 @@ Find a project file under =org-project-directory= and bind it.
 
 (map! :map doom-leader-notes-map
       "p" #'my/find-in-projects)
+#+end_src
+
+Disable visual-line-mode in agenda, it formats the tags on the next line and looks very bad.
+
+#+begin_src emacs-lisp
+(add-hook 'org-agenda-mode-hook
+          (lambda ()
+            (visual-line-mode 0)))
 #+end_src
 
 *** Archiving
