@@ -1294,17 +1294,47 @@ I have no clue why this is enabled by default
 (package! evil-escape :disable t)
 #+end_src
 
+**** hardtime.el
+
+Let's make my programming tunnel vision even worse.
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! hardtime
+  :recipe (:host github
+           :repo "ichernyshovvv/hardtime.el"
+           :branch "master"))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! hardtime
+  :config
+  (defun evil-hardtime-check-command ()
+    "Return non-nil if the currently executed command should be checked."
+    (memq this-command '( next-line previous-line evil-previous-visual-line
+                          right-char left-char left-word right-word
+                          evil-forward-char evil-backward-char
+                          evil-next-line evil-previous-line)))
+  :custom
+  (hardtime-predicate #'evil-hardtime-check-command)
+  :commands hardtime-mode
+  :init
+  (dolist (hook '(prog-mode-hook org-agenda-mode-hook org-mode-hook))
+           (add-hook hook #'hardtime-mode)))
+#+end_src
+
 *** navigation
 
 **** keybindings
+#+call: confpkg(after="evil")
 
 I think flipping this makes a lot sense and they should merge this to vim bindings.
 
 #+BEGIN_SRC emacs-lisp
-(map!  :m "H" #'evil-beginning-of-visual-line
-       :m "L" #'evil-end-of-visual-line
-       :m "0" #'evil-window-top
-       :m "$" #'evil-window-bottom)
+(map! :map override-global-map
+      :m "H" #'evil-beginning-of-visual-line
+      :m "L" #'evil-end-of-visual-line
+      :m "0" #'evil-beginning-of-line
+      :m "$" #'evil-end-of-line)
 #+END_SRC
 
 Make working with wrapped lines easy
