@@ -2268,6 +2268,14 @@ Disable visual-line-mode in agenda, it formats the tags on the next line and loo
             (visual-line-mode 0)))
 #+end_src
 
+Bind rescheduling functions to =M-h= and =M-l=. So according to evil, we are in a motion state when browsing in agenda.
+
+#+begin_src emacs-lisp
+(map! :map org-agenda-mode-map
+      :m "M-h" #'org-agenda-do-date-earlier
+      :m "M-l" #'org-agenda-do-date-later)
+#+end_src
+
 *** Archiving
 
 Set archive location, most likely only used on project files.
@@ -2380,8 +2388,9 @@ We could have a function that on a DONE hook checks if the DONE was a dependency
 
 Bind workspace navigation to be more like t-smart
 #+BEGIN_SRC emacs-lisp
-(map! :ni "C-t" #'+workspace/switch-to
-      :ni [C-tab] #'+workspace/other)
+(map! :map override-global-map
+      :g "C-t" #'+workspace/switch-to
+      :g [C-tab] #'+workspace/other)
 #+END_SRC
 
 I love the scratch buffer. Let's test out an org major mode scratch.
