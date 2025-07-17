@@ -1,3 +1,6 @@
+:PROPERTIES:
+:ID:       0291f0e1-951e-4cba-aa7c-0b260ff7b0a5
+:END:
 #+title: Surfingkeys Config
 
 For surfingkeys to load settings from a remote file, it needs to be a txt file. I already don't want to work with js, I'll be damned if I have to do it without from a txt file.
@@ -347,3 +350,7 @@ input {
 `;
 
 #+end_src
+
+# Local Variables:
+# eval: (add-hook 'after-save-hook (lambda () (org-babel-tangle)) 0 t)
+# End:
