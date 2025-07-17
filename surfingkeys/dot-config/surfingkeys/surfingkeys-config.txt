@@ -12,8 +12,8 @@ api.map("gt", "T");
 settings.scrollStepSize = 120;
 
 // go front and back
-api.map("J", "S");
-api.map("K", "D");
+api.map("H", "S");
+api.map("L", "D");
 
 // an example to remove mapkey `Ctrl-i`
 api.unmap("<ctrl-i>");
@@ -22,7 +22,7 @@ api.unmap("<ctrl-i>");
 api.Hints.setCharacters('jdksla;eiown')
 
 // Monokai
-api.Hints.style('border: solid 2px #2D2E2E; color:#F92660; background: initial; background-color: #272822;');
+api.Hints.style('border: solid 2px #2D2E2E; color:#F92660; background: initial; background-color: #272822; font-size: 12px;');
 api.Hints.style("border: solid 2px #2D2E2E !important; padding: 1px !important; color: #A6E22E !important; background: #272822 !important;", "text");
 api.Visual.style('marks', 'background-color: #A6E22E99;');
 api.Visual.style('cursor', 'background-color: #F92660;');
@@ -32,7 +32,7 @@ settings.theme = `
 :root {
   /* Font */
   --font: 'Source Code Pro', Ubuntu, sans;
-  --font-size: 15;
+  --font-size: 14px;
   --font-weight: bold;
 
   /* -------------- */
