@@ -2158,6 +2158,15 @@ Some optimizations from [[https://www.gnu.org/software/emacs/manual/html_node/tr
 (setq tramp-verbose 1)
 #+end_src
 
+** magit
+
+Configure magit to use newer homebrew version of git instead of Apple Git.
+
+#+begin_src emacs-lisp
+(after! magit
+  (setq magit-git-executable "/usr/local/bin/git"))
+#+end_src
+
 * personal workflow
 #+call: confpkg()
 
