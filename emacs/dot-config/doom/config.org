@@ -1162,16 +1162,14 @@ Load theme, taking current system appearance into consideration.
 (defun my/apply-theme (appearance)
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
-    ('light (setq doom-theme 'doom-homage-white)
-            (when (not (featurep 'nano-modeline))
-                (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-nano-modeline.el")
+    ('light (when (not (featurep 'nano-modeline))
+                (load "/Users/abhijeetsurakanti/.config/doom/subconf/config-nano-modeline.el" nil t)
                 (nano-modeline-text-mode t))
             (load-theme 'doom-homage-white t))
 
-    ('dark (setq doom-theme 'doom-lantern)
-           (when (featurep 'nano-modeline)
+    ('dark (when (featurep 'nano-modeline)
                (unload-feature 'nano-modeline))
-           (load-theme 'doom-lantern t)))
+           (load-theme 'doom-homage-black t)))
   (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
 
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
