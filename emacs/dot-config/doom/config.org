@@ -2167,6 +2167,26 @@ Configure magit to use newer homebrew version of git instead of Apple Git.
   (setq magit-git-executable "/usr/local/bin/git"))
 #+end_src
 
+** mindstream
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! mindstream)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package mindstream
+  :config
+  (mindstream-mode)
+  (setq mindstream-template-path "/Users/abhijeetsurakanti/mindstream/templates")
+#+end_src
+
+idk if i prefer manual archiving but I sure as shit don't want to lose sessions to restarts or new sessions.
+
+#+begin_src emacs-lisp
+(setq mindstream-persist t
+      mindstream-unique nil))
+#+end_src
+
 * personal workflow
 #+call: confpkg()
 
