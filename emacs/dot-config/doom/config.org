@@ -2225,9 +2225,15 @@ Hopefully these will be the only locations with TODO items.
 
  #+begin_src emacs-lisp
 (setq org-agenda-files (list +org-capture-todo-file
-                             org-project-directory
                              org-roam-directory
                              (expand-file-name "config.org" doom-user-dir)))
+#+end_src
+
+I want my project directory to be searched recursively when looking for org agenda files.
+
+#+begin_src emacs-lisp
+(setq org-agenda-files (append org-agenda-files
+                               (directory-files-recursively org-project-directory org-agenda-file-regexp)))
 #+end_src
 
 Make sure that all org headings with backlinks also have an ID property. This is useful because heading titles can change but ids don't usually.
