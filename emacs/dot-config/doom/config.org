@@ -2201,19 +2201,60 @@ Doom has a minimal dashboard that helps with startup times. Let's add a clean cu
 (setq fancy-splash-image "~/.config/doom/misc/splash-images/emacs-e-template.svg")
 #+end_src
 
+** projects
+#+call: confpkg()
+
+Create the =org-project-directory= with project files being any org files in this directory or one level below.
+
+#+begin_src emacs-lisp
+(defvar org-project-directory (expand-file-name "projects" org-directory))
+
+(defun my/one-level-down-predicate (file)
+  (let ((parent (file-name-directory file)))
+    (string-equal (directory-file-name parent)
+                  org-project-directory)))
+
+(defvar org-project-files (directory-files-recursively org-project-directory org-agenda-file-regexp
+                                                       nil #'my/one-level-down-predicate))
+#+end_src
+
+Find project files under =org-project-directory= and its direct descendent directories.
+
+#+begin_src emacs-lisp
+(defun my/find-in-projects ()
+  (interactive)
+  (let* ((default-directory (or org-project-directory org-directory)))
+    (find-file
+     (completing-read "Find project file: " org-project-files nil t))))
+
+(map! :map doom-leader-notes-map
+      "p" #'my/find-in-projects)
+#+end_src
+
+Creating a new project means creating a project directory under =org-project-directory= and adding a project file. Let's make an interactive command for this.
+
+#+begin_src emacs-lisp
+(defun my/create-org-project ()
+  "Create a new project directory under `org-project-directory` with a main Org file."
+  (interactive)
+  (let* ((project-name (read-string "Project name: "))
+         (project-dir (expand-file-name project-name org-project-directory))
+         (org-file (expand-file-name (concat project-name ".org") project-dir)))
+    (if (file-exists-p project-dir)
+        (user-error "Project '%s' already exists" project-name)
+      (make-directory project-dir t)
+      (write-region (format-message "#+title: %s" project-name)
+                    nil org-file)
+      (find-file org-file)
+      (message "Created project: %s" org-file))))
+#+end_src
+
 ** agenda
-#+call: confpkg(after="org-agenda", pre="define-project-dir")
+#+call: confpkg(after="org-agenda")
 
 Take a look at [[id:9edd2c6e-2950-4689-b2e8-3c283297cd71][A new way of organization]]. In this section we'll mostly focus on the projects.
 
 *** Setup
-
-Create a variable for the project directory.
-
-#+name: define-project-dir
-#+begin_src emacs-lisp
-(defvar org-project-directory (expand-file-name "projects" org-directory))
-#+end_src
 
 Let's change the location of the TODOs inbox to be in the org-directory.
 
@@ -2233,7 +2274,7 @@ I want my project directory to be searched recursively when looking for org agen
 
 #+begin_src emacs-lisp
 (setq org-agenda-files (append org-agenda-files
-                               (directory-files-recursively org-project-directory org-agenda-file-regexp)))
+                               org-project-files))
 #+end_src
 
 Make sure that all org headings with backlinks also have an ID property. This is useful because heading titles can change but ids don't usually.
@@ -2285,16 +2326,6 @@ Prompts for overwrite if the target file already exists."
       )))
 #+end_src
 
-Find a project file under =org-project-directory= and bind it.
-
-#+begin_src emacs-lisp
-(defun my/find-in-projects ()
-  (interactive)
-  (ido-find-file-in-dir (or org-project-directory org-directory)))
-
-(map! :map doom-leader-notes-map
-      "p" #'my/find-in-projects)
-#+end_src
 
 Disable visual-line-mode in agenda, it formats the tags on the next line and looks very bad.
 
