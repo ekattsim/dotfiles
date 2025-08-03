@@ -2214,8 +2214,11 @@ Create the =org-project-directory= with project files being any org files in thi
     (string-equal (directory-file-name parent)
                   org-project-directory)))
 
-(defvar org-project-files (directory-files-recursively org-project-directory org-agenda-file-regexp
-                                                       nil #'my/one-level-down-predicate))
+(defvar org-project-files
+  (directory-files-recursively org-project-directory
+                               org-agenda-file-regexp
+                               nil
+                               #'my/one-level-down-predicate))
 #+end_src
 
 Find project files under =org-project-directory= and its direct descendent directories.
@@ -2231,7 +2234,7 @@ Find project files under =org-project-directory= and its direct descendent direc
       "p" #'my/find-in-projects)
 #+end_src
 
-Creating a new project means creating a project directory under =org-project-directory= and adding a project file. Let's make an interactive command for this.
+Creating a new project means creating a project directory under =org-project-directory= and adding a project file. Let's make an interactive command for this. Note that it also creates a ".projectile" file and adds it as a known projectile project.
 
 #+begin_src emacs-lisp
 (defun my/create-org-project ()
@@ -2243,6 +2246,8 @@ Creating a new project means creating a project directory under =org-project-dir
     (if (file-exists-p project-dir)
         (user-error "Project '%s' already exists" project-name)
       (make-directory project-dir t)
+      (write-region "" nil (expand-file-name ".project" project-dir))
+      (projectile-add-known-project project-dir)
       (write-region (format-message "#+title: %s" project-name)
                     nil org-file)
       (find-file org-file)
