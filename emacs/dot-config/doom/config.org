@@ -2219,6 +2219,10 @@ Create the =org-project-directory= with project files being any org files in thi
                                org-agenda-file-regexp
                                nil
                                #'my/one-level-down-predicate))
+
+(use-package! projectile
+  :init
+  (setq projectile-project-search-path `((,org-project-directory . 1))))
 #+end_src
 
 Find project files under =org-project-directory= and its direct descendent directories.
