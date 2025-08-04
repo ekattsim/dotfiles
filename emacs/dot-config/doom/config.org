@@ -2225,7 +2225,7 @@ Create the =org-project-directory= with project files being any org files in thi
   (setq projectile-project-search-path `((,org-project-directory . 1))))
 #+end_src
 
-Find project files under =org-project-directory= and its direct descendent directories.
+Interactive browsing of project files under =org-project-directory= and its direct descendent directories.
 
 #+begin_src emacs-lisp
 (defun my/find-in-projects ()
@@ -2256,6 +2256,33 @@ Creating a new project means creating a project directory under =org-project-dir
                     nil org-file)
       (find-file org-file)
       (message "Created project: %s" org-file))))
+#+end_src
+
+Let's add a file-watch that rebuilds =org-project-files= and =org-agenda-files on any changes in the =org-project-directory=.
+
+#+begin_src emacs-lisp
+(defun keep-projects-in-sync (event)
+  (let ((action (cadr event)))
+    (when (memq action '(created deleted renamed))
+      ;; Refresh org project files
+      (setq org-project-files
+            (directory-files-recursively org-project-directory
+                                         org-agenda-file-regexp
+                                         nil
+                                         #'my/one-level-down-predicate))
+
+      ;; Refresh org agenda files
+      (setq org-agenda-files
+            (append (list +org-capture-todo-file
+                          org-roam-directory
+                          (expand-file-name "config.org" doom-user-dir))
+                    org-project-files))
+      )))
+
+(require 'filenotify)
+(file-notify-add-watch org-project-directory
+                       '(change attribute-change)
+                       #'keep-projects-in-sync)
 #+end_src
 
 ** agenda
