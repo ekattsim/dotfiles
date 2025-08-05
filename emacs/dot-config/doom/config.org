@@ -2540,3 +2540,30 @@ Disable automatic insertion of (sub/super)scripts.
 #+end_src
 
 *** publishing (org-publish)
+
+** pomodoro
+:PROPERTIES:
+:ID:       f139bca0-09eb-4d67-9856-bc8ef6ecff95
+:END:
+#+call: confpkg()
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! pomm)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! pomm
+  :commands (pomm pomm-third-time)
+  :config
+  (setq pomm-audio-enabled t)
+  (pomm-mode-line-mode)
+#+end_src
+
+And for integration with =org-clock=. I also like the idea of deferring clock-in until after some command to show that we're active.
+
+#+begin_src emacs-lisp
+  (setq pomm-org-clock-in-immediately nil)
+  (add-hook 'pomm-on-status-changed-hook #'pomm--sync-org-clock)
+  (add-hook 'pomm-third-time-on-status-changed-hook
+            #'pomm-third-time--sync-org-clock))
+#+end_src
