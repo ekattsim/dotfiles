@@ -2554,6 +2554,8 @@ Disable automatic insertion of (sub/super)scripts.
 #+begin_src emacs-lisp
 (use-package! pomm
   :commands (pomm pomm-third-time)
+  :bind (:map leader
+              ("P" . #'pomm))
   :config
   (setq pomm-audio-enabled t)
   (pomm-mode-line-mode)
@@ -2565,5 +2567,20 @@ And for integration with =org-clock=. I also like the idea of deferring clock-in
   (setq pomm-org-clock-in-immediately nil)
   (add-hook 'pomm-on-status-changed-hook #'pomm--sync-org-clock)
   (add-hook 'pomm-third-time-on-status-changed-hook
-            #'pomm-third-time--sync-org-clock))
+            #'pomm-third-time--sync-org-clock)
+#+end_src
+
+Customize the alerts/sounds with culture.
+
+#+begin_src emacs-lisp
+  (setq pomm-audio-files '((work . "/Users/abhijeetsurakanti/.config/doom/misc/pomm-sounds/tuturu_1.mp3")
+                           (tick . "/Users/abhijeetsurakanti/.config/doom/misc/pomm-sounds/osu-hit-sound.mp3")
+                           (short-break . "/Users/abhijeetsurakanti/.config/doom/misc/pomm-sounds/to-be-continued.mp3")
+                           (break . "/Users/abhijeetsurakanti/.config/doom/misc/pomm-sounds/to-be-continued.mp3")
+                           (long-break . "/Users/abhijeetsurakanti/.config/doom/misc/pomm-sounds/to-be-continued.mp3")
+                           (stop . "/Users/abhijeetsurakanti/.config/doom/misc/pomm-sounds/yamete-kudasai.mp3")))
+#+end_src
+
+#+begin_src emacs-lisp
+)
 #+end_src
