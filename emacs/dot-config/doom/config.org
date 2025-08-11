@@ -2554,8 +2554,8 @@ Disable automatic insertion of (sub/super)scripts.
 #+begin_src emacs-lisp
 (use-package! pomm
   :commands (pomm pomm-third-time)
-  :bind (:map leader
-              ("P" . #'pomm))
+  :bind (:map doom-leader-map
+         ("P" . #'pomm))
   :config
   (setq pomm-audio-enabled t)
   (pomm-mode-line-mode)
