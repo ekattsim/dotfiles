@@ -1659,6 +1659,83 @@ Make double quotes active again
             (setq vhdl-basic-offset 4)))
 #+end_src
 
+*** vhdl-mode
+
+Use the latest version of =vhdl-mode=.
+
+#+begin_src emacs-lisp
+(use-package! vhdl-mode
+  :load-path "~/.config/doom/emacs_packages/vhdl-mode-3.39.3")
+#+end_src
+
+*** vhdl-ext
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! vhdl-ext)
+#+end_src
+
+Adds even more features to =vhdl-mode=
+
+#+begin_src emacs-lisp
+(use-package! vhdl-ext
+  :hook (vhdl-mode-hook . vhdl-ext-mode)
+  :init
+  (setq vhdl-ext-feature-list
+        '(font-lock
+          xref
+          capf
+          hierarchy
+          eglot
+          ;; lsp
+          ;; lsp-bridge
+          ;; lspce
+          flycheck
+          beautify
+          navigation
+          template
+          compilation
+          imenu
+          which-func
+          hideshow
+          ;; time-stamp
+          ports
+          ))
+  :config
+  (vhdl-ext-mode-setup)
+  (add-to-list 'auto-mode-alist '("\\.vhdl?\\'" . vhdl-ts-mode))
+  (vhdl-ext-flycheck-set-linter 'vhdl-ghdl)
+  (vhdl-ext-eglot-set-server 've-rust-hdl)
+#+end_src
+
+Manual project management, we gotta do something about this
+
+#+begin_src emacs-lisp
+  (setq vhdl-ext-project-alist
+        '(("single-cycle-rv32i"
+           :root "/Users/abhijeetsurakanti/org/projects/comp-org/single-cycle-rv32i"
+           :files ("src/ALU.vhd"
+                   "src/RegFile.vhd"
+                   "src/PC.vhd"
+                   "src/Core.vhd"
+                   "sim/Core_tb.vhdl")
+           :workdir "library/work"
+           )))
+#+end_src
+
+Some flycheck/linting configuration of ghdl
+
+#+begin_src emacs-lisp
+  (setq vhdl-ext-flycheck-use-open-buffers t)
+  (setq-default flycheck-ghdl-language-standard "08")
+  (setq vhdl-standard '(08 nil))
+#+end_src
+
+Close the =use-package!= paren
+
+#+begin_src emacs-lisp
+)
+#+end_src
+
 ** web
 #+call: confpkg()
 
