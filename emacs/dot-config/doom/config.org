@@ -2470,8 +2470,11 @@ Set archive location, most likely only used on project files.
 (setq org-archive-location (concat org-project-directory "/archives/%s_archive::"))
 #+end_src
 
-**** TODO interactive archive
+**** DONE interactive archive
 SCHEDULED: <2025-08-18 Mon>
+:PROPERTIES:
+:ID:       52c26fea-8046-4b2f-b9f2-a16f81a34d04
+:END:
 
 Interactive command to archive projects. Should be able to provide directories as well.
 
@@ -2507,9 +2510,7 @@ Interactive command to archive projects. Should be able to provide directories a
         ;; move to archive folder
         (rename-file project-parent
                      (concat org-project-directory
-                             "/archives/"
-                             project-name
-                             "/"))))))
+                             "/archives/"))))))
 #+end_src
 
 *** Workflow and Agenda view
