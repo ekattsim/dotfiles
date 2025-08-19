@@ -2223,11 +2223,13 @@ Create the =org-project-directory= with project files being any org files in thi
     (string-equal (directory-file-name parent)
                   org-project-directory)))
 
-(defvar org-project-files
+(defun my/discover-project-files ()
   (directory-files-recursively org-project-directory
                                org-agenda-file-regexp
                                nil
                                #'my/one-level-down-predicate))
+
+(defvar org-project-files (my/discover-project-files))
 
 (use-package! projectile
   :init
@@ -2239,9 +2241,8 @@ Interactive browsing of project files under =org-project-directory= and its dire
 #+begin_src emacs-lisp
 (defun my/find-in-projects ()
   (interactive)
-  (let* ((default-directory (or org-project-directory org-directory)))
-    (find-file
-     (completing-read "Find project file: " org-project-files nil t))))
+  (find-file
+   (completing-read "Find project file: " org-project-files nil t)))
 
 (map! :map doom-leader-notes-map
       "p" #'my/find-in-projects)
@@ -2274,11 +2275,7 @@ Let's add a file-watch that rebuilds =org-project-files= and =org-agenda-files o
   (let ((action (cadr event)))
     (when (memq action '(created deleted renamed))
       ;; Refresh org project files
-      (setq org-project-files
-            (directory-files-recursively org-project-directory
-                                         org-agenda-file-regexp
-                                         nil
-                                         #'my/one-level-down-predicate))
+      (setq org-project-files (my/discover-project-files))
 
       ;; Refresh org agenda files
       (setq org-agenda-files
@@ -2394,6 +2391,48 @@ Set archive location, most likely only used on project files.
 
 #+begin_src emacs-lisp
 (setq org-archive-location (concat org-project-directory "/archives/%s_archive::"))
+#+end_src
+
+**** TODO interactive archive
+SCHEDULED: <2025-08-18 Mon>
+
+Interactive command to archive projects. Should be able to provide directories as well.
+
+#+begin_src emacs-lisp
+(defun my/archive-file (file &optional archive-dir)
+  (let* ((new-file (if archive-dir
+                       (concat org-project-directory
+                               "/archives/"
+                               (file-name-nondirectory file)
+                               "_archive")
+                     (concat file "_archive"))))
+    (rename-file file new-file 1)
+    (with-temp-buffer
+      (insert "# -*- mode: org -*-\n\n")
+      (insert-file-contents new-file)
+      (write-region (point-min) (point-max) new-file))))
+
+(defun my/archive-project ()
+  (interactive)
+  (let* ((project (completing-read "Archive project file: "
+                                   org-project-files nil t))
+         (project-parent (directory-file-name (file-name-directory project))))
+    (if (string= project-parent
+                 org-project-directory)
+        ;; if project file
+        (my/archive-file project t)
+      ;; if file is in a project dir
+      (let* ((project-name (file-name-nondirectory project-parent)))
+        ;; archive all org files in project dir
+        (mapc #'my/archive-file
+              (directory-files-recursively project-parent
+                                           org-agenda-file-regexp))
+        ;; move to archive folder
+        (rename-file project-parent
+                     (concat org-project-directory
+                             "/archives/"
+                             project-name
+                             "/"))))))
 #+end_src
 
 *** Workflow and Agenda view
