@@ -1290,7 +1290,13 @@ The ultimate convenience. We don't need to make any package declarations because
 This enables precise undo steps.
 
 #+begin_src emacs-lisp
-(setq evil-want-fine-undo t) ;; precise undo steps
+(setq evil-want-fine-undo t)
+#+end_src
+
+I want to start using "/" and "?" instead of snipe, and I want highlights to end after navigation.
+
+#+begin_src emacs-lisp
+(setq evil-ex-search-persistent-highlight nil)
 #+end_src
 
 **** evil-escape
@@ -2705,6 +2711,13 @@ Customize the alerts/sounds with culture.
                            (break . "/Users/abhijeetsurakanti/.config/doom/misc/pomm-sounds/to-be-continued.mp3")
                            (long-break . "/Users/abhijeetsurakanti/.config/doom/misc/pomm-sounds/to-be-continued.mp3")
                            (stop . "/Users/abhijeetsurakanti/.config/doom/misc/pomm-sounds/yamete-kudasai.mp3")))
+#+end_src
+
+Tweak work/break times.
+
+#+begin_src emacs-lisp
+  (setq pomm-work-period 30
+        pomm-third-time--fraction "1/6")
 #+end_src
 
 #+begin_src emacs-lisp
