@@ -1178,7 +1178,7 @@ Load theme, taking current system appearance into consideration.
 
     ('dark (when (featurep 'nano-modeline)
                (unload-feature 'nano-modeline))
-           (load-theme 'doom-homage-black t)))
+           (load-theme 'doom-feather-dark t)))
   (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
 
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
@@ -1234,7 +1234,7 @@ I want to be able to unload this package in dark mode. Emacs provides a generic 
 #+begin_src emacs-lisp
 (defun nano-modeline-unload-function ()
   ;; Reset mode-line-format globally
-  (setq-default mode-line-format (helpful--original-value 'mode-line-format))
+  (setq-default mode-line-format (custom-reevaluate-setting 'mode-line-format))
 
   ;; Kill local mode-line-format in all buffers
   (dolist (buf (buffer-list))
@@ -1535,7 +1535,7 @@ Set Roboto Mono as header font and resize headings.
                 (org-level-6 . 1.1)
                 (org-level-7 . 1.1)
                 (org-level-8 . 1.1)))
-  (set-face-attribute (car face) nil :family "Roboto Mono" :weight 'bold :height (cdr face)))
+  (set-face-attribute (car face) nil :family "Roboto Mono" :weight 'bold :height (cdr face) :inherit 'default))
 
 ;; Make the document title a bit bigger
 (set-face-attribute 'org-document-title nil :family "Roboto Mono" :weight 'bold :height 1.8)
