@@ -2194,9 +2194,19 @@ This package comes in handy for custom org link types, but pdf links weren't wor
 Installed and pre-configured as part of the =:lang org +roam2= doom module.
 
 Make "~/org/zettelkasten" the org-roam directory. Make sure only roam nodes are present in this directory.
+
 #+BEGIN_SRC emacs-lisp
 (setq org-roam-directory "/Users/abhijeetsurakanti/org/zettelkasten")
 #+END_SRC
+
+Doom is doing too much with the node template string, configure a more minimal display that just shows the title.
+
+#+begin_src emacs-lisp
+(use-package! org-roam
+  :config
+  (setq org-roam-node-display-template
+        (concat "${title:*} " "${doom-tags:15}")))
+#+end_src
 
 *** edraw
 
