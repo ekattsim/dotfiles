@@ -19,6 +19,7 @@
     rmd (layer-toggle right-mods)
     med (layer-toggle media)
     fn (around (layer-toggle function) fn)
+    cat A-C-M-spc
 )
 
 (deflayer default
@@ -32,17 +33,17 @@
 (deflayer right-mods
     _    _    _    _    _    _    _    _    _    _    _    _
 	grv	 _	  _	   _	_	 _	  _	   _	_	 _
-	tab	 _    _    _	esc	 _	  rmet rctl lalt _
+	_	 _    esc  tab  _	 _	  rmet rctl lalt _
     _    _    _    _    _    _    _    _    _    _
 	_    _    _	   _    _    _    _
 )
 
 (deflayer left-mods
     _    _    _    _    _    _    _    _    _    _    _    _
-	_	 _	  _	   _	_	 _	  _	   _	_	 _
-	tab  lalt lctl lmet _	 left down up   right _
+	grv	 _	  _	   _	_	 _	  _	   _	_	 _
+	_    lalt lctl lmet _	 left down up   right _
     _    _    _    _    _    _    _    _    _    _
-	_    _    _	   _    _    _    _
+	_    _    _	   @cat _    _    _
 )
 
 (deflayer media
