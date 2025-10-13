@@ -2292,6 +2292,36 @@ idk if i prefer manual archiving but I sure as shit don't want to lose sessions 
       mindstream-unique nil))
 #+end_src
 
+
+** AI
+
+Emacs is the perfect application for an AI to interact with.
+
+*** agent-shell
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! shell-maker)
+(package! acp
+  :recipe (:host github :repo "xenodium/acp.el"))
+(package! agent-shell
+  :recipe (:host github :repo "xenodium/agent-shell"))
+(package! agent-shell-sidebar
+  :recipe (:host github :repo "cmacrae/agent-shell-sidebar"))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! agent-shell
+  :init (require 'acp)
+  :config
+  (setq agent-shell-google-authentication
+        (agent-shell-google-make-authentication :login t)))
+
+(use-package! agent-shell-sidebar
+  :after agent-shell)
+#+end_src
+
+*** NEXT [[https://github.com/editor-code-assistant/eca][ECA: editor code assistant]]
+
 * personal workflow
 #+call: confpkg()
 
