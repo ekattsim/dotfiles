@@ -2555,10 +2555,11 @@ Show the daily agenda by default. Also known as agenday, that's gonna catch on.
    org-agenda-start-day nil)
 #+end_src
 
-Shorten deadline reminders to 2d by default. 2 weeks prior warnings is too much org-mode.
+Shorten deadline reminders to 2d by default. 2 weeks prior warnings is too much org. And also don't show deadline warnings if the task is scheduled.
 
 #+begin_src emacs-lisp
-(setq org-deadline-warning-days 2)
+(setq org-deadline-warning-days 2
+      org-agenda-skip-deadline-prewarning-if-scheduled t)
 #+end_src
 
 In this workflow all TODOs have to be scheduled, so let's add an advice over the =org-todo= and =org-agenda-todo= functions.
