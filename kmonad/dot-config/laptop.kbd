@@ -15,6 +15,7 @@
 )
 
 (defalias
+    bck backspace
     lmd (layer-toggle left-mods)
     rmd (layer-toggle right-mods)
     cat A-C-M-spc
@@ -31,15 +32,15 @@
 (deflayer right-mods
     _    _    _    _    _    _    _    _    _    _    _    _
 	grv	 _	  _	   _	_	 _	  _	   _	_	 _
-	_	 _    esc  tab  _	 _	  rmet rctl lalt _
+	_	 _    esc  _    _	 _	  rmet rctl lalt _
     _    _    _    _    _    _    _    _    _    _
 	_    _    _	   _    _    _    _
 )
 
 (deflayer left-mods
     _    _    _    _    _    _    _    _    _    _    _    _
-	grv	 _	  _	   _	_	 _	  _	   _	_	 _
+	grv	 _	  _	   _	_	 _	  tab  _	_	 _
 	_    lalt lctl lmet _	 left down up   right _
-    _    _    _    _    _    _    _    _    _    _
+    _    _    _    _    _    _    _    _    @bck  _
 	_    _    _	   @cat _    _    _
 )
