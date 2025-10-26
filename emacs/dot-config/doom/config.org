@@ -2758,6 +2758,7 @@ Tweak work/break times.
 
 #+begin_src emacs-lisp
   (setq pomm-work-period 30
+        pomm-long-break-period 30
         pomm-third-time--fraction "1/6")
 #+end_src
 
