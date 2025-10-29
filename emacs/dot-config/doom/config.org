@@ -1250,7 +1250,7 @@ I want to be able to unload this package in dark mode. Emacs provides a generic 
 Unfortunately fish is not POSIX compliant.
 
 #+BEGIN_SRC emacs-lisp
-(setq shell-file-name (executable-find "bash"))
+(setq shell-file-name (executable-find "zsh"))
 #+END_SRC
 
 ** Peformance Hacking
@@ -1278,6 +1278,12 @@ Enable visual-line-mode globally by default and disable continuation fringe indi
 (setq-default fringe-indicator-alist
               (cons '(continuation nil nil)
                     (assq-delete-all 'continuation fringe-indicator-alist)))
+#+end_src
+
+Whitespace mode visualizes tabs instead of them keeping them invisible. Let's disable this globally by default.
+
+#+begin_src emacs-lisp
+(global-whitespace-mode -1)
 #+end_src
 
 *** evil
