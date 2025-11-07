@@ -2242,12 +2242,29 @@ When exporting asynchronously with =org-export-in-background=, the instantiated 
 
 #+begin_src emacs-lisp
 (use-package! elfeed
+  :commands (elfeed)
   :config
   (setq elfeed-feeds
         '("https://xkcd.com/rss.xml"
           "https://hnrss.org/frontpage"
           "https://old.reddit.com/r/slatestarcodex.rss"
-          "https://old.reddit.com/r/hardware.rss")))
+          "https://old.reddit.com/r/hardware.rss"
+          "https://old.reddit.com/r/computerarchitecture.rss"
+          "https://old.reddit.com/r/fpga.rss"
+          "https://old.reddit.com/r/chipdesign.rss"))
+#+end_src
+
+Block execution of elfeed if currently at work.
+
+#+begin_src emacs-lisp
+(advice-add 'elfeed :around
+            (lambda (orig-fun &rest args)
+              (unless (my/i-am-working)
+                (apply orig-fun args))))
+#+end_src
+
+#+begin_src emacs-lisp
+)
 #+end_src
 
 ** tramp
@@ -2768,6 +2785,32 @@ Tweak work/break times.
         pomm-third-time--fraction "1/6")
 #+end_src
 
+Kill any elfeed buffers at the end of a break.
+
+#+begin_src emacs-lisp
+(add-hook 'pomm-on-status-changed-hook
+          (lambda ()
+            (when (my/i-am-working)
+              (dolist (buf (buffer-list))
+                (when (string-match "elfeed"
+                                    (buffer-name buf))
+                  (kill-buffer buf))))))
+#+end_src
+
 #+begin_src emacs-lisp
 )
+#+end_src
+
+Define a util function to figure out whether I am working.
+
+#+begin_src emacs-lisp
+(defun my/i-am-working ()
+  (let* ((timer-status (cdr (assoc 'status
+                                   pomm--state)))
+         (curr-timer (cdr (assoc 'current
+                                 pomm--state)))
+         (timer-type (cdr (assoc 'kind
+                                 curr-timer))))
+    (and (eq timer-status 'running)
+         (eq timer-type 'work))))
 #+end_src
