@@ -2788,29 +2788,43 @@ Tweak work/break times.
 Kill any elfeed buffers at the end of a break.
 
 #+begin_src emacs-lisp
-(add-hook 'pomm-on-status-changed-hook
-          (lambda ()
-            (when (my/i-am-working)
+(defun my/pomm-kill-elfeed ()
+  (when (my/query-pomm-state 'running 'work)
               (dolist (buf (buffer-list))
                 (when (string-match "elfeed"
                                     (buffer-name buf))
-                  (kill-buffer buf))))))
+                  (kill-buffer buf)))))
+
+(add-hook 'pomm-on-status-changed-hook
+          'my/pomm-kill-elfeed)
+#+end_src
+
+I want =pomm-ask-before-work= to be enabled only after a long break.
+
+#+begin_src emacs-lisp
+(defun my/pomm-ask-after-long-break ()
+  (if (my/query-pomm-state 'running 'long-break)
+                (setq pomm-ask-before-work t)
+              (setq pomm-ask-before-work nil)))
+
+(add-hook 'pomm-on-status-changed-hook
+          'my/pomm-ask-after-long-break)
 #+end_src
 
 #+begin_src emacs-lisp
 )
 #+end_src
 
-Define a util function to figure out whether I am working.
+Define a util function to query =pomm--state= easily.
 
 #+begin_src emacs-lisp
-(defun my/i-am-working ()
+(defun my/query-pomm-state (status type)
   (let* ((timer-status (cdr (assoc 'status
                                    pomm--state)))
          (curr-timer (cdr (assoc 'current
                                  pomm--state)))
          (timer-type (cdr (assoc 'kind
                                  curr-timer))))
-    (and (eq timer-status 'running)
-         (eq timer-type 'work))))
+    (and (eq timer-status status)
+         (eq timer-type type))))
 #+end_src
