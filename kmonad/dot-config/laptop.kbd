@@ -18,29 +18,46 @@
     bck backspace
     lmd (layer-toggle left-mods)
     rmd (layer-toggle right-mods)
-    cat A-C-M-spc
+
+    ;; symbols
+    apos (around LeftShift 1)
+    atr  (around LeftShift 2)
+    hash (around LeftShift 3)
+    dolr (around LeftShift 4)
+    perc (around LeftShift 5)
+    hat  (around LeftShift 6)
+    ampr (around LeftShift 7)
+    astr (around LeftShift 8)
+    lpar (around LeftShift 9)
+    rpar (around LeftShift 0)
+    undr (around LeftShift minus)
+    plus (around LeftShift equal)
+    lcrl (around LeftShift leftbrace)
+    rcrl (around LeftShift rightbrace)
+    verl (around LeftShift backslash) ;; stands for vertical line '|'
+    dblq (around leftshift apostrophe)
 )
 
 (deflayer default
-    1    2    3    4    5    6    7    8    9    0    -    =
-	q	 w	  e	   r	t	 y	  u	   i	o	 p
-	a	 s	  d	   f	g	 h	  j	   k	l	 ;
-	z	 x	  c	   v	b	 n	  m	   ,	.	 /
-	lctl lalt @lmd      spc       @rmd fn  rctl
+     1     2     3     4     5     6     7     8     9     0     -     =
+     q     w     e     r     t     y     u     i     o     p
+     a     s     d     f     g     h     j     k     l     ;
+     z     x     c     v     b     n     m     ,     .     /
+     lctl  lalt  @lmd  spc   @rmd  fn    rctl
 )
 
 (deflayer right-mods
-    _    _    _    _    _    _    _    _    _    _    _    _
-	grv	 _	  _	   _	_	 _	  _	   _	_	 _
-	_	 _    esc  _    _	 _	  rmet rctl lalt _
-    _    _    _    _    _    _    _    _    _    _
-	_    _    _	   _    _    _    _
+     _     _     _     _     _     _     _     _     _     _     _     _
+     grv   [     @lcrl @lpar @perc @hat  @rpar @rcrl ]     _
+     min   @atr  @dolr @undr '     @dblq rmet  rctl  lalt  =
+     @plus @apos @hash @astr _     _     \\    @ampr @verl _
+     _     _     _	   esc   _     _     _
 )
 
 (deflayer left-mods
-    _    _    _    _    _    _    _    _    _    _    _    _
-	grv	 _	  _	   _	_	 _	  tab  _	_	 _
-	_    lalt lctl lmet _	 left down up   right _
-    _    _    _    _    _    _    _    _    @bck  _
-	_    _    _	   @cat _    _    _
+     _     _     _     _     _     _     _     _     _     _     _     _
+     _     _     _     _     _     _     _     _     _     _
+     _     lalt  lctl  lmet  _     left  down  up    right _
+     _     _     _     _     _     _     _     _     @bck  _
+     _     _     _	   tab   _     _     _
 )
