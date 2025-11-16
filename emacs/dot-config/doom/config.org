@@ -1129,6 +1129,12 @@ I don't like the automatic insertion of "-hook" suffix. It breaks =K=.
 (setq use-package-hook-name-suffix nil)
 #+end_src
 
+Let's enable defer by default because it looks like a naked use-package call loads the entire package as opposed to just the *-autoload.el file.
+
+#+begin_src emacs-lisp
+(setq use-package-always-defer t)
+#+end_src
+
 ** customize
 
 Autoload the custom.el file if it exists.
@@ -2352,7 +2358,7 @@ Doom has a minimal dashboard that helps with startup times. Let's add a clean cu
 #+end_src
 
 ** projects
-#+call: confpkg()
+#+call: confpkg(after="org-agenda")
 
 Create the =org-project-directory= with project files being any org files in this directory or one level below.
 
@@ -2755,6 +2761,7 @@ Disable automatic insertion of (sub/super)scripts.
 And for integration with =org-clock=. I also like the idea of deferring clock-in until after some command to show that we're active.
 
 #+begin_src emacs-lisp
+  (require 'org-clock)
   (setq pomm-org-clock-in-immediately nil)
   (add-hook 'pomm-on-status-changed-hook #'pomm--sync-org-clock)
   (add-hook 'pomm-third-time-on-status-changed-hook
