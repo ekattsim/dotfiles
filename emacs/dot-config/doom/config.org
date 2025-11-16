@@ -1171,14 +1171,9 @@ Load theme, taking current system appearance into consideration.
 (defun my/apply-theme (appearance)
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
-    ('light (when (not (featurep 'nano-modeline))
-                (load "/Users/abhijeetsurakanti/.config/doom/subconf/config-nano-modeline.el" nil t)
-                (nano-modeline-text-mode t))
-            (load-theme 'doom-homage-white t))
+    ('light (load-theme 'doom-homage-white t))
 
-    ('dark (when (featurep 'nano-modeline)
-               (unload-feature 'nano-modeline))
-           (load-theme 'doom-feather-dark t)))
+    ('dark (load-theme 'doom-feather-dark t)))
   (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
 
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
@@ -1201,7 +1196,7 @@ Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respective
 #+END_SRC
 
 *** Modeline
-#+call: confpkg(name="nano-modeline")
+#+call: confpkg(name="nano-modeline", via="none")
 
 Let's experiment with a more minimal modeline. I've been meaning to try out something from the [[https://github.com/rougier/nano-emacs?tab=readme-ov-file][nano-emacs]] collection so let's use their modeline package.
 
