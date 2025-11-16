@@ -2322,7 +2322,9 @@ idk if i prefer manual archiving but I sure as shit don't want to lose sessions 
 
 Emacs is the perfect application for an AI to interact with.
 
-*** agent-shell
+*** agent-shell (code agents)
+
+This is kind of for vibe coding.
 
 #+begin_src emacs-lisp :tangle "packages.el"
 (package! shell-maker)
@@ -2345,7 +2347,37 @@ Emacs is the perfect application for an AI to interact with.
   :after agent-shell)
 #+end_src
 
-*** NEXT [[https://github.com/editor-code-assistant/eca][ECA: editor code assistant]]
+*** DONE [[https://github.com/karthink/gptel][gptel (LLM chat API)]]
+SCHEDULED: <2025-11-15 Sat>
+:PROPERTIES:
+:ID:       45f18400-eb8b-4d37-b943-75a7240f516e
+:END:
+
+This is just for regular LLM use.
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! gptel
+  :recipe (:nonrecursive t))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! gptel
+  :init
+  (setf epa-pinentry-mode 'loopback)
+  :bind (("C-c RET" . gptel-send))
+  :config
+  (let ((secret (car (auth-source-search :host "api.google.com" :user "gemini"))))
+    (when secret
+      (gptel-make-gemini "gemini"
+        :key (plist-get secret :secret)
+        :stream t)))
+  (setq gptel-default-mode 'org-mode))
+#+end_src
+
+*** TODO [[https://github.com/milanglacier/minuet-ai.el][minuet (LLM FIM API)]]
+SCHEDULED: <2025-11-15 Sat>
+
+This is for code autocompletion.
 
 * personal workflow
 #+call: confpkg()
