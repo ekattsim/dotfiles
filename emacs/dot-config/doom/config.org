@@ -2251,17 +2251,18 @@ When exporting asynchronously with =org-export-in-background=, the instantiated 
           "https://old.reddit.com/r/slatestarcodex.rss"
           "https://old.reddit.com/r/hardware.rss"
           "https://old.reddit.com/r/computerarchitecture.rss"
-          "https://old.reddit.com/r/fpga.rss"
           "https://old.reddit.com/r/chipdesign.rss"))
 #+end_src
 
 Block execution of elfeed if currently at work.
 
 #+begin_src emacs-lisp
-(advice-add 'elfeed :around
-            (lambda (orig-fun &rest args)
-              (unless (my/i-am-working)
-                (apply orig-fun args))))
+(defun my/block-elfeed-at-work-advice (orig-fun &rest args)
+  (unless (and (boundp 'my/query-pomm-state)
+               (my/query-pomm-state 'running 'work))
+    (apply orig-fun args)))
+
+(advice-add 'elfeed :around 'my/block-elfeed-at-work-advice)
 #+end_src
 
 #+begin_src emacs-lisp
