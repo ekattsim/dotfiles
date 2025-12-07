@@ -2772,8 +2772,9 @@ Customize the alerts/sounds with culture.
 Tweak work/break times.
 
 #+begin_src emacs-lisp
-  (setq pomm-work-period 30
-        pomm-long-break-period 30
+  (setq pomm-work-period 50
+        pomm-short-break-period 10
+        pomm-long-break-period 10
         pomm-third-time--fraction "1/6")
 #+end_src
 
