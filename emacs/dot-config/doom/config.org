@@ -2318,20 +2318,21 @@ This is just for regular LLM use.
 
 #+begin_src emacs-lisp
 (use-package! gptel
+  :preface
+  (map! :map override-global-map
+        :nvi "C-c RET" 'gptel-send)
   :init
   (setf epa-pinentry-mode 'loopback)
-  :bind (("C-c RET" . gptel-send))
   :config
   (let ((secret (car (auth-source-search :host "api.google.com" :user "gemini"))))
     (when secret
       (gptel-make-gemini "gemini"
-        :key (plist-get secret :secret)
+        :key (funcall (plist-get secret :secret))
         :stream t)))
   (setq gptel-default-mode 'org-mode))
 #+end_src
 
-*** TODO [[https://github.com/milanglacier/minuet-ai.el][minuet (LLM FIM API)]]
-SCHEDULED: <2025-11-15 Sat>
+*** NEXT [#C] [[https://github.com/milanglacier/minuet-ai.el][minuet (LLM FIM API)]]
 
 This is for code autocompletion.
 
