@@ -1833,6 +1833,15 @@ Close the =use-package!= paren
 * tools & applications
 #+call: confpkg()
 
+** image-mode
+#+call: confpkg()
+
+Rendering performance for pngs improves if we use a native decoder instead of imagemagick.
+
+#+begin_src emacs-lisp
+(add-to-list 'imagemagick-types-inhibit 'PNG)
+#+end_src
+
 ** pdf-tools
 
 Enable =auto-revert-mode= in =pdf-view-mode= and make it /fast/ by enabling revert on file notifications instead of polling.
