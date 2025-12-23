@@ -2751,17 +2751,18 @@ Disable automatic insertion of (sub/super)scripts.
 (use-package! pomm
   :commands (pomm pomm-third-time)
   :bind (:map doom-leader-map
-         ("P" . #'pomm))
+              ("P" . #'pomm))
   :config
   (setq pomm-audio-enabled t)
+  (setq pomm-csv-history-file (concat org-directory
+                                      "/pomm-history.csv"))
   (pomm-mode-line-mode)
 #+end_src
 
-And for integration with =org-clock=. I also like the idea of deferring clock-in until after some command to show that we're active.
+And for integration with =org-clock=.
 
 #+begin_src emacs-lisp
   (require 'org-clock)
-  (setq pomm-org-clock-in-immediately nil)
   (add-hook 'pomm-on-status-changed-hook #'pomm--sync-org-clock)
   (add-hook 'pomm-third-time-on-status-changed-hook
             #'pomm-third-time--sync-org-clock)
