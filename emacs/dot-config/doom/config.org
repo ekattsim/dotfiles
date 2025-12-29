@@ -1999,6 +1999,7 @@ Unbind =org-cdlatex-underscore-caret=
 (map! :map org-cdlatex-mode-map
       "^" #'org-self-insert-command
       "_" #'org-self-insert-command
+      "'" #'org-self-insert-command
       )
 #+end_src
 
