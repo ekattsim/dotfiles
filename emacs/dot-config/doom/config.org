@@ -2835,8 +2835,7 @@ Tweak work/break times.
 #+begin_src emacs-lisp
   (setq pomm-work-period 50
         pomm-short-break-period 10
-        pomm-long-break-period 10
-        pomm-third-time--fraction "1/6")
+        pomm-long-break-period 10)
 #+end_src
 
 Kill any elfeed buffers at the end of a break.
