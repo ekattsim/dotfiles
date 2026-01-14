@@ -2407,13 +2407,65 @@ Creating a new project means creating a project directory under =org-project-dir
       (make-directory project-dir t)
       (write-region "" nil (expand-file-name ".project" project-dir))
       (projectile-add-known-project project-dir)
-      (write-region (format-message "#+title: %s" project-name)
+      (write-region (format-message "#+title: %s"
+                                    (replace-regexp-in-string "-" " " project-name))
                     nil org-file)
       (find-file org-file)
       (message "Created project: %s" org-file))))
 #+end_src
 
-Let's add a file-watch that rebuilds =org-project-files= and =org-agenda-files on any changes in the =org-project-directory=.
+Now let's add a rename operation on projects.
+
+#+begin_src emacs-lisp
+(defun my/rename-org-project ()
+  "Rename an Org project using `org-project-files`."
+  (interactive)
+  (let* ((old-file (completing-read
+                    "Rename project: "
+                    org-project-files
+                    nil t))
+         (old-file (expand-file-name old-file))
+         (old-name (file-name-base old-file))
+         (new-name (read-string "New project name: "))
+         (old-dir (file-name-directory old-file))
+         (has-own-dir
+          (not (file-equal-p
+                (expand-file-name org-project-directory)
+                (directory-file-name old-dir))))
+         (new-dir (if has-own-dir
+                      (expand-file-name new-name org-project-directory)
+                    old-dir))
+         (new-file (expand-file-name (concat new-name ".org") new-dir)))
+    (when (and has-own-dir (file-exists-p new-dir))
+      (user-error "Project '%s' already exists" new-name))
+    (when (file-exists-p new-file)
+      (user-error "File '%s' already exists" new-file))
+
+    (when has-own-dir
+      (rename-file (directory-file-name old-dir) new-dir)
+      (projectile-remove-known-project old-dir)
+      (projectile-add-known-project new-dir))
+
+    (let ((source-file
+           (if has-own-dir
+               (expand-file-name (concat old-name ".org") new-dir)
+             old-file)))
+      (rename-file source-file new-file))
+
+    (with-temp-buffer
+      (insert-file-contents new-file)
+      (goto-char (point-min))
+      (when (re-search-forward "^#\\+title:.*" nil t)
+        (replace-match
+         (format "#+title: %s"
+                 (replace-regexp-in-string "-" " " new-name))))
+      (write-region nil nil new-file))
+
+    (find-file new-file)
+    (message "Renamed project to: %s" new-name)))
+#+end_src
+
+Let's add a file-watch that rebuilds =org-project-files= and =org-agenda-files= on any changes in the =org-project-directory= (nonrecursive).
 
 #+begin_src emacs-lisp
 (defun keep-projects-in-sync (event)
