@@ -1831,6 +1831,18 @@ Close the =use-package!= paren
 * tools & applications
 #+call: confpkg()
 
+** doom-scratch
+:PROPERTIES:
+:ID:       9b53dabd-fb47-4ad1-bbc0-cbe364b033dd
+:END:
+#+call: confpkg()
+
+Start doom scratch buffers in org mode.
+
+#+begin_src emacs-lisp
+(setq doom-scratch-initial-major-mode 'org-mode)
+#+end_src
+
 ** image-mode
 #+call: confpkg()
 
