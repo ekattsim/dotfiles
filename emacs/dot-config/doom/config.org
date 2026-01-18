@@ -1784,6 +1784,16 @@ Configure =typst-ts-preview-function= to open in emacs with pdf-view as a vsplit
         (find-file file)))
 #+end_src
 
+Let's also configure the typst compilation buffer to display at the bottom as opposed to messing with our preview buffer.
+
+#+begin_src emacs-lisp
+(add-to-list
+ 'display-buffer-alist
+ '("\\*typst-ts-compilation\\*.*"
+   (display-buffer-reuse-window display-buffer-at-bottom)
+   (window-height . 0.3)))
+#+end_src
+
 Setup [[id:09cb9ebc-6e05-4ae6-8162-588f3146d051][jinx]] integration.
 
 #+begin_src emacs-lisp
