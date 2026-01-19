@@ -1135,7 +1135,7 @@ Load theme, taking current system appearance into consideration.
   (pcase appearance
     ('light (load-theme 'doom-homage-white t))
 
-    ('dark (load-theme 'doom-feather-dark t)))
+    ('dark (load-theme 'doom-lantern t)))
   (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
 
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
