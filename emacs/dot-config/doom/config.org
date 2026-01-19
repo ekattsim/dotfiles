@@ -1679,14 +1679,20 @@ Adds even more features to =vhdl-mode=
 Manual project management, we gotta do something about this
 
 #+begin_src emacs-lisp
-  (setq vhdl-ext-project-alist
-        '(("single-cycle-rv32i"
-           :root "/Users/abhijeetsurakanti/org/projects/comp-org/single-cycle-rv32i"
-           :files ("src/*.vhd"
-                   "sim/*.vhd")
-           :ignore-files ("src/InstMem.vhd")
-           :workdir "library/work"
-           )))
+(setq vhdl-ext-project-alist
+      '(("single-cycle-rv32i"
+         :root "/Users/abhijeetsurakanti/org/projects/comp-org/single-cycle-rv32i"
+         :files ("src/*.vhd"
+                 "sim/*.vhd")
+         :ignore-files ("src/InstMem.vhd")
+         :workdir "library/work"
+         )
+        ("rv32i"
+         :root "~/org/projects/computer-architecture/rv32i"
+         :files ("core/*.vhd")
+         :workdir "library/work"
+         ))
+      )
 #+end_src
 
 Some flycheck/linting configuration of ghdl
