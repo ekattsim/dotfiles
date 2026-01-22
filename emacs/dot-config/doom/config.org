@@ -1875,7 +1875,33 @@ Enable =auto-revert-mode= in =pdf-view-mode= and make it /fast/ by enabling reve
 #+begin_src emacs-lisp
 (after! pdf-tools
   (add-hook 'pdf-view-mode-hook #'auto-revert-mode)
-  (setq auto-revert-use-notify t))
+  (setq auto-revert-use-notify t)
+#+end_src
+
+Open new pdf buffers in themed mode if system appearance is dark.
+
+#+begin_src emacs-lisp
+(add-hook 'pdf-view-mode-hook
+          (lambda ()
+            (if (eq ns-system-appearance 'dark)
+                (pdf-view-themed-minor-mode 1)))))
+#+end_src
+
+Enable/Disable themed mode for all existing pdf buffers on the change of system appearance.
+
+#+begin_src emacs-lisp
+(defun my/sync-pdf-theme-with-system (appearance)
+  "Toggle `pdf-view-themed-minor-mode` based on system APPEARANCE."
+  (let ((enable-p (eq appearance 'dark)))
+    ;; Iterate over all existing buffers
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+        (when (derived-mode-p 'pdf-view-mode)
+          (pdf-view-themed-minor-mode (if enable-p 1 -1)))))))
+
+(add-hook 'ns-system-appearance-change-functions
+          #'my/sync-pdf-theme-with-system
+          t)
 #+end_src
 
 ** snippets
