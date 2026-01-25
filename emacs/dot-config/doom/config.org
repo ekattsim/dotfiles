@@ -1392,6 +1392,7 @@ Bind "<leader>ff" to switch to src/header pair replacing the find-file offered b
 #+END_SRC
 
 * language configuration
+#+call: confpkg()
 
 ** lsp & syntax-highlight
 #+call: confpkg("lsp")
@@ -1765,7 +1766,6 @@ Web-mode does not have any registered lsp servers, so let's add one.
 
 Here's the [[https://www.nongnu.org/geiser/Cheat-sheet.html#Cheat-sheet][cheatsheet]].
 
-
 ** typst
 #+call: confpkg(needs="typst,tinymist")
 
@@ -1842,7 +1842,6 @@ Close the =use-package!= paren
 #+begin_src emacs-lisp
 )
 #+end_src
-
 
 * tools & applications
 #+call: confpkg()
@@ -2269,7 +2268,8 @@ When exporting asynchronously with =org-export-in-background=, the instantiated 
           "https://old.reddit.com/r/slatestarcodex.rss"
           "https://old.reddit.com/r/hardware.rss"
           "https://old.reddit.com/r/computerarchitecture.rss"
-          "https://old.reddit.com/r/chipdesign.rss"))
+          "https://old.reddit.com/r/chipdesign.rss"
+          "https://japanrunningnews.blogspot.com/rss.xml"))
 #+end_src
 
 Block execution of elfeed if currently at work.
@@ -2365,7 +2365,7 @@ This is kind of for vibe coding.
   :after agent-shell)
 #+end_src
 
-*** DONE [[https://github.com/karthink/gptel][gptel (LLM chat API)]]
+*** [[https://github.com/karthink/gptel][gptel (LLM chat API)]]
 SCHEDULED: <2025-11-15 Sat>
 :PROPERTIES:
 :ID:       45f18400-eb8b-4d37-b943-75a7240f516e
