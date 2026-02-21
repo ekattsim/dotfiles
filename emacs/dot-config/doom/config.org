@@ -1143,19 +1143,31 @@ Load theme, taking current system appearance into consideration.
 
 *** Fonts
 
-Add Roboto Mono and Source Sans Pro as fixed and variable pitch fonts respectively.
+Add Roboto Mono and ET(Edward Tufte) Book as fixed and variable pitch fonts respectively.
 
 #+BEGIN_SRC emacs-lisp
 (when (member "Roboto Mono" (font-family-list))
-  (setq doom-font (font-spec :family "Roboto Mono" :height 15.0)))
-  ;; (set-face-attribute 'default nil :family "Roboto Mono" :height 150)
-  ;; (set-face-attribute 'fixed-pitch nil :family "Roboto Mono"))
+  (setq doom-font (font-spec :family "Roboto Mono" :size 17.5)))
 
-(when (member "Source Sans Pro" (font-family-list))
+(when (member "ETBembo" (font-family-list))
   ;; variable pitch font will be a little larger than fixed fonts
-  (setq doom-variable-pitch-font (font-spec :family "Source Sans Pro" :size 18.0)))
-  ;; (set-face-attribute 'variable-pitch nil :family "Source Sans Pro" :height 1.20))
+  (setq doom-variable-pitch-font (font-spec :family "ETBembo" :size 21.0)))
+
+(doom/reload-font)
 #+END_SRC
+
+Enable =variable-pitch-mode= for all text mode derivations.
+
+#+begin_src emacs-lisp
+(add-hook 'text-mode-hook #'variable-pitch-mode)
+#+end_src
+
+Keep line number elements monospaced.
+
+#+begin_src emacs-lisp
+(set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+(set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
+#+end_src
 
 *** Modeline
 #+call: confpkg(name="nano-modeline", via="none")
@@ -1493,7 +1505,7 @@ Keep the final empty line of a subtree from being folded.
 
 **** Fonts
 
-Set Roboto Mono as header font and resize headings.
+Set title and heading font sizes.
 
 #+BEGIN_SRC emacs-lisp
 ;; Resize Org headings
@@ -1505,11 +1517,23 @@ Set Roboto Mono as header font and resize headings.
                 (org-level-6 . 1.1)
                 (org-level-7 . 1.1)
                 (org-level-8 . 1.1)))
-  (set-face-attribute (car face) nil :family "Roboto Mono" :weight 'bold :height (cdr face) :inherit 'default))
+  (set-face-attribute (car face)
+                      nil
+                      :weight 'bold
+                      :height (cdr face)))
 
 ;; Make the document title a bit bigger
-(set-face-attribute 'org-document-title nil :family "Roboto Mono" :weight 'bold :height 1.8)
+(set-face-attribute 'org-document-title nil :weight 'bold :height 1.8)
 #+END_SRC
+
+Keep structured elements monospaced.
+
+#+begin_src emacs-lisp
+(set-face-attribute 'org-block nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-verbatim nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-code nil :inherit 'fixed-pitch)
+#+end_src
 
 **** Decluttering
 
