@@ -1156,17 +1156,17 @@ Add Roboto Mono and ET(Edward Tufte) Book as fixed and variable pitch fonts resp
 (doom/reload-font)
 #+END_SRC
 
-Enable =variable-pitch-mode= for all text mode derivations.
+Enable =mixed-pitch-mode= for all text mode derivations.
 
 #+begin_src emacs-lisp
-(add-hook 'text-mode-hook #'variable-pitch-mode)
-#+end_src
-
-Keep line number elements monospaced.
-
-#+begin_src emacs-lisp
-(set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-(set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
+(use-package! mixed-pitch
+  :hook (text-mode-hook . mixed-pitch-mode)
+  :config
+  (setq mixed-pitch-set-height t)
+  (setq mixed-pitch-fixed-pitch-faces
+        (remove 'org-todo
+                (remove 'org-done
+                        mixed-pitch-fixed-pitch-faces))))
 #+end_src
 
 *** Modeline
@@ -1525,15 +1525,6 @@ Set title and heading font sizes.
 ;; Make the document title a bit bigger
 (set-face-attribute 'org-document-title nil :weight 'bold :height 1.8)
 #+END_SRC
-
-Keep structured elements monospaced.
-
-#+begin_src emacs-lisp
-(set-face-attribute 'org-block nil :inherit 'fixed-pitch)
-(set-face-attribute 'org-table nil :inherit 'fixed-pitch)
-(set-face-attribute 'org-verbatim nil :inherit 'fixed-pitch)
-(set-face-attribute 'org-code nil :inherit 'fixed-pitch)
-#+end_src
 
 **** Decluttering
 
