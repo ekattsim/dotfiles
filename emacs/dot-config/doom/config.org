@@ -2413,6 +2413,22 @@ This is just for regular LLM use.
 
 This is for code autocompletion.
 
+** Terminal Emulation
+
+*** Eat: Emulate A Terminal
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! eat
+  :recipe (:type git
+           :host codeberg
+           :repo "akib/emacs-eat"
+           :files ("*.el" ("term" "term/*.el") "*.texi"
+                   "*.ti" ("terminfo/e" "terminfo/e/*")
+                   ("terminfo/65" "terminfo/65/*")
+                   ("integration" "integration/*")
+                   (:exclude ".dir-locals.el" "*-tests.el"))))
+#+end_src
+
 * personal workflow
 #+call: confpkg()
 
