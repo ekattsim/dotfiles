@@ -1166,7 +1166,19 @@ Enable =mixed-pitch-mode= for all text mode derivations.
   (setq mixed-pitch-fixed-pitch-faces
         (remove 'org-todo
                 (remove 'org-done
-                        mixed-pitch-fixed-pitch-faces))))
+                        mixed-pitch-fixed-pitch-faces)))
+#+end_src
+
+Wrap =mixed-pitch-mode= with advice so that it doesn't set the =mixed-pitch-fixed-pitch-faces=' =:weight= attribute.
+
+#+begin_src emacs-lisp
+(defun my-mixed-pitch--family-only (orig &optional ARG)
+  (let ((old (face-attribute 'default :weight)))
+    (set-face-attribute 'default nil :weight 'unspecified)
+    (funcall orig ARG)
+    (set-face-attribute 'default nil :weight old)))
+
+(advice-add 'mixed-pitch-mode :around #'my-mixed-pitch--family-only))
 #+end_src
 
 *** Modeline
