@@ -3,16 +3,16 @@
 :END:
 #+title: Surfingkeys Config
 
-For surfingkeys to load settings from a remote file, it needs to be a txt file. I already don't want to work with js, I'll be damned if I have to do it without from a txt file.
+For surfingkeys to load settings from a remote file, it needs to be a txt file. I already don't want to work with js, I'll be damned if I have to do it from a txt file.
 
 But on the other hand I love working with emacs org-mode, so I'll do that instead. The following code block is [[https://orgmode.org/manual/Extracting-Source-Code.html][tangled]] into =surfingkeys-config.txt= in the same directory. I'll eventually organize this into a [[http://www.literateprogramming.com/][literate config]] as well and maintain both a copy of the txt file and the literate config org file.
 
 #+begin_src javascript :tangle "surfingkeys-config.txt"
 // an example to create a new mapping `ctrl-y`
 api.mapkey("<ctrl-y>", "Show me the money", function () {
-	Front.showPopup(
-		"a well-known phrase uttered by characters in the 1996 film Jerry Maguire (Escape to close).",
-	);
+    Front.showPopup(
+        "a well-known phrase uttered by characters in the 1996 film Jerry Maguire (Escape to close).",
+    );
 });
 
 // an example to replace `T` with `gt`, click `Default mappings` to see how `T` works.

@@ -2120,7 +2120,7 @@ This function adds a final '$0' tabstop to =org-cdlatex-math-modify= expansions.
   :config
   (setq org-superstar-leading-bullet " "
         org-superstar-headline-bullets-list '("●" "○" "◆" "◇" "•" "⚬")
-        org-superstar-item-bullet-alist '((42 . "⚬") (43 . "⚬") (45 . "⚬"))
+        org-superstar-item-bullet-alist '((42 . ?⚬) (43 . ?⚬) (45 . ?⚬))
         org-superstar-prettify-item-bullets t)
   #+END_SRC
 
@@ -2393,7 +2393,6 @@ This is kind of for vibe coding.
 #+end_src
 
 *** [[https://github.com/karthink/gptel][gptel (LLM chat API)]]
-SCHEDULED: <2025-11-15 Sat>
 :PROPERTIES:
 :ID:       45f18400-eb8b-4d37-b943-75a7240f516e
 :END:
