@@ -1404,7 +1404,8 @@ Let's stash layout rotation under SPC w SPC, inspired by Tmux's use of C-b SPC t
   :commands #'rotate-layout
   :init
   (map! :map evil-window-map
-        "SPC" #'rotate-layout))
+        "SPC" #'rotate-layout
+        "S-SPC" #'rotate:main-vertical))
  #+END_SRC
 
 ** file management
@@ -1583,7 +1584,7 @@ Basic appearance settings.
 (plist-put org-latex-preview-appearance-options
 :page-width 1.0)
 (plist-put org-latex-preview-appearance-options
-:zoom 1.2)
+:zoom 1.0)
 
 ;; enable consistent equation numbering
 (setq org-latex-preview-numbered t)
