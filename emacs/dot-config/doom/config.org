@@ -1422,6 +1422,14 @@ Bind "<leader>ff" to switch to src/header pair replacing the find-file offered b
 ** lsp & syntax-highlight
 #+call: confpkg("lsp")
 
+*** Eglot
+
+#+begin_src emacs-lisp
+(use-package! eglot
+  :config
+  (add-hook 'eglot-managed-mode-hook (lambda () (eglot-inlay-hints-mode -1))))
+#+end_src
+
 *** eglot-booster
 :PROPERTIES:
 :ID:       7af01b58-d326-464e-94a8-bcaf1f3b3fe5
