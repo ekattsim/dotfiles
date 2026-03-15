@@ -1330,8 +1330,7 @@ Let's make my programming tunnel vision even worse.
 I think flipping this makes a lot sense and they should merge this to vim bindings.
 
 #+BEGIN_SRC emacs-lisp
-(map! :map override-global-map
-      :m "H" #'evil-beginning-of-visual-line
+(map! :m "H" #'evil-beginning-of-visual-line
       :m "L" #'evil-end-of-visual-line
       :m "0" #'evil-beginning-of-line
       :m "$" #'evil-end-of-line)
@@ -2415,9 +2414,8 @@ This is just for regular LLM use.
 
 #+begin_src emacs-lisp
 (use-package! gptel
-  :preface
-  (map! :map override-global-map
-        :nvi "C-c RET" 'gptel-send)
+  :bind (:map override-global-map
+              ("C-c RET" . 'gptel-send))
   :init
   (setf epa-pinentry-mode 'loopback)
   :config
@@ -2842,10 +2840,11 @@ We could have a function that on a DONE hook checks if the DONE was a dependency
 ** workspace management
 
 Bind workspace navigation to be more like t-smart
+
 #+BEGIN_SRC emacs-lisp
 (map! :map override-global-map
-      :g "C-t" #'+workspace/switch-to
-      :g [C-tab] #'+workspace/other)
+      "C-t" #'+workspace/switch-to
+      [C-tab] #'+workspace/other)
 #+END_SRC
 
 I love the scratch buffer. Let's test out an org major mode scratch.
