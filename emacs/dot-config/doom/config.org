@@ -1415,6 +1415,18 @@ Bind "<leader>ff" to switch to src/header pair replacing the find-file offered b
 (map! :leader :desc "Find other file" "f f" #'ff-find-other-file)
 #+END_SRC
 
+** Buffer Management
+
+#+begin_src emacs-lisp
+(map! :map override-global-map
+      "s-k" (lambda ()
+              (interactive)
+              (if (one-window-p)
+                  (kill-current-buffer)
+                (kill-current-buffer)
+                (delete-window))))
+#+end_src
+
 * language configuration
 #+call: confpkg()
 
