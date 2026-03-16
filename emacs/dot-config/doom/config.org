@@ -2422,21 +2422,42 @@ This is just for regular LLM use.
 #+begin_src emacs-lisp :tangle "packages.el"
 (package! gptel
   :recipe (:nonrecursive t))
+
+(package! gptel-agent)
 #+end_src
 
 #+begin_src emacs-lisp
 (use-package! gptel
   :bind (:map override-global-map
               ("C-c RET" . 'gptel-send))
-  :init
-  (setf epa-pinentry-mode 'loopback)
   :config
-  (let ((secret (car (auth-source-search :host "api.google.com" :user "gemini"))))
-    (when secret
-      (gptel-make-gemini "gemini"
-        :key (funcall (plist-get secret :secret))
-        :stream t)))
-  (setq gptel-default-mode 'org-mode))
+  (setq epg-pinentry-mode 'loopback)
+  (setq gptel-model 'gemini-3.1-flash-lite-preview
+        gptel-backend (gptel-make-gemini "Gemini" :key gptel-api-key
+                     :stream t))
+  (setq gptel-default-mode 'org-mode
+        gptel-track-media t)
+#+end_src
+
+Let's create a general preset for one off queries.
+
+#+begin_src emacs-lisp
+(require 'gptel-agent)
+(gptel-make-preset 'general
+    :description "A preset for general queries."
+    :backend "Gemini"
+    :model 'gemini-3.1-flash-lite-preview
+    :system "You are a large language model and your job is to be a helpful assistant. Respond concisely and use the available tools if your knowledge is lacking or if explicitly directed by the user."
+    :tools '("WebSearch" "WebFetch" "YouTube"))
+#+end_src
+
+#+begin_src emacs-lisp
+)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! gptel-agent
+  :config (gptel-agent-update))
 #+end_src
 
 *** NEXT [#C] [[https://github.com/milanglacier/minuet-ai.el][minuet (LLM FIM API)]]
