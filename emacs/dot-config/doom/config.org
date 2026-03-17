@@ -2425,11 +2425,42 @@ This is kind of for vibe coding.
 
 #+begin_src emacs-lisp
 (use-package! agent-shell
-  :init (require 'acp)
+  :disabled
+  :init
+  (require 'acp)
+  (map! :map override
+        :nvi "M-<tab>" #'agent-shell)
   :config
-  (setq agent-shell-google-authentication
-        (agent-shell-google-make-authentication :login t)))
+#+end_src
 
+Configure codex to be the default agent
+
+#+begin_src emacs-lisp
+(setq agent-shell-openai-authentication
+      (agent-shell-openai-make-authentication :login t)
+      agent-shell-preferred-agent-config 'codex)
+#+end_src
+
+We can make the agent interface play nice with evil mode now that we're out of the terminal.
+
+#+begin_src emacs-lisp
+(map! :map agent-shell-mode-map
+      :i "RET" #'newline
+      :n "RET" #'comint-send-input
+      :n [tab] #'agent-shell-next-item)
+
+;; Configure *agent-shell-diff* buffers to start in Emacs state
+(add-hook 'diff-mode-hook
+	  (lambda ()
+	    (when (string-match-p "\\*agent-shell-diff\\*" (buffer-name))
+	      (evil-emacs-state))))
+#+end_src
+
+#+begin_src emacs-lisp
+)
+#+end_src
+
+#+begin_src emacs-lisp
 (use-package! agent-shell-sidebar
   :after agent-shell)
 #+end_src
