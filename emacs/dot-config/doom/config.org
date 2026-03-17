@@ -1532,6 +1532,16 @@ Keep the final empty line of a subtree from being folded.
 (setq org-cycle-separator-lines 1)
 #+end_src
 
+*** Navigation
+
+This is weird and idk why but ~M-<return>~ gets in the way of transient mapped binds.
+
+#+begin_src emacs-lisp
+(map! :map org-mode-map
+      :n "M-<return>" nil
+      :n "M-RET" #'org-ctrl-c-ret)
+#+end_src
+
 *** Aesthetics
 #+call: confpkg(name="org-aesthetics", after="org")
 
@@ -2438,10 +2448,19 @@ This is just for regular LLM use.
 (package! gptel-agent)
 #+end_src
 
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! gptel-quick
+  :recipe (:host github :repo "karthink/gptel-quick"))
+(package! posframe)
+#+end_src
+
 #+begin_src emacs-lisp
 (use-package! gptel
-  :bind (:map override-global-map
-              ("C-c RET" . 'gptel-send))
+  :init
+  (map! :leader
+        "j ;" #'gptel-send
+        "j s" #'gptel
+        "j c" #'gptel-context-add)
   :config
   (setq epg-pinentry-mode 'loopback)
   (setq gptel-model 'gemini-3.1-flash-lite-preview
@@ -2469,7 +2488,22 @@ Let's create a general preset for one off queries.
 
 #+begin_src emacs-lisp
 (use-package! gptel-agent
+  :init
+  (map! :leader :desc "Portable agentic intelligence"
+        "j a" #'gptel-agent)
   :config (gptel-agent-update))
+#+end_src
+
+For quick summarization, we can use gptel-quick.
+
+#+begin_src emacs-lisp
+(use-package! gptel-quick
+  :init
+  (map! :leader :desc "Quick Summaries"
+        "?" #'gptel-quick)
+  :config
+  (setq gptel-quick-use-context t
+        gptel-quick-timeout 99))
 #+end_src
 
 *** NEXT [#C] [[https://github.com/milanglacier/minuet-ai.el][minuet (LLM FIM API)]]
