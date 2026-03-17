@@ -1637,10 +1637,11 @@ Open web links in nyxt. I cannot set it to default on macOS because I haven't bu
 :ID:       e038c0dd-6188-43cd-af61-488024108f0c
 :END:
 
-Load the s5 backend from org-contrib
+Use latexmk to build LaTeX so I don't need to deal with multi-compilation headaches.
 
 #+begin_src emacs-lisp
-(add-to-list 'org-export-backends 's5)
+(setq org-latex-pdf-process
+      '("latexmk -pdf -shell-escape -interaction=nonstopmode -output-directory=%o %f"))
 #+end_src
 
 ** latex
@@ -2301,6 +2302,17 @@ When exporting asynchronously with =org-export-in-background=, the instantiated 
 (with-eval-after-load "ox"
   (require 'edraw-org)
   (edraw-org-setup-exporter))
+#+end_src
+
+*** PlantUML
+#+call: confpkg(after="org")
+
+#+begin_src emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((plantuml . t)))
+
+(setq org-plantuml-exec-mode 'plantuml)
 #+end_src
 
 ** rss feeds
