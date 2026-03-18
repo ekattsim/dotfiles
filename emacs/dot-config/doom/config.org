@@ -1623,11 +1623,11 @@ Basic appearance settings.
 
 #+BEGIN_SRC emacs-lisp
 ;; real time previews of latex fagments as you type
-(setq org-latex-preview-live t)
-(setq org-latex-preview-live-debounce 0.25)  ;; reducing delay before preview
+(setq org-latex-preview-mode-display-live t)
+(setq org-latex-preview-mode-update-delay 0)  ;; preview instantly
 
-;; png is faster than svg
-(setq org-latex-preview-process-default 'dvipng)
+;; svg is more convenient because it zoom and theme invariant
+(setq org-latex-preview-process-default 'dvisvgm)
 )
 #+END_SRC
 
