@@ -1900,31 +1900,15 @@ Close the =use-package!= paren
 )
 #+end_src
 
-* tools & applications
-#+call: confpkg()
+** Matlab
 
-** doom-scratch
-:PROPERTIES:
-:ID:       9b53dabd-fb47-4ad1-bbc0-cbe364b033dd
-:END:
-#+call: confpkg()
-
-Start doom scratch buffers in org mode.
-
-#+begin_src emacs-lisp
-(setq doom-scratch-initial-major-mode 'org-mode)
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! matlab-mode)
 #+end_src
 
-** image-mode
-#+call: confpkg()
+** Documents
 
-Rendering performance for pngs improves if we use a native decoder instead of imagemagick.
-
-#+begin_src emacs-lisp
-(add-to-list 'imagemagick-types-inhibit 'PNG)
-#+end_src
-
-** pdf-tools
+*** PDF
 
 Enable =auto-revert-mode= in =pdf-view-mode= and make it /fast/ by enabling revert on file notifications instead of polling.
 
@@ -1958,6 +1942,30 @@ Enable/Disable themed mode for all existing pdf buffers on the change of system 
 (add-hook 'ns-system-appearance-change-functions
           #'my/sync-pdf-theme-with-system
           t)
+#+end_src
+
+* tools & applications
+#+call: confpkg()
+
+** doom-scratch
+:PROPERTIES:
+:ID:       9b53dabd-fb47-4ad1-bbc0-cbe364b033dd
+:END:
+#+call: confpkg()
+
+Start doom scratch buffers in org mode.
+
+#+begin_src emacs-lisp
+(setq doom-scratch-initial-major-mode 'org-mode)
+#+end_src
+
+** image-mode
+#+call: confpkg()
+
+Rendering performance for pngs improves if we use a native decoder instead of imagemagick.
+
+#+begin_src emacs-lisp
+(add-to-list 'imagemagick-types-inhibit 'PNG)
 #+end_src
 
 ** snippets
