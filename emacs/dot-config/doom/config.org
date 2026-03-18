@@ -2490,7 +2490,7 @@ This is just for regular LLM use.
   (map! :leader
         "j ;" #'gptel-send
         "j s" #'gptel
-        "j c" #'gptel-context-add)
+        "j c" #'gptel-add)
   :config
   (setq epg-pinentry-mode 'loopback)
   (setq gptel-model 'gemini-3.1-flash-lite-preview
@@ -2554,6 +2554,19 @@ This is for code autocompletion.
                    ("terminfo/65" "terminfo/65/*")
                    ("integration" "integration/*")
                    (:exclude ".dir-locals.el" "*-tests.el"))))
+#+end_src
+
+** Appine
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! appine
+  :recipe (:host github :repo "chaoswork/appine"))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! appine
+  :config
+  (setq appine-enable-open-in-org-mode t))
 #+end_src
 
 * personal workflow
