@@ -1613,7 +1613,7 @@ Basic appearance settings.
 (plist-put org-latex-preview-appearance-options
 :page-width 1.0)
 (plist-put org-latex-preview-appearance-options
-:zoom 1.0)
+:zoom 1.1)
 
 ;; enable consistent equation numbering
 (setq org-latex-preview-numbered t)
@@ -2498,7 +2498,10 @@ This is just for regular LLM use.
   (map! :leader
         "j ;" #'gptel-send
         "j s" #'gptel
-        "j c" #'gptel-add)
+        "j c" #'gptel-add
+        "j C" (lambda ()
+                (interactive)
+                (gptel-context-remove-all nil)))
   :config
   (setq epg-pinentry-mode 'loopback)
   (setq gptel-model 'gemini-3.1-flash-lite-preview
