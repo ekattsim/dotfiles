@@ -1133,13 +1133,23 @@ Load theme, taking current system appearance into consideration.
 (defun my/apply-theme (appearance)
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
-    ('light (load-theme 'doom-homage-white t))
+    ('light (load-theme 'doom-earl-grey t))
 
-    ('dark (load-theme 'doom-lantern t)))
+    ('dark (load-theme 'almost-mono-black t)))
   (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
 
 (add-hook 'ns-system-appearance-change-functions #'my/apply-theme)
 #+END_SRC
+
+**** Monochrome Themes
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! almost-mono-themes
+  :recipe (:type git
+           :host codeberg
+           :repo "cryon/almost-mono-themes"
+           :files ("almost-mono-themes.el")))
+#+end_src
 
 *** Fonts
 
