@@ -2577,7 +2577,42 @@ This is for code autocompletion.
                    (:exclude ".dir-locals.el" "*-tests.el"))))
 #+end_src
 
-** Appine
+** Embedded Widgets
+
+*** Webkit xwidgets
+
+Xwidgets are implemented as subclassed [[https://developer.apple.com/documentation/appkit/nsview][NSViews]] under the emacs parent view, running the system WebKit engine within this child view.
+
+**** Configuring browse-url 
+
+#+begin_src emacs-lisp
+(after! browse-url
+  (setq browse-url-browser-function 'xwwp))
+#+end_src
+
+**** xwwp
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! xwwp)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! xwwp
+  :commands (xwwp)
+  :config
+  (map! :map xwidget-webkit-mode-map
+        :n "f" #'xwwp-follow-link))
+#+end_src
+
+Let's bind some keybinds from evil-collections globally
+
+#+begin_src emacs-lisp
+(after! evil-collection-xwidget
+  (map! :leader
+        "T" #'evil-collection-xwidget-webkit-search-tabs))
+#+end_src
+
+*** Appine
 
 #+begin_src emacs-lisp :tangle "packages.el"
 (package! appine
