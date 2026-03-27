@@ -2370,6 +2370,12 @@ Block execution of elfeed if currently at work.
 #+end_src
 
 #+begin_src emacs-lisp
+(map! :mode 'elfeed-search-mode
+      :m "gj" 'evil-next-line
+      :m "gk" 'evil-previous-line)
+#+end_src
+
+#+begin_src emacs-lisp
 )
 #+end_src
 
