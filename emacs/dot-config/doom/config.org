@@ -1660,8 +1660,24 @@ Open web links in nyxt. I cannot set it to default on macOS because I haven't bu
 Use latexmk to build LaTeX so I don't need to deal with multi-compilation headaches.
 
 #+begin_src emacs-lisp
-(setq org-latex-pdf-process
+(use-package! ox-latex
+  :after org
+  :config
+  (setq org-latex-pdf-process
       '("latexmk -pdf -shell-escape -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+Let's standardize on better defaults than ox-latex
+
+#+begin_src emacs-lisp
+(setq org-export-with-toc nil
+      org-export-with-section-numbers nil)
+
+(add-to-list 'org-latex-packages-alist '("margin=1in" "geometry" nil nil))
+#+end_src
+
+#+begin_src emacs-lisp
+)
 #+end_src
 
 ** latex
