@@ -2622,13 +2622,6 @@ This is for code autocompletion.
 
 Xwidgets are implemented as subclassed [[https://developer.apple.com/documentation/appkit/nsview][NSViews]] under the emacs parent view, running the system WebKit engine within this child view.
 
-**** Configuring browse-url 
-
-#+begin_src emacs-lisp
-(after! browse-url
-  (setq browse-url-browser-function 'xwwp))
-#+end_src
-
 **** xwwp
 
 #+begin_src emacs-lisp :tangle "packages.el"
@@ -2638,30 +2631,19 @@ Xwidgets are implemented as subclassed [[https://developer.apple.com/documentati
 #+begin_src emacs-lisp
 (use-package! xwwp
   :commands (xwwp)
+  :init
+  (after! browse-url
+    (setq browse-url-browser-function 'xwwp-other-window))
+  
+  (map! :leader
+        "o b" #'xwwp
+        "o B" #'xwwp-other-window)
   :config
   (map! :map xwidget-webkit-mode-map
-        :n "f" #'xwwp-follow-link))
-#+end_src
-
-Let's bind some keybinds from evil-collections globally
-
-#+begin_src emacs-lisp
-(after! evil-collection-xwidget
-  (map! :leader
-        "T" #'evil-collection-xwidget-webkit-search-tabs))
-#+end_src
-
-*** Appine
-
-#+begin_src emacs-lisp :tangle "packages.el"
-(package! appine
-  :recipe (:host github :repo "chaoswork/appine"))
-#+end_src
-
-#+begin_src emacs-lisp
-(use-package! appine
-  :config
-  (setq appine-enable-open-in-org-mode t))
+        :n "f" #'xwwp-follow-link)
+  (after! evil-collection-xwidget
+    (map! :leader
+          "T" #'evil-collection-xwidget-webkit-search-tabs)))
 #+end_src
 
 * personal workflow
