@@ -975,7 +975,7 @@ markdown          ; writing docs for people to ignore
 ;;nim               ; python + lisp at the speed of c
 ;;nix               ; i hereby declare "nix geht mehr!"
 ;;ocaml             ; an objective camel
-(org +roam2)               ; organize your plain life in plain text
+(org +roam2 +jupyter)               ; organize your plain life in plain text
 ;;php               ; perl's insecure younger brother
 ;;plantuml          ; diagrams for confusing people more
 ;;graphviz          ; diagrams for confusing yourself even more
@@ -1970,6 +1970,23 @@ Enable/Disable themed mode for all existing pdf buffers on the change of system 
           t)
 #+end_src
 
+** Jupyter Notebooks
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! code-cells
+  :recipe (:type git
+                 :host github
+                 :repo "astoff/code-cells.el"))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! code-cells
+  :config
+  (setq code-cells-convert-ipynb-style '(("pandoc" "--to" "ipynb" "--from" "org")
+                                         ("pandoc" "--to" "org" "--from" "ipynb" "--extract-media" "./ipynb-images/")
+                                         (lambda () #'org-mode))))
+#+end_src
+
 * tools & applications
 #+call: confpkg()
 
@@ -2068,7 +2085,7 @@ Environments auto-expanding snippets are under the ";e" prefix. Note that these 
  #+BEGIN_SRC emacs-lisp
 ;; (copied from karthink). We double escape '\' if we're preceding escapable chars
 "mk" '(yas "\\\\( $1 \\\\)$0 ") ;; We're trying to pass the string "\\( $1 \\)$0"
-"dm" '(yas "\\[ $1 \\]$0")
+"dmm" '(yas "\\[ $1 \\]$0")
  #+END_SRC
 
 **** latex commands
@@ -2789,6 +2806,13 @@ Let's add a file-watch that rebuilds =org-project-files= and =org-agenda-files= 
 (file-notify-add-watch org-project-directory
                        '(change attribute-change)
                        #'keep-projects-in-sync)
+#+end_src
+
+Doom sets =projectile-ignored-project-function= to ~doom-project-ignored-p~ to decide whether a project can be added as "known". Let's remove this limitation.
+
+#+begin_src emacs-lisp
+(after! projectile
+  (setq projectile-ignored-project-function nil))
 #+end_src
 
 ** agenda
