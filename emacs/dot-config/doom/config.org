@@ -860,7 +860,7 @@ zen               ; distraction-free coding or writing (todo)
 (evil +everywhere); come to the dark side, we have cookies
 file-templates    ; auto-snippets for empty files
 fold              ; (nigh) universal code folding
-;;(format +onsave)  ; automated prettiness
+(format +onsave +lsp)  ; automated prettiness
 ;;god               ; run emacs commands without modifier keys
 ;;lispy             ; vim for lisp, for people who don't like vim
 ;;multiple-cursors  ; editing in many places at once
@@ -908,7 +908,7 @@ syntax              ; tasing you for every semicolon you forget
 ;;ein               ; tame jupyter notebooks with emacs
 (eval +overlay)     ; run code, run (also, repls)
 lookup              ; navigate your code and its documentation
-(lsp +eglot)               ; m-x vscode
+(lsp +eglot +peek)               ; m-x vscode
 magit             ; a git porcelain for emacs
 ;;make              ; run make tasks from emacs
 ;;pass              ; password manager for nerds
@@ -1133,7 +1133,7 @@ Load theme, taking current system appearance into consideration.
 (defun my/apply-theme (appearance)
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
-    ('light (load-theme 'doom-earl-grey t))
+    ('light (load-theme 'doom-homage-white t))
 
     ('dark (load-theme 'almost-mono-black t)))
   (load-file "/Users/abhijeetsurakanti/.config/doom/subconf/config-org-aesthetics.el")) ;; first use of confpkg!!!
@@ -1557,10 +1557,9 @@ This is weird and idk why but ~M-<return>~ gets in the way of transient mapped b
 
 **** Fonts
 
-Set title and heading font sizes.
+Set title and heading font sizes. And also temporarily make headings inherit variable-pitch face to keep headings variable pitched in the ~almost-mono-black~ theme.
 
 #+BEGIN_SRC emacs-lisp
-;; Resize Org headings
 (dolist (face '((org-level-1 . 1.35)
                 (org-level-2 . 1.3)
                 (org-level-3 . 1.2)
@@ -1569,10 +1568,20 @@ Set title and heading font sizes.
                 (org-level-6 . 1.1)
                 (org-level-7 . 1.1)
                 (org-level-8 . 1.1)))
-  (set-face-attribute (car face)
-                      nil
-                      :weight 'bold
-                      :height (cdr face)))
+  (let* ((f (car face))
+         (current-inherit (face-attribute f :inherit))
+         (new-inherit (if (listp current-inherit)
+                          (if (eq (car current-inherit) 'variable-pitch)
+                              current-inherit
+                            (cons 'variable-pitch current-inherit))
+                        (if (eq current-inherit 'variable-pitch)
+                            'variable-pitch
+                          (list 'variable-pitch current-inherit)))))
+    (set-face-attribute f
+                        nil
+                        :weight 'bold
+                        :height (cdr face)
+                        :inherit new-inherit)))
 
 ;; Make the document title a bit bigger
 (set-face-attribute 'org-document-title nil :weight 'bold :height 1.8)
@@ -1642,6 +1651,7 @@ Basic appearance settings.
 #+END_SRC
 
 *** Links
+
 +Try to open arbitrary files in emacs+. Not needed anymore since org-link type =file+emacs= exists.
 #+begin_src emacs-lisp
 ;; (add-to-list 'org-file-apps '(t . emacs))
@@ -1985,6 +1995,15 @@ Enable/Disable themed mode for all existing pdf buffers on the change of system 
   (setq code-cells-convert-ipynb-style '(("pandoc" "--to" "ipynb" "--from" "org")
                                          ("pandoc" "--to" "org" "--from" "ipynb" "--extract-media" "./ipynb-images/")
                                          (lambda () #'org-mode))))
+#+end_src
+
+** Python
+
+#+begin_src emacs-lisp
+(use-package! python
+  :config
+  (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
+  (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 #+end_src
 
 * tools & applications
