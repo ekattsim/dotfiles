@@ -860,7 +860,7 @@ zen               ; distraction-free coding or writing (todo)
 (evil +everywhere); come to the dark side, we have cookies
 file-templates    ; auto-snippets for empty files
 fold              ; (nigh) universal code folding
-(format +onsave +lsp)  ; automated prettiness
+(format +onsave)  ; automated prettiness
 ;;god               ; run emacs commands without modifier keys
 ;;lispy             ; vim for lisp, for people who don't like vim
 ;;multiple-cursors  ; editing in many places at once
@@ -1662,6 +1662,18 @@ Open web links in nyxt. I cannot set it to default on macOS because I haven't bu
 ;; (setcdr (assoc "\\.x?html?\\'" org-file-apps) "")
 #+end_src
 
+Auto preview links after babel execution. This is useful because links are inserted as results of execution.
+
+#+begin_src emacs-lisp
+(defun my/org-link-preview-refresh-after-babel ()
+  (run-at-time
+   0.1 nil
+   'org-link-preview-refresh))
+
+(add-hook 'org-babel-after-execute-hook
+          #'my/org-link-preview-refresh-after-babel)
+#+end_src
+
 *** exports
 :PROPERTIES:
 :ID:       e038c0dd-6188-43cd-af61-488024108f0c
@@ -1997,6 +2009,182 @@ Enable/Disable themed mode for all existing pdf buffers on the change of system 
                                          (lambda () #'org-mode))))
 #+end_src
 
+#+begin_src emacs-lisp
+(after! ob-jupyter
+  (setq my/jupyter-kernel-connection-file nil)
+  (setq org-babel-default-header-args:jupyter-python
+        `((:results . "output scalar replace")
+          (:session . ,my/jupyter-kernel-connection-file)
+          (:kernel . "python3")
+          (:async . "yes"))))
+#+end_src
+
+*** Dynamic Kernelspec Generation
+#+call: confpkg(name="uv-jupyter-kernels")
+
+#+begin_src emacs-lisp
+(after! ob-jupyter
+  (require 'cl-lib)
+  (require 'subr-x)
+  (require 'json)
+
+  (defgroup uv-jupyter-kernels nil
+    "Dynamic uv-backed kernelspec generation for ob-jupyter."
+    :group 'jupyter
+    :prefix "uv-jupyter-kernels-")
+
+  (defcustom uv-jupyter-kernels-directory
+    (expand-file-name "~/.local/share/uv/tools/jupyter-core/share/jupyter/kernels/")
+    "Directory where generated kernelspecs are written."
+    :type 'directory)
+
+  (defcustom uv-jupyter-command "uv"
+    "The uv executable used in generated kernelspecs."
+    :type 'string)
+
+  (defcustom uv-jupyter-python-command "python"
+    "The Python command passed to `uv run`."
+    :type 'string)
+
+  (defcustom uv-jupyter-default-packages '()
+    "Packages always added to generated uv kernels, besides ipykernel."
+    :type '(repeat string))
+
+  (defcustom uv-jupyter-kernel-prefix "uv"
+    "Prefix used for generated kernel names."
+    :type 'string)
+
+  (defun uv-jupyter--split-package-string (s)
+    (when (stringp s)
+      (split-string s "," t "[[:space:]\n\t\r]+")))
+
+  (defun uv-jupyter--normalize-packages (packages)
+    (sort
+     (delete-dups
+      (cl-remove-if #'string-empty-p
+                    (mapcar #'string-trim packages)))
+     #'string-lessp))
+
+  (defun uv-jupyter--safe-component (s)
+    (let ((s (downcase s)))
+      (setq s (replace-regexp-in-string "[^[:alnum:]._+-]+" "-" s))
+      (setq s (replace-regexp-in-string "-+" "-" s))
+      (setq s (replace-regexp-in-string "^-\\|-$" "" s))
+      s))
+
+  (defun uv-jupyter--package-list-p (kernel)
+    "Treat KERNEL as a package list iff it contains commas.
+This avoids stealing normal kernelspec names like \"python3\"."
+    (and (stringp kernel)
+         (string-match-p "," kernel)))
+
+  (defun uv-jupyter--packages-from-kernel-header (kernel)
+    (uv-jupyter--normalize-packages
+     (append uv-jupyter-default-packages
+             (uv-jupyter--split-package-string kernel))))
+
+  (defun uv-jupyter--kernel-name (packages)
+    (let ((suffix (mapconcat #'uv-jupyter--safe-component packages "-")))
+      (if (string-empty-p suffix)
+          (format "%s-python" uv-jupyter-kernel-prefix)
+        (format "%s-%s" uv-jupyter-kernel-prefix suffix))))
+
+  (defun uv-jupyter--kernel-display-name (packages)
+    (format "Python (uv: %s)"
+            (if packages
+                (string-join packages ",")
+              "base")))
+
+  (defun uv-jupyter--kernel-dir (kernel-name)
+    (expand-file-name kernel-name uv-jupyter-kernels-directory))
+
+  (defun uv-jupyter--kernel-json-path (kernel-name)
+    (expand-file-name "kernel.json" (uv-jupyter--kernel-dir kernel-name)))
+
+  (defun uv-jupyter--argv (packages)
+    (append
+     (list uv-jupyter-command "run")
+     (cl-mapcan (lambda (pkg) (list "--with" pkg))
+                (append '("ipykernel") packages))
+     (list uv-jupyter-python-command
+           "-m" "ipykernel_launcher"
+           "-f" "{connection_file}")))
+
+  (defun uv-jupyter--kernel-plist (packages)
+    `((argv . ,(uv-jupyter--argv packages))
+      (display_name . ,(uv-jupyter--kernel-display-name packages))
+      (language . "python")
+      (metadata . ((debugger . t)))))
+
+  (defun uv-jupyter--json-encode-kernel (packages)
+    (let ((json-object-type 'alist)
+          (json-array-type 'list)
+          (json-encoding-pretty-print t))
+      (json-encode (uv-jupyter--kernel-plist packages))))
+
+  (defun uv-jupyter--ensure-directory (dir)
+    (unless (file-directory-p dir)
+      (make-directory dir t)))
+
+  (defun uv-jupyter--write-file-if-changed (file content)
+    (let ((current (when (file-exists-p file)
+                     (with-temp-buffer
+                       (insert-file-contents file)
+                       (buffer-string)))))
+      (unless (equal current content)
+        (with-temp-file file
+          (insert content)))))
+
+  (defun uv-jupyter-ensure-kernelspec-for-packages (packages)
+    "Ensure a uv-backed kernelspec exists for PACKAGES.
+Return the generated kernelspec name."
+    (let* ((packages (uv-jupyter--normalize-packages packages))
+           (kernel-name (uv-jupyter--kernel-name packages))
+           (kernel-dir (uv-jupyter--kernel-dir kernel-name))
+           (kernel-json (uv-jupyter--kernel-json-path kernel-name))
+           (json-content (uv-jupyter--json-encode-kernel packages)))
+      (uv-jupyter--ensure-directory kernel-dir)
+      (uv-jupyter--write-file-if-changed kernel-json json-content)
+      (ignore-errors (jupyter-refresh-kernelspecs))
+      kernel-name))
+
+  (defun uv-jupyter-resolve-kernel-header (kernel)
+    "If KERNEL looks like a package list, generate a kernelspec and return its name.
+Otherwise return KERNEL unchanged."
+    (if (uv-jupyter--package-list-p kernel)
+        (uv-jupyter-ensure-kernelspec-for-packages
+         (uv-jupyter--packages-from-kernel-header kernel))
+      kernel))
+
+  (defun uv-jupyter--rewrite-jupyter-params (params)
+    (let* ((kernel (alist-get :kernel params))
+           (resolved (uv-jupyter-resolve-kernel-header kernel)))
+      (if (equal kernel resolved)
+          params
+        (cons (cons :kernel resolved)
+              (assq-delete-all :kernel params)))))
+
+  (defun uv-jupyter--around-org-babel-execute-jupyter (orig-fn body params)
+    (funcall orig-fn body (uv-jupyter--rewrite-jupyter-params params)))
+
+;;;###autoload
+  (defun uv-jupyter-enable ()
+    "Enable dynamic uv-backed kernelspec generation for ob-jupyter."
+    (interactive)
+    (advice-add 'org-babel-execute:jupyter :around
+                #'uv-jupyter--around-org-babel-execute-jupyter))
+
+;;;###autoload
+  (defun uv-jupyter-disable ()
+    "Disable dynamic uv-backed kernelspec generation for ob-jupyter."
+    (interactive)
+    (advice-remove 'org-babel-execute:jupyter
+                   #'uv-jupyter--around-org-babel-execute-jupyter))
+
+  (provide 'uv-jupyter-kernels)
+  (uv-jupyter-enable))
+#+end_src
+
 ** Python
 
 #+begin_src emacs-lisp
@@ -2004,6 +2192,12 @@ Enable/Disable themed mode for all existing pdf buffers on the change of system 
   :config
   (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! flycheck
+  :config
+  (setq-default flycheck-disabled-checkers '(python-flake8)))
 #+end_src
 
 * tools & applications
