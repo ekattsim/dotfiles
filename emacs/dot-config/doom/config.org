@@ -2673,6 +2673,25 @@ idk if i prefer manual archiving but I sure as shit don't want to lose sessions 
       mindstream-unique nil))
 #+end_src
 
+** beamer
+#+call: confpkg()
+
+#+begin_src emacs-lisp
+(eval-after-load "ox-latex"
+
+  ;; update the list of LaTeX classes and associated header (encoding, etc.)
+  ;; and structure
+  '(add-to-list 'org-latex-classes
+    `("beamer"
+      ,(concat "\\documentclass[presentation]{beamer}\n"
+               "[DEFAULT-PACKAGES]"
+               "[PACKAGES]"
+               "[EXTRA]\n")
+      ("\\section{%s}" . "\\section*{%s}")
+      ("\\subsection{%s}" . "\\subsection*{%s}")
+      ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+#+end_src
+
 
 ** AI
 
@@ -2843,7 +2862,8 @@ Xwidgets are implemented as subclassed [[https://developer.apple.com/documentati
 
 #+begin_src emacs-lisp
 (use-package! xwwp
-  :commands (xwwp)
+  :commands (xwwp
+             xwwp-other-window)
   :init
   (after! browse-url
     (setq browse-url-browser-function 'xwwp-other-window))
