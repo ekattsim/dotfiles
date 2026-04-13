@@ -3384,7 +3384,7 @@ Tweak work/break times.
 #+begin_src emacs-lisp
   (setq pomm-work-period 50
         pomm-short-break-period 10
-        pomm-long-break-period 10)
+        pomm-number-of-periods 99)
 #+end_src
 
 Kill any elfeed buffers at the end of a break.
@@ -3401,7 +3401,7 @@ Kill any elfeed buffers at the end of a break.
           'my/pomm-kill-elfeed)
 #+end_src
 
-I want =pomm-ask-before-work= to be enabled only after a long break.
++I want =pomm-ask-before-work= to be enabled only after a long break.+ This is irrelevant now since I've disabled long breaks.
 
 #+begin_src emacs-lisp
 (defun my/pomm-ask-after-long-break ()
