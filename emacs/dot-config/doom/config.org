@@ -831,7 +831,7 @@ vertico           ; the search engine of the future
 
 #+name: doom-ui
 #+begin_src emacs-lisp
-;;deft              ; notational velocity for emacs
+deft              ; notational velocity for emacs
 doom              ; what makes doom look the way it does
 doom-dashboard    ; a nifty splash screen for emacs
 ;;doom-quit         ; doom quit-message prompts when you quit emacs
@@ -980,7 +980,7 @@ markdown          ; writing docs for people to ignore
 ;;plantuml          ; diagrams for confusing people more
 ;;graphviz          ; diagrams for confusing yourself even more
 ;;purescript        ; javascript, but functional
-(python +lsp +tree-sitter)            ; beautiful is better than ugly
+(python +lsp +tree-sitter +conda +uv)            ; beautiful is better than ugly
 ;;qt                ; the 'cutest' gui framework ever
 ;;racket            ; a dsl for dsls
 ;;raku              ; the artist formerly known as perl6
@@ -1151,6 +1151,19 @@ Load theme, taking current system appearance into consideration.
            :files ("almost-mono-themes.el")))
 #+end_src
 
+***** IDEA [#A] Create a custom monochrome theme
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! stimmung-themes
+  :disable t)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! stimmung-themes
+  :commands (stimmung-themes-load-light
+             stimmung-themes-load-dark))
+#+end_src
+
 *** Fonts
 
 Add Roboto Mono and ET(Edward Tufte) Book as fixed and variable pitch fonts respectively.
@@ -1190,6 +1203,8 @@ Wrap =mixed-pitch-mode= with advice so that it doesn't set the =mixed-pitch-fixe
 
 (advice-add 'mixed-pitch-mode :around #'my-mixed-pitch--family-only))
 #+end_src
+
+**** IDEA Check out [[https://input.djr.com/info/][Input]]
 
 *** Modeline
 #+call: confpkg(name="nano-modeline", via="none")
@@ -1243,6 +1258,32 @@ Unfortunately fish is not POSIX compliant.
 #+BEGIN_SRC emacs-lisp
 (setq shell-file-name (executable-find "zsh"))
 #+END_SRC
+
+Configure gpg to loopback to emacs for prompts.
+
+#+begin_src emacs-lisp
+(setq epg-pinentry-mode 'loopback)
+
+(defvar-local my/gpg-encrypted nil)
+
+(defun my/gpg-decrypt-if-needed ()
+  (when (save-excursion
+          (goto-char (point-min))
+          (looking-at "-----BEGIN PGP MESSAGE-----"))
+    (epa-decrypt-region (point-min) (point-max))
+    (setq my/gpg-encrypted t)))
+
+(defun my/gpg-encrypt-before-save ()
+  (when my/gpg-encrypted
+    (epa-encrypt-region (point-min) (point-max) nil nil nil)
+    (setq my/gpg-encrypted nil)))
+
+;; (add-hook 'find-file-hook #'my/gpg-decrypt-if-needed)
+;; (add-hook 'before-save-hook #'my/gpg-encrypt-before-save)
+
+;; (remove-hook 'find-file-hook #'my/gpg-decrypt-if-needed)
+;; (remove-hook 'before-save-hook #'my/gpg-encrypt-before-save)
+#+end_src
 
 ** Peformance Hacking
 
@@ -1647,6 +1688,9 @@ Basic appearance settings.
 
 ;; svg is more convenient because it zoom and theme invariant
 (setq org-latex-preview-process-default 'dvisvgm)
+
+;; don't cache previews across sessions to save space
+(setq org-latex-preview-cache 'temp)
 )
 #+END_SRC
 
@@ -1999,6 +2043,10 @@ Enable/Disable themed mode for all existing pdf buffers on the change of system 
   :recipe (:type git
                  :host github
                  :repo "astoff/code-cells.el"))
+(package! ox-ipynb
+  :recipe (:type git
+                 :host github
+                 :repo "jkitchin/ox-ipynb"))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -2007,16 +2055,19 @@ Enable/Disable themed mode for all existing pdf buffers on the change of system 
   (setq code-cells-convert-ipynb-style '(("pandoc" "--to" "ipynb" "--from" "org")
                                          ("pandoc" "--to" "org" "--from" "ipynb" "--extract-media" "./ipynb-images/")
                                          (lambda () #'org-mode))))
+(use-package! ox-ipynb
+  :demand)
 #+end_src
 
 #+begin_src emacs-lisp
 (after! ob-jupyter
-  (setq my/jupyter-kernel-connection-file nil)
+  (setq my/jupyter-kernel-connection-file "/ssh:gpu-server:/home/asurakan/.local/share/jupyter/runtime/kernel-85a52649-77a9-437a-a8f8-799fb74a48dc.json")
   (setq org-babel-default-header-args:jupyter-python
         `((:results . "output scalar replace")
           (:session . ,my/jupyter-kernel-connection-file)
           (:kernel . "python3")
-          (:async . "yes"))))
+          (:async . "yes")
+          (:exports . "both"))))
 #+end_src
 
 *** Dynamic Kernelspec Generation
@@ -2538,6 +2589,10 @@ This package comes in handy for custom org link types, but pdf links weren't wor
 
 Installed and pre-configured as part of the =:lang org +roam2= doom module.
 
+#+begin_src emacs-lisp :tangle "packages.el"
+(unpin! org-roam)
+#+end_src
+
 Make "~/org/zettelkasten" the org-roam directory. Make sure only roam nodes are present in this directory.
 
 #+BEGIN_SRC emacs-lisp
@@ -2550,7 +2605,48 @@ Doom is doing too much with the node template string, configure a more minimal d
 (use-package! org-roam
   :config
   (setq org-roam-node-display-template
-        (concat "${title:*} " "${doom-tags:15}")))
+        (concat "${title:*} " "${doom-tags:20}"))
+#+end_src
+
+Adjust the default template to allow insertion of file tags as well.
+
+#+begin_src emacs-lisp
+(setq org-roam-capture-templates
+      '(("d" "default" plain
+         "#+title: ${title}\n#+filetags: %?"
+         :target
+         (file "%<%Y%m%d%H%M%S>-${slug}.org")
+         :unnarrowed t)))
+#+end_src
+
+Fix ox-html's poor handling of id links
+
+#+begin_src emacs-lisp
+(after! ox-html
+  (require 'org-roam-export))
+#+end_src
+
+#+begin_src emacs-lisp
+)
+#+end_src
+
+**** Deft
+:PROPERTIES:
+:ID:       206067c8-9d36-4ad0-b397-2f9681803b9c
+:END:
+
+#+begin_src emacs-lisp
+(use-package! deft
+  :after org
+  :bind
+  (:map doom-leader-map ("n d" . #'deft))
+  :custom
+  (deft-recursive t)
+  (deft-use-filter-string-for-filename nil)
+  (deft-use-filename-as-title t)
+  (deft-extensions '("org"))
+  (deft-default-extension "org")
+  (deft-directory org-roam-directory))
 #+end_src
 
 *** edraw
@@ -2598,10 +2694,17 @@ When exporting asynchronously with =org-export-in-background=, the instantiated 
         '("https://xkcd.com/rss.xml"
           "https://hnrss.org/frontpage"
           "https://old.reddit.com/r/slatestarcodex.rss"
-          "https://old.reddit.com/r/hardware.rss"
-          "https://old.reddit.com/r/computerarchitecture.rss"
-          "https://old.reddit.com/r/chipdesign.rss"
-          "https://japanrunningnews.blogspot.com/rss.xml"))
+          ("https://old.reddit.com/r/hardware.rss" hardware)
+          ("https://old.reddit.com/r/computerarchitecture.rss" comparch)
+          ("https://old.reddit.com/r/chipdesign.rss" comparch)
+          "https://japanrunningnews.blogspot.com/rss.xml"
+          ("https://semiwiki.com/feed" semiconductors)
+          "https://owllife.kennesaw.edu/organization/isa/events.rss"
+          ("https://mattrickard.com/rss" AI)
+          ("https://semianalysis.com/rss" semiconductors)
+          ("https://geohot.github.io/blog/feed.xml" culture)
+          ("https://stratechery.passport.online/feed/rss/CaAPdzwgcYLX9nCkfGBAD" business technology)
+          ))
 #+end_src
 
 Block execution of elfeed if currently at work.
@@ -2785,11 +2888,17 @@ This is just for regular LLM use.
                 (gptel-context-remove-all nil)))
   :config
   (setq epg-pinentry-mode 'loopback)
-  (setq gptel-model 'gemini-3.1-flash-lite-preview
-        gptel-backend (gptel-make-gemini "Gemini" :key gptel-api-key
-                     :stream t))
-  (setq gptel-default-mode 'org-mode
-        gptel-track-media t)
+  (setq gptel-backend (gptel-make-openai-chatgpt "ChatGPT-Codex")
+        gptel-model 'gpt-5.4)
+#+end_src
+
+Some general settings
+
+#+begin_src emacs-lisp
+(setq gptel-default-mode 'org-mode
+        gptel-track-media t
+        gptel-use-context 'user)
+(setf (alist-get 'org-mode gptel-prompt-prefix-alist) "* ")
 #+end_src
 
 Let's create a general preset for one off queries.
@@ -2798,15 +2907,19 @@ Let's create a general preset for one off queries.
 (require 'gptel-agent)
 (gptel-make-preset 'general
     :description "A preset for general queries."
-    :backend "Gemini"
-    :model 'gemini-3.1-flash-lite-preview
-    :system "You are a large language model and your job is to be a helpful assistant. Respond concisely and use the available tools if your knowledge is lacking or if explicitly directed by the user."
+    :backend "ChatGPT-Codex"
+    :model 'gpt-5.4
+    :system "You are a large language model and your job is to be a helpful assistant. Respond concisely and only bring up information that is directly requested by the prompt. This means no 'additional information' or 'also relevant' information should populate the response. Use the available tools if your knowledge is lacking or if explicitly directed by the user."
     :tools '("WebSearch" "WebFetch" "YouTube"))
 #+end_src
+
+Close use-package paren
 
 #+begin_src emacs-lisp
 )
 #+end_src
+
+**** gptel-agent
 
 #+begin_src emacs-lisp
 (use-package! gptel-agent
@@ -2815,6 +2928,8 @@ Let's create a general preset for one off queries.
         "j a" #'gptel-agent)
   :config (gptel-agent-update))
 #+end_src
+
+**** gptel-quick
 
 For quick summarization, we can use gptel-quick.
 
@@ -2848,6 +2963,25 @@ This is for code autocompletion.
                    (:exclude ".dir-locals.el" "*-tests.el"))))
 #+end_src
 
+*** emacs-libvterm
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(unpin! vterm)
+#+end_src
+
+*** Ghostel
+
+#+begin_src emacs-lisp :tangle "packages.el"
+(package! ghostel)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! ghostel)
+(use-package! evil-ghostel
+  :after (ghostel evil)
+  :hook (ghostel-mode-hook . evil-ghostel-mode))
+#+end_src
+
 ** Embedded Widgets
 
 *** Webkit xwidgets
@@ -2866,7 +3000,7 @@ Xwidgets are implemented as subclassed [[https://developer.apple.com/documentati
              xwwp-other-window)
   :init
   (after! browse-url
-    (setq browse-url-browser-function 'xwwp-other-window))
+    (setq browse-url-browser-function 'browse-url-default-browser))
   
   (map! :leader
         "o b" #'xwwp
